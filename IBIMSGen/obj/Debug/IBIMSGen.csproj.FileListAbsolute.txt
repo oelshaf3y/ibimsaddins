@@ -1,0 +1,6 @@
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\bin\Debug\IBIMSGen.dll
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\bin\Debug\IBIMSGen.pdb
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.csproj.AssemblyReference.cache
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.csproj.CoreCompileInputs.cache
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.dll
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.pdb
