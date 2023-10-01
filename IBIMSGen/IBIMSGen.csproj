@@ -31,6 +31,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="RevitAPI">
       <HintPath>..\..\..\..\..\..\..\Program Files\Autodesk\Revit 2021\RevitAPI.dll</HintPath>
       <Private>False</Private>
@@ -41,19 +43,61 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Penetration\mechSelectionFilter.cs" />
-    <Compile Include="Penetration\SelectionExtentions.cs" />
+    <Compile Include="Penetration\ByWorksets.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Penetration\ByWorksets.Designer.cs">
+      <DependentUpon>ByWorksets.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Penetration\PenetrationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Penetration\PenetrationForm.Designer.cs">
+      <DependentUpon>PenetrationForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Penetration\HostElement.cs" />
+    <Compile Include="Penetration\PenetratingElement.cs" />
     <Compile Include="Penetration\Penetration.cs" />
-    <Compile Include="Penetration\strSelectionFilter.cs" />
+    <Compile Include="Penetration\ProgressBar.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Penetration\ProgressBar.Designer.cs">
+      <DependentUpon>ProgressBar.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Penetration\SelectionFilter.cs" />
+    <Compile Include="Penetration\WorksetsForm.xaml.cs">
+      <DependentUpon>WorksetsForm.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Penetration\ByWorksets.resx">
+      <DependentUpon>ByWorksets.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Penetration\PenetrationForm.resx">
+      <DependentUpon>PenetrationForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Penetration\ProgressBar.resx">
+      <DependentUpon>ProgressBar.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Penetration\WorksetsForm.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

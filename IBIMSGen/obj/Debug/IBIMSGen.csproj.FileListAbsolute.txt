@@ -4,3 +4,12 @@ C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.csp
 C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.csproj.CoreCompileInputs.cache
 C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.dll
 C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.pdb
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.csproj.GenerateResource.cache
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.ProgressBar.resources
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.Penetration.PenetrationForm.resources
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\Penetration\WorksetsForm.g.cs
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen_MarkupCompile.cache
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen_MarkupCompile.lref
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\Penetration\WorksetsForm.baml
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.g.resources
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.Penetration.ByWorksets.resources
