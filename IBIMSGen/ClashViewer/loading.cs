@@ -8,11 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace IBIMSGen.Penetration
+namespace IBIMSGen.ClashViewer
 {
-    public partial class ByWorksets : UserControl
+    public partial class loading : Form
     {
-        public ByWorksets()
+        public loading()
         {
             InitializeComponent();
         }

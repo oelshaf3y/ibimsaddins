@@ -30,7 +30,11 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>ClashViewer\clashesUi.resx</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="RevitAPI">
@@ -55,11 +59,32 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Penetration\ByWorksets.cs">
-      <SubType>UserControl</SubType>
+    <Compile Include="App.cs" />
+    <Compile Include="CallOutsCopy.cs" />
+    <Compile Include="ClashViewer\clashBalls.cs">
+      <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Penetration\ByWorksets.Designer.cs">
-      <DependentUpon>ByWorksets.cs</DependentUpon>
+    <Compile Include="ClashViewer\clashBalls.Designer.cs">
+      <DependentUpon>clashBalls.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ClashViewer\clashesUi.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ClashViewer\clashesUi.Designer.cs">
+      <DependentUpon>clashesUi.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ClashViewer\clashPoints.cs" />
+    <Compile Include="ClashViewer\clashViewerUi.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ClashViewer\clashViewerUi.Designer.cs">
+      <DependentUpon>clashViewerUi.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ClashViewer\loading.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ClashViewer\loading.Designer.cs">
+      <DependentUpon>loading.cs</DependentUpon>
     </Compile>
     <Compile Include="Penetration\PenetrationForm.cs">
       <SubType>Form</SubType>
@@ -81,10 +106,24 @@
       <DependentUpon>WorksetsForm.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Penetration\ByWorksets.resx">
-      <DependentUpon>ByWorksets.cs</DependentUpon>
+    <EmbeddedResource Include="ClashViewer\clashBalls.resx">
+      <DependentUpon>clashBalls.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ClashViewer\clashesUi.resx">
+      <DependentUpon>clashesUi.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ClashViewer\clashViewerUi.resx">
+      <DependentUpon>clashViewerUi.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ClashViewer\loading.resx">
+      <DependentUpon>loading.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Penetration\PenetrationForm.resx">
       <DependentUpon>PenetrationForm.cs</DependentUpon>
@@ -92,12 +131,63 @@
     <EmbeddedResource Include="Penetration\ProgressBar.resx">
       <DependentUpon>ProgressBar.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Page Include="Penetration\WorksetsForm.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="Microsoft.Office.Core">
+      <Guid>{2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>8</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="Microsoft.Office.Interop.Excel">
+      <Guid>{00020813-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>9</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="VBIDE">
+      <Guid>{0002E157-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>5</VersionMajor>
+      <VersionMinor>3</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\callouts.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\clash.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\inulation.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="IBIMSGen.addin" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bw.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Hangers\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

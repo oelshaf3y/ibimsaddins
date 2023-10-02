@@ -15,6 +15,11 @@ namespace IBIMSGen.Penetration
     public class selectionFilter : ISelectionFilter
     {
         public Document doc;
+        Func<Element, bool> filter;
+        public selectionFilter(Func<Element, bool> validate = null)
+        {
+            this.filter = validate;
+        }
         public bool AllowElement(Element elem)
         {
             doc = ((RevitLinkInstance)elem).GetLinkDocument();
@@ -24,13 +29,21 @@ namespace IBIMSGen.Penetration
         public bool AllowReference(Reference reference, XYZ position)
         {
             Element ee = doc.GetElement(reference.LinkedElementId);
-            if (ee is Pipe || ee is Duct || ee is Conduit || ee is CableTray || ee is Floor || ee is Wall || ee.Category.Name == "Structural Framing" || ee.Category.Name == "Structural Columns" || ee is FamilyInstance)
+            if (filter == null)
             {
-                return true;
+
+                if (ee is Pipe || ee is Duct || ee is Conduit || ee is CableTray || ee is Floor || ee is Wall || ee.Category.Name == "Structural Framing" || ee.Category.Name == "Structural Columns" || ee is FamilyInstance)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {
-                return false;
+                return (filter(ee) ||ee is Floor || ee is Wall || ee.Category.Name == "Structural Framing" || ee.Category.Name == "Structural Columns");
             }
         }
     }

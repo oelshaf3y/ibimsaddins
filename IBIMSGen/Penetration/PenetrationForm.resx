@@ -172,7 +172,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;panel1.ZOrder" xml:space="preserve">
-    <value>8</value>
+    <value>9</value>
   </data>
   <data name="button2.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -277,7 +277,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;flowLayoutPanel1.ZOrder" xml:space="preserve">
-    <value>7</value>
+    <value>8</value>
   </data>
   <data name="comboBox1.Location" type="System.Drawing.Point, System.Drawing">
     <value>12, 406</value>
@@ -301,7 +301,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;comboBox1.ZOrder" xml:space="preserve">
-    <value>6</value>
+    <value>7</value>
   </data>
   <data name="label1.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -331,7 +331,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;label1.ZOrder" xml:space="preserve">
-    <value>5</value>
+    <value>6</value>
   </data>
   <data name="comboBox2.Location" type="System.Drawing.Point, System.Drawing">
     <value>12, 454</value>
@@ -355,7 +355,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;comboBox2.ZOrder" xml:space="preserve">
-    <value>4</value>
+    <value>5</value>
   </data>
   <data name="label2.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -385,7 +385,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;label2.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>4</value>
   </data>
   <data name="radioButton2.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -445,7 +445,7 @@
     <value>279, 383</value>
   </data>
   <data name="panel2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>200, 92</value>
+    <value>200, 66</value>
   </data>
   <data name="panel2.TabIndex" type="System.Int32, mscorlib">
     <value>6</value>
@@ -460,7 +460,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;panel2.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>3</value>
   </data>
   <data name="label3.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -490,7 +490,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;label3.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>2</value>
   </data>
   <data name="comboBox3.Location" type="System.Drawing.Point, System.Drawing">
     <value>12, 510</value>
@@ -514,6 +514,108 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;comboBox3.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="checkBox2.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="checkBox2.Location" type="System.Drawing.Point, System.Drawing">
+    <value>11, 20</value>
+  </data>
+  <data name="checkBox2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>107, 17</value>
+  </data>
+  <data name="checkBox2.TabIndex" type="System.Int32, mscorlib">
+    <value>9</value>
+  </data>
+  <data name="checkBox2.Text" xml:space="preserve">
+    <value>Native Structural</value>
+  </data>
+  <data name="&gt;&gt;checkBox2.Name" xml:space="preserve">
+    <value>checkBox2</value>
+  </data>
+  <data name="&gt;&gt;checkBox2.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;checkBox2.Parent" xml:space="preserve">
+    <value>panel3</value>
+  </data>
+  <data name="&gt;&gt;checkBox2.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="label4.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="label4.Location" type="System.Drawing.Point, System.Drawing">
+    <value>8, 4</value>
+  </data>
+  <data name="label4.Size" type="System.Drawing.Size, System.Drawing">
+    <value>63, 13</value>
+  </data>
+  <data name="label4.TabIndex" type="System.Int32, mscorlib">
+    <value>11</value>
+  </data>
+  <data name="label4.Text" xml:space="preserve">
+    <value>Also Select:</value>
+  </data>
+  <data name="&gt;&gt;label4.Name" xml:space="preserve">
+    <value>label4</value>
+  </data>
+  <data name="&gt;&gt;label4.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;label4.Parent" xml:space="preserve">
+    <value>panel3</value>
+  </data>
+  <data name="&gt;&gt;label4.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="checkBox3.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="checkBox3.Location" type="System.Drawing.Point, System.Drawing">
+    <value>11, 43</value>
+  </data>
+  <data name="checkBox3.Size" type="System.Drawing.Size, System.Drawing">
+    <value>112, 17</value>
+  </data>
+  <data name="checkBox3.TabIndex" type="System.Int32, mscorlib">
+    <value>10</value>
+  </data>
+  <data name="checkBox3.Text" xml:space="preserve">
+    <value>Native Mechanical</value>
+  </data>
+  <data name="&gt;&gt;checkBox3.Name" xml:space="preserve">
+    <value>checkBox3</value>
+  </data>
+  <data name="&gt;&gt;checkBox3.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;checkBox3.Parent" xml:space="preserve">
+    <value>panel3</value>
+  </data>
+  <data name="&gt;&gt;checkBox3.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="panel3.Location" type="System.Drawing.Point, System.Drawing">
+    <value>279, 455</value>
+  </data>
+  <data name="panel3.Size" type="System.Drawing.Size, System.Drawing">
+    <value>200, 76</value>
+  </data>
+  <data name="panel3.TabIndex" type="System.Int32, mscorlib">
+    <value>10</value>
+  </data>
+  <data name="&gt;&gt;panel3.Name" xml:space="preserve">
+    <value>panel3</value>
+  </data>
+  <data name="&gt;&gt;panel3.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Panel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;panel3.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;panel3.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
@@ -524,6 +626,101 @@
   </data>
   <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
     <value>509, 613</value>
+  </data>
+  <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        AAABAAIAEBAAAAEAIABoBAAAJgAAACAgAAABACAAqBAAAI4EAAAoAAAAEAAAACAAAAABACAAAAAAAAAE
+        AAATCwAAEwsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAUeZLAFHmWgBR5loAUeZaAFHmWgBR5loATuZaP4PvWj+D
+        71oATuZaAFHmWgBR5loAUeZaAFHmWgBR5loAUeZLAFHm9wBR5v8AUeb/AFHm/wBR5v8AUeb/AE7m/z+D
+        7/8/g+//AE7m/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm9gBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBO
+        5v8/g+//P4Pv/wBO5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb3AFHm/wBR5v8AUeb/AFHm/wBR
+        5v8ATub/P4Pv/z+D7/8ATub/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb2AFHmSwBR5loAUeZaAFHmWQBR
+        5lkAUeZaAE7mWj+D71o/g+9aAE7mWgBR5loAUeZZAFHmWQBR5loAUeZaAFHmSwAAAAAAAAAAAFDmAABQ
+        5gsAUeZ9AFHmogBR5qEAT+ahAE7loQBQ5qEAUeaiAFHmfQBR5gsAUeYAAAAAAAAAAAAAAAAAAAAAAABR
+        5gAAUeYdAFHm4QBR5v8AUeb/BFbn/xly7v8HWuj/AFDm/wBR5uEAUeYdAFHmAAAAAAAAAAAAAAAAAAAA
+        AAAAUeYAAFHmHQBR5uIAUeb/AFDm/wZZ6P88ofr/Lo71/wRW5/8AUObiAFHmHQBR5gAAAAAAAAAAAAAA
+        AAAAAAAAAFHmAABR5hQAUea5BVfo8gld6f8FWOb/IX3v/0qz/f8vj/X/CFzpxABJ5BMAT+YAAAAAAAAA
+        AAAAAAAAAAAAAABQ5wAAUOcBAEnkEyyM9UZApvrJPKH1/zmd8v9Jsvz/Tbf//0at/aE+o/oGQ6n8AAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIf//wAzmf8AUbz/IU+5/2RNuP9/Tbf/nU23/9tOuP99Trj/BE24
+        /wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATLb/AEy2/wJNt/8mTbf/DE23
+        /wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//AAD//wAAAAAAAAAAAAAAAAAAAAAAAAAAAADgBwAA4AcAAOAH
+        AADgBwAA4AcAAPwHAAD/jwAA//8AAP//AAAoAAAAIAAAAEAAAAABACAAAAAAAAAQAAATCwAAEwsAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABQ5mAAUeahAFHmpwBR
+        5qYAUeamAFHmpgBR5qYAUeamAFHmpgBR5qYAUeamAFHmpgBR5qYAUeamAFDmpniy96Z4svemAFDmpgBR
+        5qYAUeamAFHmpgBR5qYAUeamAFHmpgBR5qYAUeamAFHmpgBR5qYAUeamAFHmpwBR5qEAUeZfAFHm7ABR
+        5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUOb/eLL3/3iy
+        9/8AUOb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR
+        5usAUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBQ
+        5v94svf/eLL3/wBQ5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR
+        5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR
+        5v8AUeb/AFDm/3iy9/94svf/AFDm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR
+        5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR
+        5v8AUeb/AFHm/wBR5v8AUOb/eLL3/3iy9/8AUOb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR
+        5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR
+        5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBQ5v94svf/eLL3/wBQ5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR
+        5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5uwAUeb/AFHm/wBR5v8AUeb/AFHm/wBR
+        5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFDm/3iy9/94svf/AFDm/wBR5v8AUeb/AFHm/wBR
+        5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUebsAFDmYABR5qIAUeanAFHmpgBR
+        5qYAUeamAFHmpgBR5qYAUeamAFHmpgBR5qYAUeamAFHmpgBR5qYAUOameLL3pniy96YAUOamAFHmpgBR
+        5qYAUeamAFHmpgBR5qYAUeamAFHmpgBR5qYAUeamAFHmpgBR5qYAUeanAFHmoQBQ5l8AAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAABQ5gAAUOYBAFDmKABR5lYAUeZZAFHmWQBR5lkAUeZZAFHmWQBR
+        5lkAUeZZAFHmWQBR5lkAUeZZAFHmWQBR5lkAUeZWAFHmKABR5gEAUeYAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFDmAABQ5g8AUOa5AFHm/gBR5v8AUeb/AFHm/wBR
+        5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v4AUea4AFHmDwBR5gAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAUeYAAFHmGABR5ucAUeb/AFHm/wBR
+        5v8AUeb/AFHm/wBR5v8AUeb/BFbn/wVX6P8AUeb/AFHm/wBR5v8AUeb/AFHm/wBR5ucAUeYYAFHmAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABR5gAAUeYYAFHm5wBR
+        5v8AUeb/AFHm/wBR5v8AUeb/AFHm/wVY6P8vj/X/NZf3/w9k6/8AUOb/AFHm/wBR5v8AUeb/AFHm5wBR
+        5hgAUeYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFHmAABR
+        5hgAUebnAFHm/wBR5v8AUeb/AFHm/wBR5v8AUOb/C1/p/0Wt/P9Puf//N5r4/wlc6f8AUOb/AFHm/wBR
+        5v8AUebnAFHmGABR5gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAUeYAAFHmGABR5ucAUeb/AFHm/wBR5v8AUeb/AFHm/wBR5v8CVOf/LIv0/023//9Mtv//Lo71/wZY
+        6P8AUOb/AFHm/wBR5ucAUeYYAFHmAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAABR5gAAUeYXAFHm4wBR5v8AUeb/AFHm/wBQ5v8AUeb/AFHm/wBQ5v8MYOr/PaL6/064
+        //9Mtf7/MpL2/wxh6v8AUeb/AFHm4gBR5hcAUeYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAFDmAABQ5wkAUOaOAFHm4wFT5uwHWuj7CFvo/wZa6P8FV+b/BFfm/wRX
+        5v8gfe//SrT+/023//9Nt///Op75/w9k6/IAUOaNAFHmCQBQ5gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAUugAAEDYAABQ5wkASuQWIn3xKkGn+5pFrf33Qqn6/zid
+        8f8xlez/LpDp/y+S6f9ErPj/Tbf//023//9Nt///R679yjug+ipJs/4AH3bwAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABOuf8AUr3/EU64
+        /3xNt//pTbf+/0my+/9Frvn/RKz3/0ix+/9Nt///Tbf//023//9Nt//9Tbf/kEy2/wdMtv8AAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AABOtP8AT7P/Bky2/1JMt/+pTbf/vU64/8xNuP/bTbf/6023//pNt///Tbf//023//JNt/98Tbf/Bk23
+        /wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAA6vP8Acav/AEu3/wVMt/8UTbb/I0y3/zJMtv9BTLf/WU23/7tNt//yTbf/gE23
+        /w5Nt/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEu1/wBPuf8ATbf/J023
+        /1tMt/8PTLf/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//////////////////////////AAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAD//////gAAf/4AAH/+AAB//gAAf/4AAH/+AAB//gAAf/4AAH//AAD//+AAf//w
+        AH///AD////x////////////////////////////
+</value>
   </data>
   <data name="$this.StartPosition" type="System.Windows.Forms.FormStartPosition, System.Windows.Forms">
     <value>CenterParent</value>

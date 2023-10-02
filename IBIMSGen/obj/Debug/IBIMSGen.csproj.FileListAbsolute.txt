@@ -12,4 +12,9 @@ C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen_Mar
 C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen_MarkupCompile.lref
 C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\Penetration\WorksetsForm.baml
 C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.g.resources
-C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.Penetration.ByWorksets.resources
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.Properties.Resources.resources
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.csproj.ResolveComReference.cache
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.ClashViewer.clashesUi.resources
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.ClashViewer.clashBalls.resources
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.ClashViewer.clashViewerUi.resources
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.ClashViewer.loading.resources

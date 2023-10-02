@@ -5,11 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:IBIMSGen.Penetration"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="841.016" Title="Workset Collector" SizeToContent="Width" ResizeMode="NoResize">
-    <Grid x:Name="GRID">
+             d:DesignHeight="400" d:DesignWidth="865.016" Title="Workset Collector" SizeToContent="Width" ResizeMode="NoResize" MaxHeight="400"  WindowStartupLocation="CenterScreen" >
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid x:Name="GRID">
+            <Button x:Name="addMore" Content="Add More" Margin="0,0,22,35" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="100" Click="addMore_Click" Background="#FF1FA2C5" BorderBrush="#FF080961" Foreground="#FF050F61"/>
+            <Button x:Name="cancelBut" Content="Cancel" Margin="487,0,298,35" Width="80"  IsCancel="True" Background="#FFDC6B6B" BorderBrush="Red" Foreground="White" Height="30" VerticalAlignment="Bottom" Click="Button_Click"/>
+            <Button x:Name="OKBut" Content="Ok" Margin="0,0,227,35" Background="#FF1BC143" BorderBrush="#FF02580B" Foreground="White" HorizontalAlignment="Right" Width="60" Height="30" VerticalAlignment="Bottom" Click="OKBut_Click"/>
 
-
-        <Button x:Name="addMore" Content="Button" Margin="0,0,-13,28" Height="45" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="226" Click="addMore_Click_1"/>
-
-    </Grid>
+        </Grid>
+    </ScrollViewer>
 </Window>
