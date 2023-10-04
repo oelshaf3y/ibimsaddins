@@ -4,14 +4,22 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:IBIMSGen.Penetration"
-             mc:Ignorable="d" 
-             d:DesignHeight="400" d:DesignWidth="865.016" Title="Workset Collector" SizeToContent="Width" ResizeMode="NoResize" MaxHeight="400"  WindowStartupLocation="CenterScreen" >
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Grid x:Name="GRID">
-            <Button x:Name="addMore" Content="Add More" Margin="0,0,22,35" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="100" Click="addMore_Click" Background="#FF1FA2C5" BorderBrush="#FF080961" Foreground="#FF050F61"/>
-            <Button x:Name="cancelBut" Content="Cancel" Margin="487,0,298,35" Width="80"  IsCancel="True" Background="#FFDC6B6B" BorderBrush="Red" Foreground="White" Height="30" VerticalAlignment="Bottom" Click="Button_Click"/>
-            <Button x:Name="OKBut" Content="Ok" Margin="0,0,227,35" Background="#FF1BC143" BorderBrush="#FF02580B" Foreground="White" HorizontalAlignment="Right" Width="60" Height="30" VerticalAlignment="Bottom" Click="OKBut_Click"/>
+             mc:Ignorable="d" d:DesignWidth="865"  Title="Workset Collector" SizeToContent="Width"  WindowStartupLocation="CenterScreen" Height="450" >
+    <Grid >
+        <Grid.RowDefinitions>
+            <RowDefinition></RowDefinition>
+            <RowDefinition Height="80" ></RowDefinition>
+        </Grid.RowDefinitions>
+        <ScrollViewer  VerticalScrollBarVisibility="Auto"   Grid.Row="0">
+            <Grid x:Name="GRID" Margin="10,10,10,10"></Grid>
+        </ScrollViewer>
+        <Grid x:Name="Buts" Grid.Row="1">
 
+            <Button x:Name="addMore" Content="+" Margin="792,10,10,10" Click="addMore_Click" FontSize="20" Height="36" VerticalAlignment="Center" HorizontalAlignment="Left" Width="63"/>
+            <Button x:Name="cancelBut" Content="Cancel" Margin="474,10,10,10"  IsCancel="True" Click="Button_Click" Height="34" VerticalAlignment="Center" HorizontalAlignment="Left" Width="111"/>
+            <Button x:Name="OKBut" Content="Ok" Margin="590,10,10,10" Click="OKBut_Click" Height="34" VerticalAlignment="Center" HorizontalAlignment="Left" Width="97"/>
+            <Button x:Name="less" Content="-" Margin="709,10,10,10" FontSize="24" Click="Button_Click_1" Height="36" VerticalAlignment="Center" HorizontalAlignment="Left" Width="78"/>
         </Grid>
-    </ScrollViewer>
+
+    </Grid>
 </Window>

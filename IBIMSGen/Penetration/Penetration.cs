@@ -31,7 +31,8 @@ namespace IBIMSGen.Penetration
         StringBuilder sb;
         Options optt;
         int FSCount;
-        FilteredWorksetCollector worksetFilteredCollector;
+        FilteredWorksetCollector nativeWorkSets, LinkedWorksets;
+        IList<Workset> worksets, nativeWorkset;
         IList<PenetratingElement> penetratingElements;
         WorksetsForm wsform;
         FilteredElementCollector allsymbols;
@@ -52,8 +53,8 @@ namespace IBIMSGen.Penetration
             nativeFloors = new FilteredElementCollector(doc).OfClass(typeof(Floor)).ToList();
             nativeWalls = new FilteredElementCollector(doc).OfClass(typeof(Wall)).Where(x => ((Wall)x).Width >= (50 / 304.8)).ToList();
             nativeBeams = new FilteredElementCollector(doc).OfClass(typeof(FamilyInstance)).Where(x => x.Category.Name == "Structural Framing").ToList();
-            worksetFilteredCollector = new FilteredWorksetCollector(doc);
-
+            nativeWorkSets = new FilteredWorksetCollector(doc);
+            nativeWorkset = nativeWorkSets.ToList();
 
 
             familysymbolnamesuniq = allsymbols.Cast<FamilySymbol>().Select(fi => fi.Family.Name).ToList();
@@ -112,10 +113,22 @@ namespace IBIMSGen.Penetration
             }
             bool byworkset = form.radioButton1.Checked;
 
+            selectedLinks = new List<Element>();
+            selDocsNames = new List<string>();
+            foreach (int i in form.linksinds)
+            {
+                string linkPath = null;
+                linkPath = ((RevitLinkInstance)allLinksUnique[i]).GetLinkDocument()?.PathName?.Trim();
+                if (linkPath == null) continue;
+                selectedLinks.Add(allLinksUnique[i]);
+                selDocsNames.Add(linkPath);
+            }
+
             Type type = null;
+            worksets = nativeWorkSets.ToList().Concat(getlinkedWorksets()).ToList();
             if (byworkset)
             {
-                wsform = new WorksetsForm(worksetFilteredCollector.ToList(), allsymbols.Cast<FamilySymbol>().ToList());
+                wsform = new WorksetsForm(worksets, allsymbols.Cast<FamilySymbol>().ToList());
                 wsform.ShowDialog();
                 if (!wsform.state) return Result.Cancelled;
             }
@@ -137,17 +150,6 @@ namespace IBIMSGen.Penetration
                         type = typeof(Conduit);
                         break;
                 }
-            }
-
-            selectedLinks = new List<Element>();
-            selDocsNames = new List<string>();
-            foreach (int i in form.linksinds)
-            {
-                string linkPath = null;
-                linkPath = ((RevitLinkInstance)allLinksUnique[i]).GetLinkDocument()?.PathName?.Trim();
-                if (linkPath == null) continue;
-                selectedLinks.Add(allLinksUnique[i]);
-                selDocsNames.Add(linkPath);
             }
 
             if (form.sel)
@@ -278,7 +280,6 @@ namespace IBIMSGen.Penetration
 
             if (byworkset)
             {
-
                 foreach (PenetratingElement penElement in penetratingElements)
                 {
                     Tuple<Workset, FamilySymbol> tup = wsform.worksetCollection.Where(x => x.Item1.Id == penElement.element.WorksetId).FirstOrDefault();
@@ -336,6 +337,7 @@ namespace IBIMSGen.Penetration
                 {
                     if (penetratingElement.familySymbol == null)
                     {
+
                         continue;
                     }
                     foreach (HostElement hostElement in hostElements)
@@ -484,11 +486,27 @@ namespace IBIMSGen.Penetration
                                             familyInstance.LookupParameter("Depth").Set(depth + (50 / 304.8));
                                             familyInstance.LookupParameter("Schedule Level").Set(ElevationSleeve(locationPt).Id);
                                             familyInstance.LookupParameter("Comments").Set(ElevationSleeve(locationPt).Name.ToString());
-                                            familyInstance.LookupParameter("Workset").Set(penetratingElement.worksetId.IntegerValue);
+                                            if (nativeWorkset.Where(x => x.Id.IntegerValue == penetratingElement.worksetId.IntegerValue)?.FirstOrDefault() != null)
+                                            {
+                                                Workset ws = nativeWorkset.Where(x => x.Id.IntegerValue == penetratingElement.worksetId.IntegerValue)?.FirstOrDefault();
+                                                td($"found {ws.Name}");
+                                                familyInstance.LookupParameter("Workset").Set(penetratingElement.worksetId.IntegerValue);
+                                            }
+                                            else
+                                            {
+                                                Workset ws = Workset.Create(doc, wsform.worksetCollection.Where(x => x.Item1.Id == penetratingElement.worksetId).Select(x => x.Item1).FirstOrDefault().Name);
+                                                familyInstance.LookupParameter("Workset").Set(ws.Id.IntegerValue);
+                                                nativeWorkset.Add(ws);
+                                                td($"created workset {ws.Name}");
+                                            }
                                         }
                                     }
                                 }
-                                catch { }
+                                catch (Exception ex)
+                                {
+
+                                    td(ex.Message);
+                                }
                             }
                         }
                         progressBarForm.Lb.Text = $"Progress: {hostElements.IndexOf(hostElement)}  / {hostElements.Count}(Task {penetratingElements.IndexOf(penetratingElement)} of {penetratingElements.Count})";
@@ -510,6 +528,28 @@ namespace IBIMSGen.Penetration
 
             return Result.Succeeded;
 
+        }
+
+        private List<Workset> getlinkedWorksets()
+        {
+            List<Workset> worksets = new List<Workset>();
+            foreach (Element linkInstance in selectedLinks)
+            {
+                RevitLinkInstance rli = linkInstance as RevitLinkInstance;
+                Document linkedDoc = rli.GetLinkDocument();
+                LinkedWorksets = new FilteredWorksetCollector(linkedDoc);
+                if (worksets.Count == 0)
+                {
+                    worksets = LinkedWorksets.ToList();
+                    //td(worksets.Count.ToString());
+                }
+                else
+                {
+                    worksets = worksets.Concat(LinkedWorksets.ToList()).ToList();
+                }
+            }
+            //td(worksets.Count.ToString());
+            return worksets;
         }
 
         private Solid getSolid(Element elem)
@@ -569,6 +609,10 @@ namespace IBIMSGen.Penetration
                     {
                         hostElements.Add(new HostElement(el, rli));
                     }
+                }
+                else
+                {
+                    td($"linked document {linkedDoc.PathName} is not loaded");
                 }
             }
         }

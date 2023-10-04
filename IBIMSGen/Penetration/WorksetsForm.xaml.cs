@@ -32,16 +32,18 @@ namespace IBIMSGen.Penetration
         public WorksetsForm(IList<Workset> worksets, IList<FamilySymbol> familySymbols)
         {
             InitializeComponent();
-            this.worksets = worksets;
+            this.worksets = worksets.Where(x => x.Kind == WorksetKind.UserWorkset).ToList();
             this.worksetNames = this.worksets.Select(x => x.Name).ToList();
             this.familySymbols = familySymbols;
             this.Panels = new List<WrapPanel>();
-            this.worksetCollection=new List<Tuple<Workset, FamilySymbol>>();
+            this.worksetCollection = new List<Tuple<Workset, FamilySymbol>>();
             this.state = false;
-            addMore_Click(null,null);
+            addMore_Click(null, null);
+            //TaskDialog.Show("added", this.Panels.Count.ToString());
+
         }
 
-        
+
         private void selectionChange(object sender, SelectionChangedEventArgs e)
         {
             string selected = ((ComboBox)sender).SelectedItem.ToString();
@@ -56,9 +58,6 @@ namespace IBIMSGen.Penetration
 
         private void addMore_Click(object sender, RoutedEventArgs e)
         {
-            addMore.Margin = new Thickness(addMore.Margin.Left, addMore.Margin.Top + 45, addMore.Margin.Right, addMore.Margin.Bottom);
-            OKBut.Margin = new Thickness(OKBut.Margin.Left, OKBut.Margin.Top + 45, OKBut.Margin.Right, OKBut.Margin.Bottom);
-            cancelBut.Margin = new Thickness(cancelBut.Margin.Left, cancelBut.Margin.Top + 45, cancelBut.Margin.Right, cancelBut.Margin.Bottom);
             Label l1 = new Label();
             l1.Content = "Worksets";
             Label l2 = new Label();
@@ -66,6 +65,7 @@ namespace IBIMSGen.Penetration
             Label l3 = new Label();
             l3.Content = "Type Name";
             ComboBox wscb = new ComboBox();
+            //this.Height += 45;
             foreach (string a in this.worksetNames)
             {
                 wscb.Items.Add(a);
@@ -86,7 +86,7 @@ namespace IBIMSGen.Penetration
             WrapPanel wrapPanel = new WrapPanel();
             wrapPanel.VerticalAlignment = VerticalAlignment.Top;
             wrapPanel.Height = 40;
-            wrapPanel.Margin = new Thickness(10, (GRID.Children.Count - 3) * 45, 10, 10);
+            wrapPanel.Margin = new Thickness(10, (GRID.Children.Count) * 45, 10, 10);
             wrapPanel.Children.Add(l1);
             wrapPanel.Children.Add(wscb);
             wrapPanel.Children.Add(l2);
@@ -96,7 +96,6 @@ namespace IBIMSGen.Penetration
             wrapPanel.Children.Add(tyName);
             GRID.Children.Add(wrapPanel);
             this.Panels.Add(wrapPanel);
-
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -109,15 +108,32 @@ namespace IBIMSGen.Penetration
         {
             foreach (WrapPanel panel in this.Panels)
             {
-                Workset workset =this.worksets.Where(x=> x.Name == (panel.Children[1] as ComboBox).SelectedItem.ToString()).FirstOrDefault();
-                FamilySymbol familySymbol = this.familySymbols.Where(x=>
-                x.Family.Name == (panel.Children[3] as ComboBox).SelectedItem.ToString() 
-                && x.Name== (panel.Children[5] as ComboBox).SelectedItem.ToString()
-                ).FirstOrDefault();
-                worksetCollection.Add(new Tuple<Workset, FamilySymbol>(workset, familySymbol));
+                if ((panel.Children[1] as ComboBox).SelectedIndex != -1 &&
+                    (panel.Children[3] as ComboBox).SelectedIndex != -1 &&
+                    (panel.Children[5] as ComboBox).SelectedIndex != -1)
+                {
+
+                    Workset workset = this.worksets.Where(x => x.Name == (panel.Children[1] as ComboBox).SelectedItem.ToString()).FirstOrDefault();
+                    FamilySymbol familySymbol = this.familySymbols.Where(x =>
+                    x.Family.Name == (panel.Children[3] as ComboBox).SelectedItem.ToString()
+                    && x.Name == (panel.Children[5] as ComboBox).SelectedItem.ToString()
+                    ).FirstOrDefault();
+                    worksetCollection.Add(new Tuple<Workset, FamilySymbol>(workset, familySymbol));
+                }
             }
             this.state = true;
             this.Close();
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            if (this.Panels.Count > 1)
+            {
+                WrapPanel panel = this.Panels.Last();
+                this.GRID.Children.Remove(panel);
+                this.Panels.Remove(panel);
+            }
+
         }
     }
 }
