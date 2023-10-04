@@ -488,13 +488,12 @@ namespace IBIMSGen.Penetration
                                             familyInstance.LookupParameter("Comments").Set(ElevationSleeve(locationPt).Name.ToString());
                                             if (nativeWorkset.Where(x => x.Id.IntegerValue == penetratingElement.worksetId.IntegerValue)?.FirstOrDefault() != null)
                                             {
-                                                Workset ws = nativeWorkset.Where(x => x.Id.IntegerValue == penetratingElement.worksetId.IntegerValue)?.FirstOrDefault();
-                                                td($"found {ws.Name}");
+                                                //td($"found {ws.Name}");
                                                 familyInstance.LookupParameter("Workset").Set(penetratingElement.worksetId.IntegerValue);
                                             }
                                             else
                                             {
-                                                Workset ws = Workset.Create(doc, wsform.worksetCollection.Where(x => x.Item1.Id == penetratingElement.worksetId).Select(x => x.Item1).FirstOrDefault().Name);
+                                                Workset ws = Workset.Create(doc, wsform.worksetCollection.Where(x => x.Item1.Id == penetratingElement.worksetId).ToList().Select(x => x.Item1).FirstOrDefault().Name);
                                                 familyInstance.LookupParameter("Workset").Set(ws.Id.IntegerValue);
                                                 nativeWorkset.Add(ws);
                                                 td($"created workset {ws.Name}");
