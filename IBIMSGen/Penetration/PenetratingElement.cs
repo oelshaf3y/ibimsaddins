@@ -11,7 +11,7 @@ namespace IBIMSGen.Penetration
     {
         public Element element;
         public double width, height, insulationThickness;
-        public WorksetId worksetId;
+        public Workset workset;
         public Curve axis;
         public FamilySymbol familySymbol;
         public XYZ sleeveDir;
@@ -21,7 +21,7 @@ namespace IBIMSGen.Penetration
             FamilySymbol familySymbol)
         {
             this.element = element;
-            this.worksetId = worksetId;
+            this.workset = workset;
             this.width = width;
             this.height = height;
             this.insulationThickness = insulationThickness;

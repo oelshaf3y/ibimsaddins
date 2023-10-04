@@ -285,7 +285,7 @@ namespace IBIMSGen.Penetration
                     Tuple<Workset, FamilySymbol> tup = wsform.worksetCollection.Where(x => x.Item1.Id == penElement.element.WorksetId).FirstOrDefault();
                     if (tup != null)
                     {
-                        penElement.worksetId = tup.Item1.Id;
+                        penElement.workset = tup.Item1;
                         penElement.familySymbol = tup.Item2;
                     }
                 }
@@ -486,14 +486,28 @@ namespace IBIMSGen.Penetration
                                             familyInstance.LookupParameter("Depth").Set(depth + (50 / 304.8));
                                             familyInstance.LookupParameter("Schedule Level").Set(ElevationSleeve(locationPt).Id);
                                             familyInstance.LookupParameter("Comments").Set(ElevationSleeve(locationPt).Name.ToString());
-                                            if (nativeWorkset.Where(x => x.Id.IntegerValue == penetratingElement.worksetId.IntegerValue)?.FirstOrDefault() != null)
+                                            WorksetTable wst = doc.GetWorksetTable();
+                                            if (nativeWorkset.Where(x => x.Id.IntegerValue == penetratingElement.workset.Id.IntegerValue)?.FirstOrDefault() != null)
                                             {
-                                                //td($"found {ws.Name}");
-                                                familyInstance.LookupParameter("Workset").Set(penetratingElement.worksetId.IntegerValue);
+                                                Workset ws = nativeWorkset.Where(x => x.Id.IntegerValue == penetratingElement.workset.Id.IntegerValue)?.FirstOrDefault();
+                                                if (ws.Name == penetratingElement.workset.Name)
+                                                {
+                                                    if (wst.GetActiveWorksetId() != penetratingElement.workset.Id) wst.SetActiveWorksetId(penetratingElement.workset.Id);
+                                                    familyInstance.LookupParameter("Workset").Set(penetratingElement.workset.Id.IntegerValue);
+                                                }
+                                                else
+                                                {
+                                                    Workset ws2 = Workset.Create(doc, wsform.worksetCollection.Where(x => x.Item1.Id == penetratingElement.workset.Id).ToList().Select(x => x.Item1).FirstOrDefault().Name);
+                                                    if (wst.GetActiveWorksetId() != ws2.Id) wst.SetActiveWorksetId(ws2.Id);
+                                                    familyInstance.LookupParameter("Workset").Set(ws2.Id.IntegerValue);
+                                                    nativeWorkset.Add(ws2);
+                                                    td($"created workset {ws2.Name}");
+                                                }
                                             }
                                             else
                                             {
-                                                Workset ws = Workset.Create(doc, wsform.worksetCollection.Where(x => x.Item1.Id == penetratingElement.worksetId).ToList().Select(x => x.Item1).FirstOrDefault().Name);
+                                                Workset ws = Workset.Create(doc, wsform.worksetCollection.Where(x => x.Item1.Id == penetratingElement.workset.Id).ToList().Select(x => x.Item1).FirstOrDefault().Name);
+                                                if (wst.GetActiveWorksetId() != ws.Id) wst.SetActiveWorksetId(ws.Id);
                                                 familyInstance.LookupParameter("Workset").Set(ws.Id.IntegerValue);
                                                 nativeWorkset.Add(ws);
                                                 td($"created workset {ws.Name}");
