@@ -18,3 +18,4 @@ C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.Cla
 C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.ClashViewer.clashBalls.resources
 C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.ClashViewer.clashViewerUi.resources
 C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.ClashViewer.loading.resources
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\IBIMSGen\obj\Debug\IBIMSGen.Rooms.RoomsUI.resources

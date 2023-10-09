@@ -86,6 +86,7 @@
     <Compile Include="ClashViewer\loading.Designer.cs">
       <DependentUpon>loading.cs</DependentUpon>
     </Compile>
+    <Compile Include="Rooms\Rooms.cs" />
     <Compile Include="Penetration\PenetrationForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -111,6 +112,13 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Rooms\RoomSelectionFilter.cs" />
+    <Compile Include="Rooms\RoomsUI.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Rooms\RoomsUI.Designer.cs">
+      <DependentUpon>RoomsUI.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ClashViewer\clashBalls.resx">
@@ -134,6 +142,9 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Rooms\RoomsUI.resx">
+      <DependentUpon>RoomsUI.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -186,8 +197,6 @@
   <ItemGroup>
     <None Include="Resources\bw.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Hangers\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
