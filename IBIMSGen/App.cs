@@ -33,7 +33,10 @@ namespace IBIMSGen
             catch { }
             RibbonPanel genTools = application.CreateRibbonPanel(tabName, "General Tools");
             RibbonPanel systems = application.CreateRibbonPanel(tabName, "System Tools");
+            RibbonPanel Arch = application.CreateRibbonPanel(tabName, "Arch. Tools");
 
+            Image rep = Properties.Resources.replace;
+            Image roo = Properties.Resources.Room;
             Image co = Properties.Resources.callouts;
             Image srch = Properties.Resources.clash;
             Image insu = Properties.Resources.inulation;
@@ -43,7 +46,22 @@ namespace IBIMSGen
             ImageSource callouts = GetImgSrc(co);
             ImageSource insulation = GetImgSrc(insu);
             ImageSource bwIS = GetImgSrc(bw);
+            ImageSource roomIco = GetImgSrc(roo);
+            ImageSource replaceIco = GetImgSrc(rep);
 
+            PushButtonData ReplaceElements = new PushButtonData("Find & Replace Elements", "Replace Elements", assemblyName, "IBIMSGen.ReplaceFamilies.Replace")
+            {
+                LargeImage = replaceIco,
+                Image = replaceIco,
+                ToolTip = "Find all instances of element and replace it with another element"
+            };
+
+            PushButtonData RoomSections = new PushButtonData("Room Sheets", "Room Sheet", assemblyName, "IBIMSGen.Rooms.Rooms")
+            {
+                LargeImage = roomIco,
+                Image = roomIco,
+                ToolTip = "Create a sheet for each selected room containing all wall elevations, flooring plans and ceiling plan."
+            };
 
             PushButtonData copyCallouts = new PushButtonData("Copy all Callouts", "Copy Callouts", assemblyName, "IBIMSGen.CallOutsCopy")
             {
@@ -68,6 +86,8 @@ namespace IBIMSGen
 
             genTools.AddItem(copyCallouts);
             genTools.AddItem(clash);
+            genTools.AddItem(ReplaceElements);
+            Arch.AddItem(RoomSections);
             systems.AddItem(BWork);
             return Result.Succeeded;
         }

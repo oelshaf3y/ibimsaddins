@@ -17,7 +17,6 @@ using Microsoft.VisualBasic.FileIO;
 namespace IBIMSGen.ClashViewer
 {
     [TransactionAttribute(TransactionMode.Manual)]
-
     public class clashPoints : IExternalCommand
     {
         UIApplication app;

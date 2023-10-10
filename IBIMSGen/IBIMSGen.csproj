@@ -86,6 +86,14 @@
     <Compile Include="ClashViewer\loading.Designer.cs">
       <DependentUpon>loading.cs</DependentUpon>
     </Compile>
+    <Compile Include="BlockWork.cs" />
+    <Compile Include="ReplaceFamilies\Replace.cs" />
+    <Compile Include="ReplaceFamilies\ReplaceUI.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ReplaceFamilies\ReplaceUI.Designer.cs">
+      <DependentUpon>ReplaceUI.cs</DependentUpon>
+    </Compile>
     <Compile Include="Rooms\Rooms.cs" />
     <Compile Include="Penetration\PenetrationForm.cs">
       <SubType>Form</SubType>
@@ -143,6 +151,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="ReplaceFamilies\ReplaceUI.resx">
+      <DependentUpon>ReplaceUI.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Rooms\RoomsUI.resx">
       <DependentUpon>RoomsUI.cs</DependentUpon>
     </EmbeddedResource>
@@ -197,6 +208,11 @@
   <ItemGroup>
     <None Include="Resources\bw.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Room.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\replace.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

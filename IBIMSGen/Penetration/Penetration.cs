@@ -15,7 +15,7 @@ using System.Diagnostics.SymbolStore;
 
 namespace IBIMSGen.Penetration
 {
-    [Transaction(TransactionMode.Manual)]
+    [TransactionAttribute(TransactionMode.Manual)]
     public class Penetration : IExternalCommand
     {
         UIDocument uidoc;
