@@ -1,0 +1,9 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+*.vsidx
+/IBIMSGen/.vs/IBIMSGen/FileContentIndex/6dd94434-d827-4f84-98b6-80eea9bfc439.vsidx
+/IBIMSGen/.vs/IBIMSGen/FileContentIndex/461b364d-e804-41d6-8454-35776935368e.vsidx
+/IBIMSGen/.vs/IBIMSGen/FileContentIndex/cb0eea05-12aa-4aed-b814-ac40f887f742.vsidx
+/IBIMSGen/.vs/IBIMSGen/v17/.suo
