@@ -94,6 +94,12 @@
     <Compile Include="ReplaceFamilies\ReplaceUI.Designer.cs">
       <DependentUpon>ReplaceUI.cs</DependentUpon>
     </Compile>
+    <Compile Include="Rooms\ParentView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Rooms\ParentView.Designer.cs">
+      <DependentUpon>ParentView.cs</DependentUpon>
+    </Compile>
     <Compile Include="Rooms\Rooms.cs" />
     <Compile Include="Penetration\PenetrationForm.cs">
       <SubType>Form</SubType>
@@ -127,6 +133,7 @@
     <Compile Include="Rooms\RoomsUI.Designer.cs">
       <DependentUpon>RoomsUI.cs</DependentUpon>
     </Compile>
+    <Compile Include="Vectors.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ClashViewer\clashBalls.resx">
@@ -153,6 +160,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ReplaceFamilies\ReplaceUI.resx">
       <DependentUpon>ReplaceUI.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Rooms\ParentView.resx">
+      <DependentUpon>ParentView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Rooms\RoomsUI.resx">
       <DependentUpon>RoomsUI.cs</DependentUpon>

@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Forms = System.Windows.Forms;
+
 
 namespace IBIMSGen.Rooms
 {
@@ -20,10 +22,12 @@ namespace IBIMSGen.Rooms
         Options options;
         StringBuilder sb;
         RoomsUI UI;
-        Element viewForSection, viewForDetials;
+        Element viewForSection, viewForCeiling, viewForFlooring;
         ElementId titleBlockId;
-        FilteredElementCollector views, titleBlocks, vft;
+        FilteredElementCollector views, titleBlocks, vft, levels;
         List<ElementId> viewTempsIds;
+        List<View> ceilings, floors;
+        View VFF, VFC;
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -32,30 +36,30 @@ namespace IBIMSGen.Rooms
             options = new Options();
             options.ComputeReferences = true;
             viewForSection = null;
-            viewForDetials = null;
             views = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Views);
             vft = new FilteredElementCollector(doc).OfClass(typeof(ViewFamilyType));
             viewTempsIds = views.Cast<View>().Where(x => x.IsTemplate).OrderBy(x => x.Name).Select(x => x.Id).Distinct().ToList();
+
+
             titleBlocks = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_TitleBlocks);
             titleBlockId = titleBlocks.FirstOrDefault().Id;
-            foreach (Element view in vft)
-            {
-                ViewFamilyType vf = view as ViewFamilyType;
-                if (vf.ViewFamily == ViewFamily.Section)
-                {
-                    viewForSection = view;
-                }
-                if (vf.ViewFamily == ViewFamily.Detail)
-                {
-                    viewForDetials = view;
-                }
-            }
+            levels = new FilteredElementCollector(doc).OfClass(typeof(Level));
+            ceilings = new List<View>();
+            ceilings = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Views)
+                .Cast<View>().Where(l => l.ViewType == ViewType.CeilingPlan)?.ToList();
+
+            floors = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Views)
+                .Cast<View>().Where(l => l.ViewType == ViewType.FloorPlan)?.ToList();
+
+            if (ceilings == null) { return Result.Failed; }
+            viewForSection = vft.Where(x => ((ViewFamilyType)x).ViewFamily == ViewFamily.Section).FirstOrDefault();
+            viewForCeiling = vft.Where(l => (l as ViewFamilyType).ViewFamily == ViewFamily.CeilingPlan).First();
+            viewForFlooring = vft.Where(l => (l as ViewFamilyType).ViewFamily == ViewFamily.Detail).FirstOrDefault();
+
             UI = new RoomsUI(doc, viewTempsIds);
             UI.ShowDialog();
-            if (UI.DialogResult == System.Windows.Forms.DialogResult.Cancel)
-            {
-                return Result.Failed;
-            }
+            if (UI.DialogResult == System.Windows.Forms.DialogResult.Cancel) return Result.Failed;
+
             try
             {
                 rooms = uidoc.Selection.PickObjects(ObjectType.Element, new RoomSelectionFilter(), "select rooms").Select(x => doc.GetElement(x) as Room).ToList();
@@ -66,8 +70,6 @@ namespace IBIMSGen.Rooms
             }
 
             sb = new StringBuilder();
-            double min = double.MaxValue;
-            double max = double.MinValue;
             List<ElementId> ids = new List<ElementId>();
             Transaction tr = new Transaction(doc);
             tr.Start("wall section");
@@ -90,35 +92,18 @@ namespace IBIMSGen.Rooms
                     sheet.Name = room.Name;
                 }
                 Solid solid = getSolid(room);
-                double minx = double.MaxValue, miny = double.MaxValue, maxx = double.MinValue, maxy = double.MinValue;
-                foreach (Face face in solid.Faces)
+                if (solid == null || solid.Faces.IsEmpty)
                 {
-                    PlanarFace planarFace = face as PlanarFace;
-                    if (planarFace.Origin.Z < min)
-                    {
-                        min = planarFace.Origin.Z;
-                    }
-                    else if (planarFace.Origin.Z > max)
-                    {
-                        max = planarFace.Origin.Z;
-                    }
-                    if (planarFace.Origin.X < minx)
-                    {
-                        minx = planarFace.Origin.X;
-                    }
-                    else if (planarFace.Origin.X > maxx)
-                    {
-                        maxx = planarFace.Origin.X;
-                    }
-                    if (planarFace.Origin.Y < miny)
-                    {
-                        miny = planarFace.Origin.Y;
-                    }
-                    else if (planarFace.Origin.Y > maxy)
-                    {
-                        maxy = planarFace.Origin.Y;
-                    }
+                    sb.AppendLine($"{room.Name} boundry is not correct.");
+                    continue;
                 }
+
+                double minX = solid.Faces.Cast<PlanarFace>().OrderBy(face => face.Origin.X).Select(face => face.Origin.X).First();
+                double minY = solid.Faces.Cast<PlanarFace>().OrderBy(face => face.Origin.Y).Select(face => face.Origin.Y).First();
+                double maxX = solid.Faces.Cast<PlanarFace>().OrderByDescending(face => face.Origin.X).Select(face => face.Origin.X).First();
+                double maxY = solid.Faces.Cast<PlanarFace>().OrderByDescending(face => face.Origin.Y).Select(face => face.Origin.Y).First();
+                double minZ = solid.Faces.Cast<PlanarFace>().OrderBy(face => face.Origin.Z).Select(face => face.Origin.Z).First();
+                double maxZ = solid.Faces.Cast<PlanarFace>().OrderByDescending(face => face.Origin.Z).Select(face => face.Origin.Z).First();
 
                 PlanarFace bottomFace = solid.Faces.get_Item(1) as PlanarFace;
                 EdgeArrayArray edgeArrArr = bottomFace.EdgeLoops;
@@ -138,7 +123,7 @@ namespace IBIMSGen.Rooms
                         XYZ crossDir = curve.Direction.Normalize().CrossProduct(XYZ.BasisZ).Normalize();
                         XYZ p1 = CG.Add(2 * crossDir);
                         XYZ p2 = CG.Add(-2 * crossDir);
-                        double h = max - min;
+                        double h = maxZ - minZ;
                         XYZ bxMin = new XYZ(-1.5, 0, -0.50);
                         XYZ bxMax = new XYZ(curve.Length + 1.5, h, 1.5);
                         Transform transform = Transform.Identity;
@@ -176,58 +161,84 @@ namespace IBIMSGen.Rooms
                 }
                 try
                 {
-
-                    BoundingBoxXYZ bxUp = new BoundingBoxXYZ();
-                    XYZ minUp = new XYZ(minx - 1.5, miny - 1.5, min + 3);
-                    XYZ maxUp = new XYZ(maxx + 1.5, maxy + 1.5, max + 3);
-                    bxUp.Min = minUp; bxUp.Max = maxUp;
-                    bxUp.Transform = Transform.Identity;
-                    ViewSection up = ViewSection.CreateDetail(doc, viewForDetials.Id, bxUp);
-                    if (UI.celingVTId != null)
+                    XYZ p1 = new XYZ(minX, minY, minZ);
+                    XYZ p2 = new XYZ(maxX, maxY, maxZ);
+                    Line line = Line.CreateBound(p1, p2);
+                    XYZ mid = line.Evaluate(0.5, true);
+                    Level topLevel = levels.Cast<Level>().Where(lev => lev.ProjectElevation <= maxZ).OrderByDescending(l => l.ProjectElevation).FirstOrDefault();
+                    Level botLevel = levels.Cast<Level>().Where(lev => lev.ProjectElevation >= minZ).OrderBy(l => l.ProjectElevation).FirstOrDefault();
+                    List<View> vTop = null, vBot = null; ;
+                    if (topLevel != null)
                     {
-                        up.ViewTemplateId = UI.celingVTId;
-                    }
-                    else
-                    {
-                        up.DetailLevel = ViewDetailLevel.Fine;
-                        up.Scale = 25;
-                        up.get_Parameter(BuiltInParameter.MODEL_GRAPHICS_STYLE).Set(4);
-                    }
-                    if (UI.ceilingName != null)
-                    {
-                        up.Name = room.Name + " " + UI.ceilingName;
-                    }
-                    viewPorts.Add(up);
-                    //ElementTransformUtils.MirrorElement(doc,up.Id,Plane.CreateByNormalAndOrigin(bottomFace.FaceNormal, bottomFace.Origin.Add(5*XYZ.BasisZ)));
-                    List<ElementId> tempIds = new List<ElementId>() { UI.floor1VTId, UI.floor2VTId, UI.floor3VTId };
-                    List<string> names = new List<string>() { UI.floor1Name, UI.floor2Name, UI.floor3Name };
-                    for (int i = 0; i < 3; i++)
-                    {
-                        BoundingBoxXYZ bxDown = new BoundingBoxXYZ();
-                        Transform tDown = Transform.Identity;
-                        tDown.Origin = bottomFace.Origin;
-                        tDown.BasisX = new XYZ(-1, 0, 0);
-                        tDown.BasisY = new XYZ(0, 1, 0);
-                        tDown.BasisZ = new XYZ(0, 0, -1);
-                        bxDown.Min = new XYZ(-1.5, -1.5, -5);
-                        bxDown.Max = new XYZ(maxx - minx + 1.5, maxy - miny + 1.5, +5);
-                        bxDown.Transform = tDown;
-                        ViewSection down = ViewSection.CreateDetail(doc, viewForDetials.Id, bxDown);
-                        if (tempIds[i] != null)
+                        vTop = ceilings.Where(v => v.GenLevel?.Elevation == topLevel.Elevation).ToList();
+                        if (vTop.Count > 1)
                         {
-                            down.ViewTemplateId = tempIds[i];
+                            ParentView pv = new ParentView(vTop, room.Name, "Ceiling");
+                            pv.ShowDialog();
+                            if (pv.DialogResult == Forms.DialogResult.Cancel) { return Result.Cancelled; }
+                            else { VFC = pv.views.ElementAt(pv.comboBox1.SelectedIndex); }
                         }
                         else
                         {
-                            down.DetailLevel = ViewDetailLevel.Fine;
-                            down.Scale = 25;
-                            down.get_Parameter(BuiltInParameter.MODEL_GRAPHICS_STYLE).Set(4);
+                            VFC = ViewPlan.Create(doc, viewForCeiling.Id, topLevel.Id);
                         }
-                        if (names[i] != null)
+
+                        View up = ViewSection.CreateCallout(doc, VFC.Id, viewForCeiling.Id, new XYZ(minX - 1.5, minY - 1.5, minZ + 3.5), new XYZ(maxX + 1.50, maxY + 1.5, maxZ + 5));
+                        BoundingBoxXYZ bxUp = new BoundingBoxXYZ();
+                        if (UI.celingVTId != null)
                         {
-                            down.Name = room.Name + " " + names[i];
+                            up.ViewTemplateId = UI.celingVTId;
                         }
-                        viewPorts.Add(down);
+                        else
+                        {
+                            up.DetailLevel = ViewDetailLevel.Fine;
+                            up.Scale = 25;
+                            up.get_Parameter(BuiltInParameter.MODEL_GRAPHICS_STYLE).Set(4);
+                        }
+                        if (UI.ceilingName != null)
+                        {
+                            up.Name = room.Name + " " + UI.ceilingName;
+                        }
+                        viewPorts.Add(up);
+
+                    }
+                    //ElementTransformUtils.MirrorElement(doc,up.Id,Plane.CreateByNormalAndOrigin(bottomFace.FaceNormal, bottomFace.Origin.Add(5*XYZ.BasisZ)));
+                    List<ElementId> tempIds = new List<ElementId>() { UI.floor1VTId, UI.floor2VTId, UI.floor3VTId };
+                    List<string> names = new List<string>() { UI.floor1Name, UI.floor2Name, UI.floor3Name };
+                    if (botLevel != null)
+                    {
+
+                        vBot = floors.Where(v => v.GenLevel?.Elevation == botLevel.Elevation).ToList();
+                        if (vBot.Count > 1)
+                        {
+                            ParentView pv = new ParentView(vBot, room.Name, "Floor");
+                            pv.ShowDialog();
+                            if (pv.DialogResult == Forms.DialogResult.Cancel) { return Result.Cancelled; }
+                            else { VFF = pv.views.ElementAt(pv.comboBox1.SelectedIndex); }
+                        }
+                        else
+                        {
+                            VFF = ViewPlan.Create(doc, viewForFlooring.Id, botLevel.Id);
+                        }
+                        for (int i = 0; i < 3; i++)
+                        {
+                            View down = ViewSection.CreateCallout(doc, VFF.Id, viewForFlooring.Id, new XYZ(minX - 1.5, minY - 1.5, 0), new XYZ(maxX + 1.5, maxY + 1.5, 0));
+                            if (tempIds[i] != null)
+                            {
+                                down.ViewTemplateId = tempIds[i];
+                            }
+                            else
+                            {
+                                down.DetailLevel = ViewDetailLevel.Fine;
+                                down.Scale = 25;
+                                down.get_Parameter(BuiltInParameter.MODEL_GRAPHICS_STYLE).Set(4);
+                            }
+                            if (names[i] != null)
+                            {
+                                down.Name = room.Name + " " + names[i];
+                            }
+                            viewPorts.Add(down);
+                        }
                     }
                     double rowHeight = 0;
                     for (int i = 0; i < viewPorts.Count; i++)
@@ -267,9 +278,10 @@ namespace IBIMSGen.Rooms
                 }
 
 
-                if (sb.ToString().Trim().Length > 0) td(sb.ToString());
+
             }
             tr.Commit();
+            if (sb.ToString().Trim().Length > 0) td(sb.ToString());
             return Result.Succeeded;
 
         }

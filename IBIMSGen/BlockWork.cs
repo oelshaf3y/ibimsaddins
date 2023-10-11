@@ -24,6 +24,9 @@ namespace IBIMSGen
             options.ComputeReferences = true;
             FilteredElementCollector walls = new FilteredElementCollector(doc, doc.ActiveView.Id).OfCategory(BuiltInCategory.OST_Walls).WhereElementIsNotElementType();
             FilteredElementCollector dims = new FilteredElementCollector(doc, doc.ActiveView.Id).OfClass(typeof(Dimension)).WhereElementIsNotElementType();
+            FilteredElementCollector openings=new FilteredElementCollector(doc,doc.ActiveView.Id).OfClass(typeof(Opening)).WhereElementIsNotElementType();
+            uidoc.Selection.SetElementIds(openings.Select(x=> x.Id).ToList());
+            return Result.Succeeded;
             Dimension d = dims.ToElements()?.FirstOrDefault(e => e is Dimension && !(e is SpotDimension)) as Dimension;
             if (d == null) return Result.Cancelled;
             List<Wall> collection = new List<Wall>();
