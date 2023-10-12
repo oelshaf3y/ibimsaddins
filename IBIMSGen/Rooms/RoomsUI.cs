@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -15,12 +16,15 @@ namespace IBIMSGen.Rooms
     public partial class RoomsUI : System.Windows.Forms.Form
     {
         public List<ElementId> viewTempsIds;
-        public ElementId sectionVTId, celingVTId, floor1VTId, floor2VTId, floor3VTId;
+        List<Element> titleBlocks;
+        public ElementId sectionVTId, celingVTId, floor1VTId, floor2VTId, floor3VTId,titleBlockId;
         public string sheetName, sectionName, ceilingName, floor1Name, floor2Name, floor3Name, sheetNumber;
-        public RoomsUI(Document doc, List<ElementId> viewTempsIds)
+        public RoomsUI(Document doc, List<ElementId> viewTempsIds,List<Element> titleBlocks)
         {
             InitializeComponent();
             this.viewTempsIds = viewTempsIds;
+            this.titleBlocks = titleBlocks;
+            this.comboBox6.Items.AddRange(this.titleBlocks.Select(x=>x.Name).Distinct().ToArray());
             this.comboBox1.Items.AddRange(this.viewTempsIds.Select(x => doc.GetElement(x).Name).ToArray());
             this.comboBox2.Items.AddRange(this.viewTempsIds.Select(x => doc.GetElement(x).Name).ToArray());
             this.comboBox3.Items.AddRange(this.viewTempsIds.Select(x => doc.GetElement(x).Name).ToArray());
@@ -55,6 +59,16 @@ namespace IBIMSGen.Rooms
 
         }
 
+        private void label1_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.linkedin.com/in/oelshaf3y");
+        }
+
+        private void RoomsUI_Load(object sender, EventArgs e)
+        {
+
+        }
+
         private void checkBox4_CheckedChanged(object sender, EventArgs e)
         {
             comboBox4.Enabled = checkBox4.Checked;
@@ -85,25 +99,30 @@ namespace IBIMSGen.Rooms
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (checkBox1.Checked) { this.sectionVTId = this.viewTempsIds[comboBox1.SelectedIndex]; }
-            if (checkBox2.Checked) { this.celingVTId = this.viewTempsIds[comboBox2.SelectedIndex]; }
-            if (checkBox3.Checked) { this.floor1VTId = this.viewTempsIds[comboBox3.SelectedIndex]; }
-            if (checkBox4.Checked) { this.floor2VTId = this.viewTempsIds[comboBox4.SelectedIndex]; }
-            if (checkBox5.Checked) { this.floor3VTId = this.viewTempsIds[comboBox5.SelectedIndex]; }
+            if (comboBox6.SelectedIndex == -1) { MessageBox.Show("Please Select Title Block"); }
+            else
+            {
+                this.titleBlockId = this.titleBlocks.Where(x=>x.Name==comboBox6.Text).FirstOrDefault().GetTypeId();
+                if (checkBox1.Checked) { this.sectionVTId = this.viewTempsIds[comboBox1.SelectedIndex]; }
+                if (checkBox2.Checked) { this.celingVTId = this.viewTempsIds[comboBox2.SelectedIndex]; }
+                if (checkBox3.Checked) { this.floor1VTId = this.viewTempsIds[comboBox3.SelectedIndex]; }
+                if (checkBox4.Checked) { this.floor2VTId = this.viewTempsIds[comboBox4.SelectedIndex]; }
+                if (checkBox5.Checked) { this.floor3VTId = this.viewTempsIds[comboBox5.SelectedIndex]; }
 
-            if (checkBox6.Checked) { this.sheetName = this.textBox7.Text; }
-            if (checkBox7.Checked) { this.sectionName = this.textBox2.Text; }
-            if (checkBox8.Checked) { this.ceilingName = this.textBox3.Text; }
-            if (checkBox9.Checked) { this.floor1Name = this.textBox4.Text; }
-            if (checkBox10.Checked) { this.floor2Name = this.textBox5.Text; }
-            if (checkBox11.Checked) { this.floor3Name = this.textBox6.Text; }
+                if (checkBox6.Checked) { this.sheetName = this.textBox7.Text; }
+                if (checkBox7.Checked) { this.sectionName = this.textBox2.Text; }
+                if (checkBox8.Checked) { this.ceilingName = this.textBox3.Text; }
+                if (checkBox9.Checked) { this.floor1Name = this.textBox4.Text; }
+                if (checkBox10.Checked) { this.floor2Name = this.textBox5.Text; }
+                if (checkBox11.Checked) { this.floor3Name = this.textBox6.Text; }
 
-            if (checkBox12.Checked) { this.sheetNumber = this.textBox8.Text; }
+                if (checkBox12.Checked) { this.sheetNumber = this.textBox8.Text; }
 
 
 
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+            }
         }
 
         private void checkBox9_CheckedChanged(object sender, EventArgs e)

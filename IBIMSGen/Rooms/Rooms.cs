@@ -41,8 +41,7 @@ namespace IBIMSGen.Rooms
             viewTempsIds = views.Cast<View>().Where(x => x.IsTemplate).OrderBy(x => x.Name).Select(x => x.Id).Distinct().ToList();
 
 
-            titleBlocks = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_TitleBlocks);
-            titleBlockId = titleBlocks.FirstOrDefault().Id;
+            titleBlocks = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_TitleBlocks).OfClass(typeof(FamilyInstance));
             levels = new FilteredElementCollector(doc).OfClass(typeof(Level));
             ceilings = new List<View>();
             ceilings = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Views)
@@ -56,8 +55,9 @@ namespace IBIMSGen.Rooms
             viewForCeiling = vft.Where(l => (l as ViewFamilyType).ViewFamily == ViewFamily.CeilingPlan).First();
             viewForFlooring = vft.Where(l => (l as ViewFamilyType).ViewFamily == ViewFamily.Detail).FirstOrDefault();
 
-            UI = new RoomsUI(doc, viewTempsIds);
+            UI = new RoomsUI(doc, viewTempsIds, titleBlocks.ToList());
             UI.ShowDialog();
+            titleBlockId = UI.titleBlockId;
             if (UI.DialogResult == System.Windows.Forms.DialogResult.Cancel) return Result.Failed;
 
             try

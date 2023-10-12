@@ -40,5 +40,10 @@ namespace IBIMSGen.Rooms
             this.DialogResult= DialogResult.Cancel;
             this.Close();
         }
+
+        private void label7_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.linkedin.com/in/oelshaf3y");
+        }
     }
 }

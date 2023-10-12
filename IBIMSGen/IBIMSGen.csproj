@@ -87,6 +87,7 @@
       <DependentUpon>loading.cs</DependentUpon>
     </Compile>
     <Compile Include="BlockWork.cs" />
+    <Compile Include="Fillet.cs" />
     <Compile Include="ReplaceFamilies\Replace.cs" />
     <Compile Include="ReplaceFamilies\ReplaceUI.cs">
       <SubType>Form</SubType>
@@ -133,6 +134,7 @@
     <Compile Include="Rooms\RoomsUI.Designer.cs">
       <DependentUpon>RoomsUI.cs</DependentUpon>
     </Compile>
+    <Compile Include="SelectSimilar.cs" />
     <Compile Include="Vectors.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -216,13 +218,16 @@
     <None Include="IBIMSGen.addin" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\bw.png" />
+    <EmbeddedResource Include="Resources\bw.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Room.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\replace.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\similar.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

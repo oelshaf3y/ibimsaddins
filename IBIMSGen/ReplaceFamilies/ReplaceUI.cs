@@ -28,5 +28,10 @@ namespace IBIMSGen.ReplaceFamilies
             this.Close();
             this.DialogResult = DialogResult.Cancel;
         }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.linkedin.com/in/oelshaf3y");
+        }
     }
 }

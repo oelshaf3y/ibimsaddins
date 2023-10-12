@@ -110,5 +110,10 @@ namespace IBIMSGen.ClashViewer
             inspectCheckBox.Checked = false;
             create3DCheckBox.Checked = false;
         }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.linkedin.com/in/oelshaf3y");
+        }
     }
 }

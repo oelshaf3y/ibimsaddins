@@ -41,6 +41,7 @@ namespace IBIMSGen
             Image srch = Properties.Resources.clash;
             Image insu = Properties.Resources.inulation;
             Image bw = Properties.Resources.bw;
+            Image sim = Properties.Resources.similar;
 
             ImageSource search = GetImgSrc(srch);
             ImageSource callouts = GetImgSrc(co);
@@ -48,6 +49,14 @@ namespace IBIMSGen
             ImageSource bwIS = GetImgSrc(bw);
             ImageSource roomIco = GetImgSrc(roo);
             ImageSource replaceIco = GetImgSrc(rep);
+            ImageSource similarIco = GetImgSrc(sim);
+
+            PushButtonData SelectSimilarDL = new PushButtonData("Similar Detail Line", "Similar Lines", assemblyName, "IBIMSGen.SelectSimilar")
+            {
+                LargeImage = similarIco,
+                Image = similarIco,
+                ToolTip = "Find and Select all Lines with the same line style in the current view."
+            };
 
             PushButtonData ReplaceElements = new PushButtonData("Find & Replace Elements", "Replace Elements", assemblyName, "IBIMSGen.ReplaceFamilies.Replace")
             {
@@ -87,6 +96,7 @@ namespace IBIMSGen
             genTools.AddItem(copyCallouts);
             genTools.AddItem(clash);
             genTools.AddItem(ReplaceElements);
+            genTools.AddItem(SelectSimilarDL);
             Arch.AddItem(RoomSections);
             systems.AddItem(BWork);
             return Result.Succeeded;

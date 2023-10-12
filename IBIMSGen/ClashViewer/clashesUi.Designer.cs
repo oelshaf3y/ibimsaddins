@@ -53,12 +53,16 @@
             // 
             // button1
             // 
+            this.button1.BackColor = System.Drawing.Color.White;
+            this.button1.FlatAppearance.BorderColor = System.Drawing.Color.White;
+            this.button1.FlatAppearance.BorderSize = 0;
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button1.Location = new System.Drawing.Point(308, 87);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 0;
             this.button1.Text = "Browse";
-            this.button1.UseVisualStyleBackColor = true;
+            this.button1.UseVisualStyleBackColor = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // label1
@@ -104,7 +108,12 @@
             // 
             // OkBut
             // 
-            this.OkBut.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
+            this.OkBut.BackColor = System.Drawing.Color.White;
+            this.OkBut.FlatAppearance.BorderColor = System.Drawing.Color.White;
+            this.OkBut.FlatAppearance.BorderSize = 0;
+            this.OkBut.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.OkBut.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.OkBut.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.OkBut.Location = new System.Drawing.Point(289, 208);
             this.OkBut.Name = "OkBut";
             this.OkBut.Size = new System.Drawing.Size(75, 23);
@@ -115,13 +124,19 @@
             // 
             // cancelBut
             // 
+            this.cancelBut.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.cancelBut.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.cancelBut.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
+            this.cancelBut.FlatAppearance.BorderSize = 0;
+            this.cancelBut.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Red;
+            this.cancelBut.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
+            this.cancelBut.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cancelBut.Location = new System.Drawing.Point(188, 208);
             this.cancelBut.Name = "cancelBut";
             this.cancelBut.Size = new System.Drawing.Size(75, 23);
             this.cancelBut.TabIndex = 6;
             this.cancelBut.Text = "Cancel";
-            this.cancelBut.UseVisualStyleBackColor = true;
+            this.cancelBut.UseVisualStyleBackColor = false;
             // 
             // clashBallCheckBox
             // 
@@ -156,6 +171,7 @@
             this.label3.Size = new System.Drawing.Size(171, 13);
             this.label3.TabIndex = 9;
             this.label3.Text = "© Omar O.Elshafey | I-BIMS 2023";
+            this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // panel1
             // 
@@ -196,6 +212,7 @@
             // 
             // comboBox1
             // 
+            this.comboBox1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox1.FormattingEnabled = true;
             this.comboBox1.Location = new System.Drawing.Point(164, 142);
             this.comboBox1.Name = "comboBox1";
@@ -226,6 +243,7 @@
             this.AcceptButton = this.OkBut;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.Gainsboro;
             this.CancelButton = this.cancelBut;
             this.ClientSize = new System.Drawing.Size(395, 277);
             this.Controls.Add(this.collectBallCheckBox);
@@ -241,8 +259,10 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "clashesUi";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "I-BIMS Clash Finder";
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();

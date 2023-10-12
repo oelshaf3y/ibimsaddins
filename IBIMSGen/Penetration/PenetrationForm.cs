@@ -78,6 +78,13 @@ namespace IBIMSGen.Penetration
             comboBox3.Visible = radioButton2.Checked;
         }
 
+        private void label5_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.linkedin.com/in/oelshaf3y");
+            System.Diagnostics.Process.Start("https://www.linkedin.com/in/tarek-mahmoud-ahmed-103041204");
+
+        }
+
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             comboBox2.Items.Clear();
