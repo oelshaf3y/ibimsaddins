@@ -35,7 +35,7 @@ namespace IBIMSGen.ReplaceFamilies
 
                 try
                 {
-                    td("Select Source Element");
+                    td("Select Element to Replace");
                     source = doc.GetElement(uidoc.Selection.PickObject(ObjectType.Element, "Pick 1st Element"));
                     td("Select Destination Element");
                     destination = doc.GetElement(uidoc.Selection.PickObject(ObjectType.Element, "Pick 2nd Element"));
@@ -63,7 +63,7 @@ namespace IBIMSGen.ReplaceFamilies
                 try
                 {
 
-                    td("Select Source Element");
+                    td("Select Element to Change");
                     elems = uidoc.Selection.PickObjects(ObjectType.Element, "Pick Elements").Select(x => doc.GetElement(x)).ToList();
                     td("Select Destination Element");
                     destination = doc.GetElement(uidoc.Selection.PickObject(ObjectType.Element, "Pick 2nd Element"));

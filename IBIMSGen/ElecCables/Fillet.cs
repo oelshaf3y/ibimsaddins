@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace IBIMSGen
+namespace IBIMSGen.ElecCables
 {
     [TransactionAttribute(TransactionMode.Manual)]
     internal class Fillet : IExternalCommand
@@ -26,25 +26,25 @@ namespace IBIMSGen
             uidoc = commandData.Application.ActiveUIDocument;
             doc = uidoc.Document;
             R = 2 *doc.ActiveView.Scale / 304.8;
-            Transaction t = new Transaction(doc, "tr");
-            t.Start("direct shape");
-            DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel)).SetShape(
-                new List<GeometryObject> { NurbSpline.CreateCurve(
-                    new List<XYZ>
-                    {
-                        //2 4 1 3 
-                        new XYZ(26.1349027046458,38.7422687557032,0),
-                        new XYZ(24.7722236317828,36.7318481581823,0),
-                        new XYZ(27.0452561876474,35.419512200177,0),
-                        new XYZ(25.5726351525734,33.2468893719458,0)
+            //Transaction t = new Transaction(doc, "tr");
+            //t.Start("direct shape");
+            //DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel)).SetShape(
+            //    new List<GeometryObject> { NurbSpline.CreateCurve(
+            //        new List<XYZ>
+            //        {
+            //            //2 4 1 3 
+            //            new XYZ(26.1349027046458,38.7422687557032,0),
+            //            new XYZ(24.7722236317828,36.7318481581823,0),
+            //            new XYZ(27.0452561876474,35.419512200177,0),
+            //            new XYZ(25.5726351525734,33.2468893719458,0)
 
 
-                    }
-                    ,new List<double> { 1,1,1,1})}
-                );
-            t.Commit();
-            t.Dispose();
-            return Result.Succeeded;
+            //        }
+            //        ,new List<double> { 1,1,1,1})}
+            //    );
+            //t.Commit();
+            //t.Dispose();
+            //return Result.Succeeded;
 
             selectedElements = uidoc.Selection.GetElementIds().Select(x => doc.GetElement(x)).ToList();
             if (selectedElements.Count == 0)
