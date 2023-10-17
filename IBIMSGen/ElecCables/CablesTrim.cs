@@ -19,7 +19,6 @@ namespace IBIMSGen.ElecCables
         FamilySymbol familySymbol;
         List<Element> selectedElements;
         List<CurveElement> linesFEC;
-        List<Spline> splines, splineSets;
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             uidoc = commandData.Application.ActiveUIDocument;
@@ -28,7 +27,6 @@ namespace IBIMSGen.ElecCables
             familySymbol = null;
             familySymbol = new FilteredElementCollector(doc).OfClass(typeof(FamilySymbol))
                 ?.Cast<FamilySymbol>()?.Where(x => x != null && x.Name.ToLower().Contains("cut"))?.FirstOrDefault();
-            splines = new List<Spline>();
             if (familySymbol == null)
             {
                 td("Loading Family");
@@ -62,104 +60,80 @@ namespace IBIMSGen.ElecCables
             {
                 return Result.Cancelled;
             }
-
+            double z = 0;
+            List<XYZ> points = new List<XYZ>();
             foreach (Element elm in selectedElements)
             {
                 if (elm is CurveElement)
                 {
                     CurveElement curveElement = (CurveElement)elm;
                     Curve curve = curveElement.GeometryCurve;
-                    List<XYZ> intersectionPoints = getIntersections(curve, linesFEC.Select(x => x.GeometryCurve).Where(x => (x is Line)).ToList())
-                        ?.OrderBy(x => x.DistanceTo(curve.GetEndPoint(0))).ToList();
-                    td(intersectionPoints.Count.ToString());
-                    List<List<XYZ>> sets = new List<List<XYZ>>();
-                    sets.AddRange(getIntersectionSets(intersectionPoints));
-                    foreach (List<XYZ> set in sets)
-                    {
-                        XYZ pt1st = set.First();
-                        XYZ ptLast = set.Last();
-                        double length;
-                        XYZ origin;
-                        if (pt1st.IsAlmostEqualTo(ptLast))
-                        {
-                            length = 200 / 304.8;
-                            origin = pt1st;
-                        }
-                        else if (pt1st.DistanceTo(ptLast) <= 200)
-                        {
-                            XYZ dir = (ptLast - pt1st);
-                            Line l = Line.CreateBound(pt1st.Add(-100 / 304.8 * dir), ptLast.Add(100 / 304.8 * dir));
-                            length = l.Length;
-                            origin = l.Evaluate(0.5, true);
-                        }
-                        else
-                        {
-                            length = pt1st.DistanceTo(ptLast) + (200 / 304.8);
-                            origin = Line.CreateBound(pt1st, ptLast).Evaluate(0.5, true);
-                        }
-                        double angle = ((Line)curve).Direction.AngleTo(XYZ.BasisY);
-                        //FamilyInstance famins = doc.Create.NewFamilyInstance(origin, familySymbol, doc.ActiveView);
-                        //famins.LookupParameter("Length").Set(length);
-                        //famins.Location.Rotate(Line.CreateUnbound(origin, XYZ.BasisZ), angle);
-                        splines.Add(new Spline(curveElement, length, 200, angle, origin));
-                    }
-                    DetailElementOrderUtils.BringForward(doc, doc.ActiveView, curveElement.Id);
+                    points.AddRange(getIntersections(curve, linesFEC.Select(x => x.GeometryCurve).Where(x => (x is Line)).ToList())
+                        ?.OrderBy(x => x.DistanceTo(curve.GetEndPoint(0))).ToArray());
+                    if (z == 0) z = points[0].Z;
                 }
             }
+            double minx, miny, maxx, maxy;
 
-            List<Spline> Splines = splines.OrderBy(x => x.origin.DistanceTo(XYZ.Zero)).ToList();
-            Spline prev = Splines.Last();
-            for (int i = Splines.Count-2; i >=0; i--)
+            minx = points.OrderBy(x => x.X).First().X;
+            miny = points.OrderBy(x => x.Y).First().Y;
+            maxx = points.OrderByDescending(x => x.X).First().X;
+            maxy = points.OrderByDescending(x => x.Y).First().Y;
+
+            //td(points.Count.ToString());
+            QuadTree qtree = new QuadTree(new Rectangle(Convert.ToInt32(minx), Convert.ToInt32(maxy), Convert.ToInt32(maxx), Convert.ToInt32(miny)));
+            foreach (XYZ point in points.Distinct().ToList())
             {
-                Spline spline = Splines[i];
-                if (spline.origin.DistanceTo(prev.origin) < 500 / 304.8)
-                {
-                    //Line l = 
-                }
+                qtree.Insert(point);
             }
-
-            using (Transaction tr = new Transaction(doc, "Cable Cut"))
-            {
-                tr.Start();
-                familySymbol.Activate();
-
-
-                tr.Commit();
-                tr.Dispose();
-            }
-
-
-            return Result.Succeeded;
-        }
-
-        private List<List<XYZ>> getIntersectionSets(List<XYZ> intersectionPoints)
-        {
-            XYZ prevPoint = XYZ.Zero;
-            double distance = 0;
             List<List<XYZ>> sets = new List<List<XYZ>>();
-            List<XYZ> set = new List<XYZ>();
-            for (int i = 0; i < intersectionPoints.Count; i++)
+            List<XYZ> nearest = new List<XYZ>();
+            int range = Convert.ToInt32(3000 / 304.8);
+            foreach (XYZ point in points)
             {
-                if (i != 0) prevPoint = intersectionPoints[i - 1];
-                distance = prevPoint.DistanceTo(intersectionPoints[i]);
-                if (distance <= 500 / 304.8)
+                if (CollectedPoint(sets, point)) continue;
+                if (nearest.Where(x => x.IsAlmostEqualTo(point)).Any()) continue;
+                QuadTree rect = new QuadTree(new Rectangle(Convert.ToInt32(point.X) - range, Convert.ToInt32(point.Y) + range, Convert.ToInt32(point.X) + range, Convert.ToInt32(point.Y) - range));
+                List<XYZ> query = qtree.queryRange(rect);
+                if (query.Count > 0)
                 {
-                    set.Add(intersectionPoints[i]);
+                    nearest.AddRange(query.ToArray());
                 }
                 else
                 {
-                    if (set.Count > 0)
-                    {
-                        sets.Add(set.OrderBy(x => x.DistanceTo(XYZ.Zero)).ToList());
-                    }
-                    set = new List<XYZ>
-                    {
-                        intersectionPoints[i]
-                    };
+                    if (nearest.Count > 0) sets.Add(nearest.Distinct().ToList());
+                    nearest = new List<XYZ>();
                 }
             }
-            sets.Add(set);
-            return sets;
+            //td(sets.Count.ToString());
+            Transaction tr = new Transaction(doc);
+            tr.Start("a7a");
+            familySymbol.Activate();
+            foreach (List<XYZ> set in sets)
+            {
+                XYZ min = set.OrderBy(x => x.DistanceTo(XYZ.Zero)).First()
+                    , max = set.OrderByDescending(x => x.DistanceTo(XYZ.Zero)).First(),
+                    origin = Line.CreateBound(min, max).Evaluate(0.5, true);
+                FamilyInstance fam = doc.Create.NewFamilyInstance(origin, familySymbol, doc.ActiveView);
+                double dx = (max - min).DotProduct(XYZ.BasisX);
+                double dy = (max - min).DotProduct(XYZ.BasisY);
+                fam.LookupParameter("Width").Set(Math.Max(dx, dy) + 400 / 304.8);
+                fam.LookupParameter("Length").Set((Math.Min(dx, dy)) + 400 / 304.8);
+                if (dy > dx) fam.Location.Rotate(Line.CreateUnbound(origin, XYZ.BasisZ), Math.PI / 2);
+            }
+
+            tr.Commit();
+            tr.Dispose();
+            return Result.Succeeded;
+        }
+
+        private bool CollectedPoint(List<List<XYZ>> sets, XYZ point)
+        {
+            foreach (List<XYZ> set in sets)
+            {
+                if (set.Where(x => x.IsAlmostEqualTo(point)).Any()) return true;
+            }
+            return false;
         }
 
         private List<XYZ> getIntersections(Curve curve, List<Curve> curves)
@@ -183,20 +157,19 @@ namespace IBIMSGen.ElecCables
             TaskDialog.Show("Message", message);
         }
     }
+
     public class Spline
     {
-        public CurveElement curveElement;
-        public double length, width, angle;
-        public XYZ origin;
-        public bool merged;
-        public Spline(CurveElement curveElement, double length, double width, double angle, XYZ origin)
+        double Width;
+        double Length;
+        double Angle;
+        XYZ Origin;
+        public Spline(double width, double length, double angle, XYZ origin)
         {
-            this.curveElement = curveElement;
-            this.length = length;
-            this.width = width;
-            this.angle = angle;
-            this.origin = origin;
-            this.merged = false;
+            Width = width;
+            Length = length;
+            Angle = angle;
+            Origin = origin;
         }
     }
 
