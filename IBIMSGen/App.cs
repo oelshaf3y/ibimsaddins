@@ -39,17 +39,21 @@ namespace IBIMSGen
             Image roo = Properties.Resources.Room;
             Image co = Properties.Resources.callouts;
             Image srch = Properties.Resources.clash;
-            Image insu = Properties.Resources.inulation;
             Image bw = Properties.Resources.bw;
             Image sim = Properties.Resources.similar;
+            Image fil = Properties.Resources.fillet;
+            Image cut = Properties.Resources.CutLines;
+
 
             ImageSource search = GetImgSrc(srch);
             ImageSource callouts = GetImgSrc(co);
-            ImageSource insulation = GetImgSrc(insu);
             ImageSource bwIS = GetImgSrc(bw);
             ImageSource roomIco = GetImgSrc(roo);
             ImageSource replaceIco = GetImgSrc(rep);
             ImageSource similarIco = GetImgSrc(sim);
+            ImageSource filletIcon = GetImgSrc(fil);
+            ImageSource CutLinesIco = GetImgSrc(cut);
+
 
             PushButtonData SelectSimilarDL = new PushButtonData("Similar Detail Line", "Similar Lines", assemblyName, "IBIMSGen.SelectSimilar")
             {
@@ -93,12 +97,30 @@ namespace IBIMSGen
                 ToolTip = "Insert sleeves of a choosen type at penetration location."
             };
 
+
+            PushButtonData Fillet = new PushButtonData("Fillet Electrical Lines", "Fillet Lines", assemblyName, "IBIMSGen.ElecCables.Fillet")
+            {
+                LargeImage = filletIcon,
+                Image = filletIcon,
+                ToolTip = "Fillet lines with the same line style at the ends where they meet."
+            };
+
+
+            PushButtonData CutLines = new PushButtonData("Cut Electrical Lines", "Cut Lines", assemblyName, "IBIMSGen.ElecCables.CablesTrim")
+            {
+                LargeImage = CutLinesIco,
+                Image = CutLinesIco,
+                ToolTip = "Cut intersecting lines with the selection set of lines."
+            };
+
+
             genTools.AddItem(copyCallouts);
             genTools.AddItem(clash);
             genTools.AddItem(ReplaceElements);
             genTools.AddItem(SelectSimilarDL);
             Arch.AddItem(RoomSections);
             systems.AddItem(BWork);
+            systems.AddStackedItems(Fillet, CutLines);
             return Result.Succeeded;
         }
         private BitmapSource GetImgSrc(Image img)

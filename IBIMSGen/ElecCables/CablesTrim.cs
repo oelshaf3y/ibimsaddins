@@ -79,52 +79,59 @@ namespace IBIMSGen.ElecCables
             miny = points.OrderBy(x => x.Y).First().Y;
             maxx = points.OrderByDescending(x => x.X).First().X;
             maxy = points.OrderByDescending(x => x.Y).First().Y;
-
-            //td(points.Count.ToString());
-            QuadTree qtree = new QuadTree(new Rectangle(Convert.ToInt32(minx), Convert.ToInt32(maxy), Convert.ToInt32(maxx), Convert.ToInt32(miny)));
-            foreach (XYZ point in points.Distinct().ToList())
-            {
-                qtree.Insert(point);
-            }
             List<List<XYZ>> sets = new List<List<XYZ>>();
-            List<XYZ> nearest = new List<XYZ>();
-            int range = Convert.ToInt32(3000 / 304.8);
             foreach (XYZ point in points)
             {
-                if (CollectedPoint(sets, point)) continue;
-                if (nearest.Where(x => x.IsAlmostEqualTo(point)).Any()) continue;
-                QuadTree rect = new QuadTree(new Rectangle(Convert.ToInt32(point.X) - range, Convert.ToInt32(point.Y) + range, Convert.ToInt32(point.X) + range, Convert.ToInt32(point.Y) - range));
-                List<XYZ> query = qtree.queryRange(rect);
-                if (query.Count > 0)
-                {
-                    nearest.AddRange(query.ToArray());
-                }
-                else
-                {
-                    if (nearest.Count > 0) sets.Add(nearest.Distinct().ToList());
-                    nearest = new List<XYZ>();
-                }
-            }
-            //td(sets.Count.ToString());
-            Transaction tr = new Transaction(doc);
-            tr.Start("a7a");
-            familySymbol.Activate();
-            foreach (List<XYZ> set in sets)
-            {
-                XYZ min = set.OrderBy(x => x.DistanceTo(XYZ.Zero)).First()
-                    , max = set.OrderByDescending(x => x.DistanceTo(XYZ.Zero)).First(),
-                    origin = Line.CreateBound(min, max).Evaluate(0.5, true);
-                FamilyInstance fam = doc.Create.NewFamilyInstance(origin, familySymbol, doc.ActiveView);
-                double dx = (max - min).DotProduct(XYZ.BasisX);
-                double dy = (max - min).DotProduct(XYZ.BasisY);
-                fam.LookupParameter("Width").Set(Math.Max(dx, dy) + 400 / 304.8);
-                fam.LookupParameter("Length").Set((Math.Min(dx, dy)) + 400 / 304.8);
-                if (dy > dx) fam.Location.Rotate(Line.CreateUnbound(origin, XYZ.BasisZ), Math.PI / 2);
+                addToSets(point, sets);
             }
 
-            tr.Commit();
-            tr.Dispose();
+            using (Transaction transaction = new Transaction(doc, "Create cut lines"))
+            {
+                transaction.Start();
+                foreach (List<XYZ> set in sets)
+                {
+                    XYZ min = set.OrderBy(x => x.DistanceTo(XYZ.Zero)).First();
+                    XYZ max = set.OrderByDescending(x => x.DistanceTo(XYZ.Zero)).First();
+                    double dx = Math.Abs((max - min).DotProduct(XYZ.BasisX)) + 200 / 304.8;
+                    double dy = Math.Abs((max - min).DotProduct(XYZ.BasisY)) + 200 / 304.8;
+                    XYZ origin;
+                    try
+                    {
+
+                        origin = Line.CreateBound(min, max).Evaluate(0.5, true);
+                    }
+                    catch
+                    {
+                        origin = min.Add((max - min).GetLength() / 2 * (max - min).Normalize());
+                    }
+                    FamilyInstance instance = doc.Create.NewFamilyInstance(origin, familySymbol, doc.ActiveView);
+                    instance.LookupParameter("Width").Set(Math.Max(dx, dy));
+                    instance.LookupParameter("Length").Set(Math.Min(dx, dy));
+                    if (dx < dy) instance.Location.Rotate(Line.CreateUnbound(origin, XYZ.BasisZ), Math.PI / 2);
+
+                }
+                transaction.Commit();
+                transaction.Dispose();
+            }
+
             return Result.Succeeded;
+        }
+
+        private void addToSets(XYZ point, List<List<XYZ>> sets)
+        {
+            bool added = false;
+            foreach (List<XYZ> set in sets)
+            {
+                added = set.Where(x => x.DistanceTo(point) <= 210 / 304.8).Any();
+                if (added)
+                {
+                    set.Add(point);
+                    return;
+                }
+
+            }
+            sets.Add(new List<XYZ> { point });
+            return;
         }
 
         private bool CollectedPoint(List<List<XYZ>> sets, XYZ point)
@@ -158,19 +165,5 @@ namespace IBIMSGen.ElecCables
         }
     }
 
-    public class Spline
-    {
-        double Width;
-        double Length;
-        double Angle;
-        XYZ Origin;
-        public Spline(double width, double length, double angle, XYZ origin)
-        {
-            Width = width;
-            Length = length;
-            Angle = angle;
-            Origin = origin;
-        }
-    }
 
 }

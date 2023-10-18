@@ -89,7 +89,6 @@
     <Compile Include="BlockWork.cs" />
     <Compile Include="ElecCables\CablesTrim.cs" />
     <Compile Include="ElecCables\Fillet.cs" />
-    <Compile Include="ElecCables\QuadTree.cs" />
     <Compile Include="ReplaceFamilies\Replace.cs" />
     <Compile Include="ReplaceFamilies\ReplaceUI.cs">
       <SubType>Form</SubType>
@@ -230,6 +229,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\similar.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\CutLines.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\fillet.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
