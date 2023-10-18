@@ -89,6 +89,8 @@
     <Compile Include="BlockWork.cs" />
     <Compile Include="ElecCables\CablesTrim.cs" />
     <Compile Include="ElecCables\Fillet.cs" />
+    <Compile Include="ElecEquipCeilings\AlignBetween2Pts.cs" />
+    <Compile Include="ElecEquipCeilings\CeilingLightsPlacement.cs" />
     <Compile Include="ReplaceFamilies\Replace.cs" />
     <Compile Include="ReplaceFamilies\ReplaceUI.cs">
       <SubType>Form</SubType>
@@ -236,5 +238,6 @@
   <ItemGroup>
     <None Include="Resources\fillet.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
