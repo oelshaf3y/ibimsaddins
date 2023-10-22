@@ -17,3 +17,9 @@
 /IBIMSGen/obj/Debug/IBIMSGen.dll
 /IBIMSGen/obj/Debug/IBIMSGen.Rooms.ParentView.resources
 /IBIMSGen/obj/Debug/IBIMSGen_MarkupCompile.cache
+/IBIMSGen/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+*.resources
+/IBIMSGen/obj/Debug/IBIMSGen.Properties.Resources.resources
+/IBIMSGen/Properties/Resources.resx
+/IBIMSGen/obj/Debug/TempPE/Properties.Resources.Designer.cs.dll
+*.resx
