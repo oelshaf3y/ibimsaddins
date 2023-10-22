@@ -3,6 +3,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Structure;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
+using Microsoft.Office.Interop.Excel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,11 +23,14 @@ namespace IBIMSGen.ReplaceFamilies
         List<XYZ> locations;
         FamilyInstance fI;
         FamilySymbol fs;
+        Options options;
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             uidoc = commandData.Application.ActiveUIDocument;
             doc = uidoc.Document;
             locations = new List<XYZ>();
+            options = new Options();
+            options.ComputeReferences = true;
             ReplaceUI UI = new ReplaceUI();
             UI.ShowDialog();
             if (UI.DialogResult == DialogResult.Cancel) return Result.Failed;
@@ -35,9 +39,7 @@ namespace IBIMSGen.ReplaceFamilies
 
                 try
                 {
-                    td("Select Element to Replace");
                     source = doc.GetElement(uidoc.Selection.PickObject(ObjectType.Element, "Pick 1st Element"));
-                    td("Select Destination Element");
                     destination = doc.GetElement(uidoc.Selection.PickObject(ObjectType.Element, "Pick 2nd Element"));
                     fI = destination as FamilyInstance;
                     fs = fI.Symbol;
@@ -56,16 +58,14 @@ namespace IBIMSGen.ReplaceFamilies
             else if (UI.radioButton2.Checked)
             {
                 elems = new FilteredElementCollector(doc, doc.ActiveView.Id).OfCategoryId(source.Category.Id).Where(x => x.Name == source.Name).ToList();
-                if(!getLocations(elems)) return Result.Failed;
+                if (!getLocations(elems)) return Result.Failed;
             }
             else
             {
                 try
                 {
 
-                    td("Select Element to Change");
                     elems = uidoc.Selection.PickObjects(ObjectType.Element, "Pick Elements").Select(x => doc.GetElement(x)).ToList();
-                    td("Select Destination Element");
                     destination = doc.GetElement(uidoc.Selection.PickObject(ObjectType.Element, "Pick 2nd Element"));
                     fI = destination as FamilyInstance;
                     fs = fI.Symbol;
@@ -74,7 +74,7 @@ namespace IBIMSGen.ReplaceFamilies
                 {
                     return Result.Failed;
                 }
-                if(!getLocations(elems)) return Result.Failed;
+                if (!getLocations(elems)) return Result.Failed;
             }
             Transaction tr = new Transaction(doc, "Replace");
             tr.Start();
@@ -110,28 +110,74 @@ namespace IBIMSGen.ReplaceFamilies
 
         private bool replaceElement(XYZ location, FamilySymbol fs, Element elem)
         {
+            FamilyInstance fam;
             try
             {
 
-                doc.Create.NewFamilyInstance(location, fs, doc.ActiveView);
+                fam = doc.Create.NewFamilyInstance(location, fs, doc.ActiveView);
             }
             catch
             {
                 try
                 {
-
                     FamilyInstance famins = elem as FamilyInstance;
-                    Element host = famins.Host;
-                    doc.Create.NewFamilyInstance(location, fs, host, famins.StructuralType);
+                    Reference host = famins.HostFace;
+                    Element el = doc.GetElement(host);
+                    if (el is RevitLinkInstance)
+                    {
+                        RevitLinkInstance rli = (RevitLinkInstance)el;
+                        Document linkedDoc = rli.GetLinkDocument();
+                        el = linkedDoc.GetElement(host.LinkedElementId);
+                        Solid solid = getSolid(el);
+                        List<PlanarFace> faces = new List<PlanarFace>();
+                        foreach (Face f in solid.Faces)
+                        {
+                            if (f != null && f is PlanarFace planarFace)
+                            {
+                                faces.Add(planarFace);
+                            }
+                        }
+                        Face face = faces?.OrderBy(x => x.Origin.DistanceTo(location))?.FirstOrDefault();
+                        Reference nHost = face.Reference;
+                        if (nHost != null)
+                        {
+
+                            fam = doc.Create.NewFamilyInstance(nHost, location, famins.FacingOrientation, fs);
+                        }
+                        else
+                        {
+                            try
+                            {
+
+                                fam = doc.Create.NewFamilyInstance(face, location, famins.FacingOrientation, fs);
+                            }
+                            catch
+                            {
+                                fam = doc.Create.NewFamilyInstance(location, fs, el, famins.StructuralType);
+
+                            }
+                        }
+                        //host = host.CreateReferenceInLink();
+                    }
+                    fam = doc.Create.NewFamilyInstance(host, location, famins.FacingOrientation, fs);
+
+
+
                 }
-                catch
+                catch (Exception ex)
                 {
                     try
                     {
-
                         FamilyInstance famins = elem as FamilyInstance;
-                        Reference host = famins.HostFace;
-                        doc.Create.NewFamilyInstance(host, location, famins.FacingOrientation, fs);
+                        Element host = famins.Host;
+                        if (host is RevitLinkInstance)
+                        {
+                            RevitLinkInstance rli = host as RevitLinkInstance;
+                            Document linkedDoc = rli.GetLinkDocument();
+                            host = linkedDoc.GetElement(host.Id);
+                        }
+
+                        fam = doc.Create.NewFamilyInstance(location, fs, host, famins.StructuralType);
                     }
                     catch
                     {
@@ -142,9 +188,83 @@ namespace IBIMSGen.ReplaceFamilies
                 }
             }
             doc.Delete(elem.Id);
+            uidoc.Selection.SetElementIds(new List<ElementId>() { fam.Id });
             return true;
         }
 
+
+        public Solid getSolid(Element elem)
+        {
+            IList<Solid> solids = new List<Solid>();
+            try
+            {
+
+                GeometryElement geo = elem.get_Geometry(options);
+                if (geo.FirstOrDefault() is Solid)
+                {
+                    Solid solid = (Solid)geo.FirstOrDefault();
+                    return SolidUtils.Clone(solid);
+                }
+                foreach (GeometryObject geometryObject in geo)
+                {
+                    if (geometryObject != null)
+                    {
+                        Solid solid = geometryObject as Solid;
+                        if (solid != null && solid.Volume > 0)
+                        {
+                            solids.Add(solid);
+
+                        }
+                    }
+                }
+            }
+            catch
+            {
+            }
+            if (solids.Count == 0)
+            {
+                try
+                {
+                    GeometryElement geo = elem.get_Geometry(options);
+                    GeometryInstance geoIns = geo.FirstOrDefault() as GeometryInstance;
+                    if (geoIns != null)
+                    {
+                        GeometryElement geoElem = geoIns.GetInstanceGeometry();
+                        if (geoElem != null)
+                        {
+                            foreach (GeometryObject geometryObject in geoElem)
+                            {
+                                Solid solid = geometryObject as Solid;
+                                if (solid != null && solid.Volume > 0)
+                                {
+                                    solids.Add(solid);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    throw new InvalidOperationException();
+                }
+            }
+            if (solids.Count > 0)
+            {
+                try
+                {
+
+                    return SolidUtils.Clone(solids.OrderByDescending(x => x.Volume).ElementAt(0));
+                }
+                catch
+                {
+                    return solids.OrderByDescending(x => x.Volume).ElementAt(0);
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
         void td(string message)
         {
             TaskDialog.Show("message", message);

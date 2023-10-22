@@ -87,10 +87,17 @@
       <DependentUpon>loading.cs</DependentUpon>
     </Compile>
     <Compile Include="BlockWork.cs" />
+    <Compile Include="DeleteCad.cs" />
     <Compile Include="ElecCables\CablesTrim.cs" />
     <Compile Include="ElecCables\Fillet.cs" />
-    <Compile Include="ElecEquipCeilings\AlignBetween2Pts.cs" />
+    <Compile Include="AlignBetween2Pts.cs" />
     <Compile Include="ElecEquipCeilings\CeilingLightsPlacement.cs" />
+    <Compile Include="ElecEquipCeilings\PlaceLightsUi.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ElecEquipCeilings\PlaceLightsUi.Designer.cs">
+      <DependentUpon>PlaceLightsUi.cs</DependentUpon>
+    </Compile>
     <Compile Include="ReplaceFamilies\Replace.cs" />
     <Compile Include="ReplaceFamilies\ReplaceUI.cs">
       <SubType>Form</SubType>
@@ -138,6 +145,7 @@
       <DependentUpon>RoomsUI.cs</DependentUpon>
     </Compile>
     <Compile Include="SelectSimilar.cs" />
+    <Compile Include="Trial.cs" />
     <Compile Include="Vectors.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -152,6 +160,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ClashViewer\loading.resx">
       <DependentUpon>loading.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ElecEquipCeilings\PlaceLightsUi.resx">
+      <DependentUpon>PlaceLightsUi.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Penetration\PenetrationForm.resx">
       <DependentUpon>PenetrationForm.cs</DependentUpon>
@@ -209,35 +220,73 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\callouts.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\clash.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\inulation.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="IBIMSGen.addin" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\bw.png" />
+    <EmbeddedResource Include="Resources\similar.ico" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Room.png" />
+    <EmbeddedResource Include="Resources\CutLines.ico" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\replace.png" />
+    <EmbeddedResource Include="Resources\fillet.ico" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\similar.png" />
+    <EmbeddedResource Include="Resources\replace2.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\CutLines.png" />
+    <EmbeddedResource Include="Resources\Room.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\fillet.png" />
+    <EmbeddedResource Include="Resources\bw.ico" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\callouts.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\clash.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\clash-s.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\callouts-s.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\bw-s.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Room-s.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\replace2-s.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\CutLines-s.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\fillet-s.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\similar-s.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\centerElement-s.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\centerElement.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\gridLights.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\gridLights-s.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\delete cad.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\delete cad-s.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

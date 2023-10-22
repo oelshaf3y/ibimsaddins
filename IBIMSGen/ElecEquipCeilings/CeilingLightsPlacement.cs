@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace IBIMSGen.ElecEquipCeilings
 {
@@ -18,18 +19,44 @@ namespace IBIMSGen.ElecEquipCeilings
         List<FamilySymbol> Symbols;
         FamilySymbol fs;
         Options options;
+        PlaceLightsUi ui;
+        int nx, ny;
+        double pitchX, pitchY;
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             uidoc = commandData.Application.ActiveUIDocument;
             doc = uidoc.Document;
+            Reference refFace;
+            try
+            {
+                refFace = uidoc.Selection.PickObject(ObjectType.PointOnElement, "pick Host");
+            }
+            catch
+            {
+                return Result.Cancelled;
+            }
             Symbols = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_LightingFixtures).OfClass(typeof(FamilySymbol)).Cast<FamilySymbol>().ToList();
-            fs = Symbols.Where(x => x.Name.Equals("CSL-1")).FirstOrDefault();
             options = new Options();
             options.ComputeReferences = true;
+            ui = new PlaceLightsUi(Symbols.ToList());
+            ui.ShowDialog();
+            if (ui.DialogResult == DialogResult.Cancel) return Result.Cancelled;
+            fs = ui.families.ElementAt(ui.comboBox1.SelectedIndex);
             if (fs == null)
             {
                 td("Not found FS");
                 return Result.Failed;
+            }
+
+            if (ui.radioButton1.Checked)
+            {
+                pitchX = ui.x / 304.8;
+                pitchY = ui.y / 304.8;
+            }
+            else
+            {
+                nx = ui.nx;
+                ny = ui.ny;
             }
             using (Transaction transaction = new Transaction(doc, "Center Element"))
             {
@@ -43,27 +70,44 @@ namespace IBIMSGen.ElecEquipCeilings
                 uidoc.ActiveView.ShowActiveWorkPlane();
                 #endregion
                 ElementMulticategoryFilter ceilingsAndFloors = new ElementMulticategoryFilter(new BuiltInCategory[] { BuiltInCategory.OST_Floors, BuiltInCategory.OST_Ceilings });
-                List<Element> elementInView = new FilteredElementCollector(doc, doc.ActiveView.Id).WherePasses(ceilingsAndFloors).ToList();
-                uidoc.Selection.SetElementIds(elementInView.Select(x => x.Id).ToArray());
+                XYZ p1, p2, p3, p4;
+                Line l12, l23;
+                
+                try
+                {
 
-                XYZ p1 = uidoc.Selection.PickPoint(ObjectSnapTypes.Endpoints, "Pick 1st Corner");
-                XYZ p2 = uidoc.Selection.PickPoint(ObjectSnapTypes.Endpoints, "Pick 2nd Corner");
-                XYZ p3 = uidoc.Selection.PickPoint(ObjectSnapTypes.Endpoints, "Pick 3rd Corner");
-                Line l12 = Line.CreateBound(p1, p2);
-                Line l23 = Line.CreateBound(p2, p3);
-                XYZ p4 = p1.Add(l23.Length * l23.Direction);
-                double nx = 3;
-                double ny = 2;
-                double pitchX = l12.Length / nx;
-                double pitchY = l23.Length / ny;
+                    p1 = uidoc.Selection.PickPoint(ObjectSnapTypes.Endpoints, "Pick 1st Corner");
+                    p2 = uidoc.Selection.PickPoint(ObjectSnapTypes.Endpoints, "Pick 2nd Corner");
+                    p3 = uidoc.Selection.PickPoint(ObjectSnapTypes.Endpoints, "Pick 3rd Corner");
+                    l12 = Line.CreateBound(p1, p2);
+                    l23 = Line.CreateBound(p2, p3);
+                    p4 = p1.Add(l23.Length * l23.Direction);
+                }
+                catch
+                {
+                    return Result.Cancelled;
+                }
+                if (ui.radioButton1.Checked)
+                {
+                    nx = Convert.ToInt32(Math.Floor(l12.Length / pitchX));
+                    ny = Convert.ToInt32(Math.Floor(l23.Length / pitchY));
+                }
+                else
+                {
+                    pitchX = l12.Length / nx;
+                    pitchY = l23.Length / ny;
+                }
 
-                Reference refFace = uidoc.Selection.PickObject(ObjectType.Face, "pick Host");
                 Element elem = doc.GetElement(refFace);
-                var par = elem.get_Parameter(BuiltInParameter.TILE_PATTERN_GRID_CELLS_X);
-                td(par.ToString)
+                if(elem is RevitLinkInstance)
+                {
+                    RevitLinkInstance rli = elem as RevitLinkInstance;
+                    Document LinkDoc = rli.GetLinkDocument();
+                    elem = LinkDoc.GetElement(refFace.LinkedElementId);
+                }
                 Solid solid = getSolid(elem);
                 double z = solid.Faces.Cast<PlanarFace>().OrderBy(x => x.Origin.Z).Select(x => x.Origin.Z).First();
-
+                fs.Activate();
                 for (int i = 0; i < nx; i++)
                 {
                     for (int j = 0; j < ny; j++)

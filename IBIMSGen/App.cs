@@ -8,6 +8,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Interop;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -27,7 +29,6 @@ namespace IBIMSGen
             String tabName = "IBIMS";
             try
             {
-
                 application.CreateRibbonTab(tabName);
             }
             catch { }
@@ -35,108 +36,105 @@ namespace IBIMSGen
             RibbonPanel systems = application.CreateRibbonPanel(tabName, "System Tools");
             RibbonPanel Arch = application.CreateRibbonPanel(tabName, "Arch. Tools");
 
-            Image rep = Properties.Resources.replace;
-            Image roo = Properties.Resources.Room;
-            Image co = Properties.Resources.callouts;
-            Image srch = Properties.Resources.clash;
-            Image bw = Properties.Resources.bw;
-            Image sim = Properties.Resources.similar;
-            Image fil = Properties.Resources.fillet;
-            Image cut = Properties.Resources.CutLines;
-
-
-            ImageSource search = GetImgSrc(srch);
-            ImageSource callouts = GetImgSrc(co);
-            ImageSource bwIS = GetImgSrc(bw);
-            ImageSource roomIco = GetImgSrc(roo);
-            ImageSource replaceIco = GetImgSrc(rep);
-            ImageSource similarIco = GetImgSrc(sim);
-            ImageSource filletIcon = GetImgSrc(fil);
-            ImageSource CutLinesIco = GetImgSrc(cut);
-
 
             PushButtonData SelectSimilarDL = new PushButtonData("Similar Detail Line", "Similar Lines", assemblyName, "IBIMSGen.SelectSimilar")
             {
-                LargeImage = similarIco,
-                Image = similarIco,
+                LargeImage = Properties.Resources.similar.ToImageSource(),
+                Image = Properties.Resources.similar_s.ToImageSource(),
                 ToolTip = "Find and Select all Lines with the same line style in the current view."
             };
 
             PushButtonData ReplaceElements = new PushButtonData("Find & Replace Elements", "Replace Elements", assemblyName, "IBIMSGen.ReplaceFamilies.Replace")
             {
-                LargeImage = replaceIco,
-                Image = replaceIco,
+                LargeImage = Properties.Resources.replace2.ToImageSource(),
+                Image = Properties.Resources.replace2_s.ToImageSource(),
                 ToolTip = "Find all instances of element and replace it with another element"
             };
 
             PushButtonData RoomSections = new PushButtonData("Room Sheets", "Room Sheet", assemblyName, "IBIMSGen.Rooms.Rooms")
             {
-                LargeImage = roomIco,
-                Image = roomIco,
+                LargeImage = Properties.Resources.Room.ToImageSource(),
+                Image = Properties.Resources.Room_s.ToImageSource(),
                 ToolTip = "Create a sheet for each selected room containing all wall elevations, flooring plans and ceiling plan."
             };
 
             PushButtonData copyCallouts = new PushButtonData("Copy all Callouts", "Copy Callouts", assemblyName, "IBIMSGen.CallOutsCopy")
             {
-                LargeImage = callouts,
-                Image = callouts,
+                LargeImage = Properties.Resources.callouts.ToImageSource(),
+                Image = Properties.Resources.callouts_s.ToImageSource(),
                 ToolTip = "Copy all callouts in all view ports in a specific sheet to the corresponding view in other project."
             };
 
             PushButtonData clash = new PushButtonData("Clash Finder", "Clashes Finder", assemblyName, "IBIMSGen.ClashViewer.clashPoints")
             {
-                LargeImage = search,
-                Image = search,
+                LargeImage = Properties.Resources.clash.ToImageSource(),
+                Image = Properties.Resources.clash_s.ToImageSource(),
                 ToolTip = "Retrive clashes from navisworks"
             };
 
-            PushButtonData BWork = new PushButtonData( "Penetrate structural elements using sleeves", "Builder Work", assemblyName, "IBIMSGen.Penetration.Penetration")
+            PushButtonData BWork = new PushButtonData("Penetrate structural elements using sleeves", "Builder Work", assemblyName, "IBIMSGen.Penetration.Penetration")
             {
-                LargeImage = bwIS,
-                Image = bwIS,
+                LargeImage = Properties.Resources.bw.ToImageSource(),
+                Image = Properties.Resources.bw_s.ToImageSource(),
                 ToolTip = "Insert sleeves of a choosen type at penetration location."
             };
 
-
             PushButtonData Fillet = new PushButtonData("Fillet Electrical Lines", "Fillet Lines", assemblyName, "IBIMSGen.ElecCables.Fillet")
             {
-                LargeImage = filletIcon,
-                Image = filletIcon,
+                LargeImage = Properties.Resources.fillet.ToImageSource(),
+                Image = Properties.Resources.fillet_s.ToImageSource(),
                 ToolTip = "Fillet lines with the same line style at the ends where they meet."
             };
 
-
             PushButtonData CutLines = new PushButtonData("Cut Electrical Lines", "Cut Lines", assemblyName, "IBIMSGen.ElecCables.CablesTrim")
             {
-                LargeImage = CutLinesIco,
-                Image = CutLinesIco,
+                LargeImage = Properties.Resources.CutLines.ToImageSource(),
+                Image = Properties.Resources.CutLines_s.ToImageSource(),
                 ToolTip = "Cut intersecting lines with the selection set of lines."
+            };
+
+            PushButtonData CenterElement = new PushButtonData("Center Element 2pts", "Center Element", assemblyName, "IBIMSGen.AlignBetween2Pts")
+            {
+                LargeImage = Properties.Resources.centerElement.ToImageSource(),
+                Image = Properties.Resources.centerElement_s.ToImageSource(),
+                ToolTip = "Allign the mid point of the element between two points in 2D"
+            };
+
+            PushButtonData Lights = new PushButtonData("Distribute Lighting Fixtures", "Distribute Fixtures", assemblyName, "IBIMSGen.ElecEquipCeilings.CeilingLightsPlacement")
+            {
+                LargeImage = Properties.Resources.gridLights.ToImageSource(),
+                Image = Properties.Resources.gridLights_s.ToImageSource(),
+                ToolTip = "Distribute Lighting Fixtures in a certain area"
+            };
+
+            PushButtonData RemoveCad = new PushButtonData("Remove CAD Imports", "Remove CAD", assemblyName, "IBIMSGen.DeleteCad")
+            {
+                LargeImage = Properties.Resources.delete_cad.ToImageSource(),
+                Image = Properties.Resources.delete_cad_s.ToImageSource(),
+                ToolTip = "Delete All CAD Imports From The Entire Project."
             };
 
 
             genTools.AddItem(copyCallouts);
             genTools.AddItem(clash);
-            genTools.AddItem(ReplaceElements);
-            genTools.AddItem(SelectSimilarDL);
+            genTools.AddStackedItems(ReplaceElements,SelectSimilarDL, RemoveCad);
             Arch.AddItem(RoomSections);
             systems.AddItem(BWork);
-            systems.AddStackedItems(Fillet, CutLines);
+            systems.AddItem(Lights);
+            systems.AddStackedItems(CenterElement,Fillet, CutLines);
             return Result.Succeeded;
         }
-        private BitmapSource GetImgSrc(Image img)
+    }
+    public static class Methods
+    {
+        public static ImageSource ToImageSource(this Icon icon)
         {
-            BitmapImage bmi = new BitmapImage();
-            using (MemoryStream ms = new MemoryStream())
-            {
-                img.Save(ms, ImageFormat.Png);
-                ms.Position = 0;
-                bmi.BeginInit();
-                bmi.CacheOption = BitmapCacheOption.OnLoad;
-                bmi.UriSource = null;
-                bmi.StreamSource = ms;
-                bmi.EndInit();
-            }
-            return bmi;
+            ImageSource imageSource = Imaging.CreateBitmapSourceFromHIcon(
+                icon.Handle,
+                Int32Rect.Empty,
+                BitmapSizeOptions.FromEmptyOptions());
+
+            return imageSource;
         }
     }
 }

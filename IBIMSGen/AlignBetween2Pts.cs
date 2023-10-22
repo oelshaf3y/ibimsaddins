@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBIMSGen.ElecEquipCeilings
+namespace IBIMSGen
 {
     [TransactionAttribute(TransactionMode.Manual)]
     internal class AlignBetween2Pts : IExternalCommand
@@ -22,8 +22,16 @@ namespace IBIMSGen.ElecEquipCeilings
             doc = uidoc.Document;
             options = new Options();
             options.ComputeReferences = true;
-            if (doc.ActiveView is View3D) {TaskDialog.Show("Error", "Active View Can't be 3D!"); return Result.Failed; }
-            Element elem = doc.GetElement(uidoc.Selection.PickObject(ObjectType.Element, "Select Elements you'd like to center"));
+            if (doc.ActiveView is View3D) { TaskDialog.Show("Error", "Active View Can't be 3D!"); return Result.Failed; }
+            Element elem;
+            try
+            {
+                elem = doc.GetElement(uidoc.Selection.PickObject(ObjectType.Element, "Select Elements you'd like to center"));
+            }
+            catch
+            {
+                return Result.Cancelled;
+            }
             using (Transaction transaction = new Transaction(doc, "Center Element"))
             {
 
@@ -31,15 +39,15 @@ namespace IBIMSGen.ElecEquipCeilings
 
                 Solid solid = getSolid(elem);
                 EdgeArray edgeArray = solid.Edges;
-                List<XYZ> points=new List<XYZ>();
-                foreach(Edge edge in edgeArray)
+                List<XYZ> points = new List<XYZ>();
+                foreach (Edge edge in edgeArray)
                 {
                     Curve curve = edge.AsCurve();
                     points.Add(curve.GetEndPoint(0));
                     points.Add(curve.GetEndPoint(1));
                 }
-                XYZ p0 = points.OrderBy(p=>p.DistanceTo(XYZ.Zero)).FirstOrDefault();
-                XYZ p00 = points.OrderByDescending(p=>p.DistanceTo(XYZ.Zero)).FirstOrDefault();
+                XYZ p0 = points.OrderBy(p => p.DistanceTo(XYZ.Zero)).FirstOrDefault();
+                XYZ p00 = points.OrderByDescending(p => p.DistanceTo(XYZ.Zero)).FirstOrDefault();
                 XYZ centroid = Line.CreateBound(p0, p00).Evaluate(0.5, true);
 
                 Plane plane = Plane.CreateByNormalAndOrigin(uidoc.ActiveView.ViewDirection, uidoc.ActiveView.Origin);
@@ -52,20 +60,22 @@ namespace IBIMSGen.ElecEquipCeilings
 
                 XYZ origin = ((LocationPoint)elem.Location).Point;
                 //DirectShape.CreateElement(doc,new ElementId(BuiltInCategory.OST_GenericModel)).SetShape(new List<GeometryObject> { Line.CreateBound(XYZ.Zero, origin) });
-                GeometryElement geoelem = elem.get_Geometry(options);
-                foreach(GeometryObject obj in geoelem)
+                XYZ p1, p2, p3, p4;
+                try
                 {
-
+                    p1 = uidoc.Selection.PickPoint(Autodesk.Revit.UI.Selection.ObjectSnapTypes.Intersections, "Pick 1st corner.");
+                    p2 = uidoc.Selection.PickPoint(Autodesk.Revit.UI.Selection.ObjectSnapTypes.Intersections, "Pick 2nd corner.");
+                    p3 = new XYZ(p1.X, p1.Y, origin.Z);
+                    p4 = new XYZ(p2.X, p2.Y, origin.Z);
                 }
-
-                XYZ p1 = uidoc.Selection.PickPoint(Autodesk.Revit.UI.Selection.ObjectSnapTypes.Intersections, "Pick 1st corner.");
-                XYZ p2 = uidoc.Selection.PickPoint(Autodesk.Revit.UI.Selection.ObjectSnapTypes.Intersections, "Pick 2nd corner.");
-                XYZ p3 = new XYZ(p1.X, p1.Y, origin.Z);
-                XYZ p4 = new XYZ(p2.X, p2.Y, origin.Z);
+                catch
+                {
+                    return Result.Cancelled;
+                }
                 XYZ newLocation;
                 try
                 {
-                    newLocation = Line.CreateBound(p1, p2).Evaluate(0.5, true);
+                    newLocation = Line.CreateBound(p3, p4).Evaluate(0.5, true);
                 }
                 catch
                 {
