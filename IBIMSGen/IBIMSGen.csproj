@@ -113,6 +113,7 @@
     <Compile Include="Hangers\HangersFM.Designer.cs">
       <DependentUpon>HangersFM.cs</DependentUpon>
     </Compile>
+    <Compile Include="Hangers\SelectionFilterPDC.cs" />
     <Compile Include="ReplaceFamilies\Replace.cs" />
     <Compile Include="ReplaceFamilies\ReplaceUI.cs">
       <SubType>Form</SubType>

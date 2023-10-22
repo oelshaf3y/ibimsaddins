@@ -10,77 +10,51 @@ using Line = Autodesk.Revit.DB.Line;
 using Parameter = Autodesk.Revit.DB.Parameter;
 using System.Windows.Forms;
 using Autodesk.Revit.DB.Electrical;
-using Autodesk.Revit.DB.Plumbing;
-using Autodesk.Revit.DB.Mechanical;
 using System.Text;
 using System.Drawing;
-
+using System.Windows.Controls;
 namespace IBIMSGen.Hangers
 {
-    public class filterselpdc : ISelectionFilter
-    {
-        public bool AllowElement(Element e)
-        {
-            if (e.Category != null)
-            {
-                if (e is Pipe || e is Duct || e is CableTray)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            return false;
-        }
-
-        public bool AllowReference(Reference reference, XYZ position)
-        {
-            throw new NotImplementedException();
-        }
-    }
     [Transaction(TransactionMode.Manual)]
-
     public class Hangers : IExternalCommand
     {
+        UIDocument uidoc;
+        Document doc;
+        HangersFM UI;
+        FilteredElementCollector fecLnk, feclvl, fec1;
+        ElementCategoryFilter ecf1;
+        FamilySymbol ductHanger, pipeHanger20, pipeHanger2, pipeHanger200;
+        List<string> LinksNames, lvlnames;
+        Document LinkDoc;
+        List<Level> lvls;
+        List<List<string>> AllWorksetNames;
+        List<List<List<string>>> AllWorksetsDIMS;
+        IList<Element> MechanicalEquipment, ducts, pipes, cables, floors, floooors, DUCTS, AllDuctFits, ductfits, CTS, PIPES;
+        List<ElementId> plvlids, plvids;
+        IList<Reference> reffs, reffslks;
+        List<Face> floorfaces, floorfacesd;
+        List<List<double>> Alldiameters;
+        List<double> WSdias, WSspcs, CHWdias, CHWspcs, DRdias, DRespcs, Firedias, Firespcs, elvss;
+        List<double> Belevs, Dhs, Dws, insthicks, HangDias1, HangDias2, pdias, smes, pelevs, emes, slps, widthes, pelevsct, floorelevs;
+        List<XYZ> HOs, HOps, FOps, PipePSs, HOcts, FOcts;
+        List<int> ffls;
+        List<bool> Firebool;
+        List<List<XYZ>> hangptsss, pangptsss, CTPS;
+        Options options;
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet element)
         {
-            UIDocument uidoc = commandData.Application.ActiveUIDocument;
-            Autodesk.Revit.DB.Document doc = commandData.Application.ActiveUIDocument.Document;
-            Autodesk.Revit.Creation.Application app = commandData.Application.Application.Create;
+            uidoc = commandData.Application.ActiveUIDocument;
+            doc = uidoc.Document;
+            UI = new HangersFM();
+            options = new Options();
+            options.ComputeReferences = true;
 
-            HangersFM f7 = new HangersFM();
-            DialogResult td(object g)
-            {
-                return MessageBox.Show(g + " ");
-            }
+            MechanicalEquipment = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_GenericModel).OfClass(typeof(FamilySymbol)).ToList();
+            pipeHanger20 = MechanicalEquipment.Cast<FamilySymbol>().Where(x => x.Name.Equals("02- PIPE HANGER ( 20 - 200 )"))?.FirstOrDefault() ?? null;
+            pipeHanger200 = MechanicalEquipment.Cast<FamilySymbol>().Where(x => x.Name.Equals("01- PIPE HANGER ( +200 mm )"))?.FirstOrDefault() ?? null;
+            pipeHanger2 = MechanicalEquipment.Cast<FamilySymbol>().Where(x => x.Name.Equals("Pipes Hanger 2"))?.FirstOrDefault() ?? null;
+            ductHanger = MechanicalEquipment.Cast<FamilySymbol>().Where(x => x.Name.Equals("The Lower Bridge Duct Hanger"))?.FirstOrDefault() ?? null;
 
-            FilteredElementCollector fec6 = new FilteredElementCollector(doc).OfClass(typeof(FamilySymbol));
-            ElementCategoryFilter ecf6 = new ElementCategoryFilter(BuiltInCategory.OST_GenericModel);
-            IList<Element> MechanicalEquipment = fec6.WherePasses(ecf6).ToList(); FamilySymbol pipeHanger20 = null; FamilySymbol pipeHanger2 = null; FamilySymbol pipeHanger200 = null;
-            FamilySymbol ductHanger = null;
-            foreach (Element e in MechanicalEquipment)
-            {
-                FamilySymbol fi = e as FamilySymbol;
-                if (fi.FamilyName == "02- PIPE HANGER ( 20 - 200 )")
-                {
-                    pipeHanger20 = fi;
-                }
-                else if (fi.FamilyName == "01- PIPE HANGER ( +200 mm )")
-                {
-                    pipeHanger200 = fi;
-                }
-                else if (fi.FamilyName == "Pipes Hanger 2")
-                {
-                    pipeHanger2 = fi;
-                }
-                else if (fi.FamilyName == "The Lower Bridge Duct Hanger")
-                {
-                    ductHanger = fi;
-                }
-                if (pipeHanger20 != null && pipeHanger2 != null && ductHanger != null && pipeHanger200 != null) { break; }
-            }
             string nullfams = "";
             if (pipeHanger20 == null)
             {
@@ -98,61 +72,31 @@ namespace IBIMSGen.Hangers
             {
                 nullfams += "The Lower Bridge Duct Hanger" + "\n";
             }
-
-            //FilteredElementCollector fec = new FilteredElementCollector(doc).OfClass(typeof(FamilySymbol));
-            //ElementCategoryFilter ecf = new ElementCategoryFilter(BuiltInCategory.OST_DuctAccessory);
-            //IList<Element> generics = fec.WherePasses(ecf).ToList();  /*FamilySymbol fsd2 = null;*/
-            //foreach (Element e in generics)
-            //{
-            //    FamilySymbol fi = e as FamilySymbol;
-            //    if (fi.FamilyName == "The Lower Bridge Duct Hanger")
-            //    {
-            //        fsd1 = fi;
-            //        break;
-            //    }
-            //}
-            //foreach (Element e in generics)
-            //{
-            //    FamilySymbol fi = e as FamilySymbol;
-            //    if (fi.FamilyName == "The Upper Bridge Duct Hanger")
-            //    {
-            //        fsd2 = fi;
-            //        break;
-            //    }
-            //}
-
             if (ductHanger == null || pipeHanger20 == null || pipeHanger200 == null || pipeHanger2 == null)
             {
                 TaskDialog.Show("Error", "Please Load Supports Family." + "\n" + nullfams); ;
                 return Result.Failed;
             }
-            List<string> LinksNames = new List<string>();
-            Autodesk.Revit.DB.Document LinkDoc = null;
-            FilteredElementCollector fecLnk = new FilteredElementCollector(doc).OfClass(typeof(RevitLinkInstance));
-            foreach (RevitLinkInstance ri in fecLnk)
-            {
-                RevitLinkType rlt = (RevitLinkType)doc.GetElement(ri.GetTypeId());
-                if (rlt.GetLinkedFileStatus() == LinkedFileStatus.Loaded)
-                {
-                    string name = rlt.Name;
-                    LinksNames.Add(name);
-                }
-            }
+            fecLnk = new FilteredElementCollector(doc).OfClass(typeof(RevitLinkInstance));
+            LinksNames = fecLnk.Cast<RevitLinkInstance>()
+                .Select(x => ((RevitLinkType)doc.GetElement(x.GetTypeId())))
+                .Where(x => x.GetLinkedFileStatus() == LinkedFileStatus.Loaded)
+                .Select(x => x.Name).ToList();
+            //TODO HERE
             if (LinksNames.Count == 0)
             {
                 TaskDialog.Show("Error", "There are no Loaded Linked Revit detected in Project.");
                 return Result.Failed;
             }
-            f7.Linkes = LinksNames;
-
-            FilteredElementCollector feclvl = new FilteredElementCollector(doc).OfClass(typeof(Level));
-            List<string> lvlnames = new List<string>(); List<double> elvss = new List<double>();
-            List<Level> lvls = new List<Level>();
+            UI.Linkes = LinksNames;
+            feclvl = new FilteredElementCollector(doc).OfClass(typeof(Level));
+            lvlnames = new List<string>();
+            elvss = new List<double>();
+            lvls = new List<Level>();
             foreach (Level lvl in feclvl)
             {
                 elvss.Add(lvl.Elevation);
             }
-
             elvss.Sort();
             foreach (Level lvl in feclvl)
             {
@@ -184,10 +128,10 @@ namespace IBIMSGen.Hangers
                 TaskDialog.Show("Error", "Document has not UserWorksets.");
                 return Result.Failed;
             }
-            f7.worksetnames = worksetnames;
-            f7.Levels = lvlnames;
-            f7.ShowDialog();
-            if (f7.canc)
+            UI.worksetnames = worksetnames;
+            UI.Levels = lvlnames;
+            UI.ShowDialog();
+            if (UI.canc)
             {
                 return Result.Cancelled;
             }
@@ -196,7 +140,7 @@ namespace IBIMSGen.Hangers
             {
                 RevitLinkType rlt = (RevitLinkType)doc.GetElement(ri.GetTypeId());
                 LinksNames.Add(rlt.Name);
-                if (rlt.Name == LinksNames[f7.lnk])
+                if (rlt.Name == LinksNames[UI.lnk])
                 {
                     LinkDoc = ri.GetLinkDocument();
                     RLI = ri;
@@ -206,41 +150,26 @@ namespace IBIMSGen.Hangers
                     }
                 }
             }
-
-            List<List<string>> AllWorksetNames = f7.AllworksetsNames;
-            List<List<List<string>>> AllWorksetsDIMS = f7.AllworksetsDIMS;
-
+            AllWorksetNames = UI.AllworksetsNames;
+            AllWorksetsDIMS = UI.AllworksetsDIMS;
             //==================================================================================
             double f = 100 / 304.8;
             double Ngd = 100 / 304.80;
             //==================================================================================
-
-            List<XYZ> Decorder(List<XYZ> oldlist, Curve cu)
-            {
-                List<XYZ> newlist = new List<XYZ>();
-                if (Math.Round(((Line)cu).Direction.Normalize().Y, 3) == 0)
-                {
-                    newlist = oldlist.OrderByDescending(a => a.X).ToList();
-                }
-                else
-                {
-                    newlist = oldlist.OrderByDescending(a => a.Y).ToList();
-                }
-                return newlist;
-            }
-
-            IList<Reference> reffs = new List<Reference>();
-            IList<Reference> reffslks = new List<Reference>();
-            IList<Element> ducts = new List<Element>();
-            IList<Element> pipes = new List<Element>();
-            IList<Element> cables = new List<Element>();
-            IList<Element> floors = new List<Element>();
-
-
-            FilteredElementCollector fec4 = new FilteredElementCollector(doc).OfClass(typeof(FamilyInstance));
-            ElementCategoryFilter ecf4 = new ElementCategoryFilter(BuiltInCategory.OST_PipeFitting);
-            IList<Element> pipefits = fec4.WherePasses(ecf4).ToList();
-            filterselpdc fpdc = new filterselpdc();
+            reffs = new List<Reference>();
+            reffslks = new List<Reference>();
+            ducts = new List<Element>();
+            pipes = new List<Element>();
+            cables = new List<Element>();
+            floors = new List<Element>();
+            FilteredElementCollector fec4;
+            fec4 = new FilteredElementCollector(doc).OfClass(typeof(FamilyInstance));
+            ElementCategoryFilter ecf4;
+            ecf4 = new ElementCategoryFilter(BuiltInCategory.OST_PipeFitting);
+            IList<Element> pipefits;
+            pipefits = fec4.WherePasses(ecf4).ToList();
+            SelectionFilterPDC fpdc;
+            fpdc = new SelectionFilterPDC();
             try
             {
                 TaskDialog.Show("Select", "Select Pipes / Ducts / CableTrays.");
@@ -250,7 +179,7 @@ namespace IBIMSGen.Hangers
             {
                 return Result.Cancelled;
             }
-            if (f7.selc)
+            if (UI.selc)
             {
                 TaskDialog.Show("Select", "Select Linked Elements.");
                 try
@@ -264,10 +193,9 @@ namespace IBIMSGen.Hangers
             }
             else
             {
-                Level from = lvls[f7.frin]; double d1 = from.Elevation;
-                Level to = lvls[f7.toin]; double d2 = to.Elevation;
+                Level from = lvls[UI.frin]; double d1 = from.Elevation;
+                Level to = lvls[UI.toin]; double d2 = to.Elevation;
                 FilteredElementCollector fecflln = new FilteredElementCollector(RLI.GetLinkDocument()).OfClass(typeof(Floor));
-
                 foreach (Floor fl in fecflln)
                 {
                     double eat = 0; double eatop = 0;
@@ -309,8 +237,6 @@ namespace IBIMSGen.Hangers
                     }
                 }
             }
-
-
             foreach (Reference reff in reffs)
             {
                 Element e = doc.GetElement(reff);
@@ -359,16 +285,11 @@ namespace IBIMSGen.Hangers
                     }
                 }
             }
-
-
             if (ducts.Count == 0 && pipes.Count == 0 && cables.Count == 0)
             {
                 TaskDialog.Show("Wrong Selection", "There are no Ducts or Pipes or Cabletrays selected.");
                 return Result.Failed;
             }
-
-
-
             foreach (Reference reff in reffslks)
             {
                 RevitLinkInstance rli = doc.GetElement(reff.ElementId) as RevitLinkInstance;
@@ -385,20 +306,16 @@ namespace IBIMSGen.Hangers
                     }
                 }
             }
-
-
-            List<double> floorelevs = new List<double>();
-            IList<Element> floooors = new List<Element>();
-            List<Face> floorfaces = new List<Face>();
-            List<Face> floorfacesd = new List<Face>();
+            floorelevs = new List<double>();
+            floooors = new List<Element>();
+            floorfaces = new List<Face>();
+            floorfacesd = new List<Face>();
             if (floors.Count > 0)
             {
                 foreach (Element ele in floors)
                 {
-                    Options optt = app.NewGeometryOptions();
-                    Solid s1 = null;
-                    optt.ComputeReferences = true;
-                    GeometryElement gele = ele.get_Geometry(optt);
+                    options.ComputeReferences = true;
+                    GeometryElement gele = ele.get_Geometry(options);
                     foreach (GeometryObject geo in gele)
                     {
                         Solid g = geo as Solid;
@@ -444,11 +361,10 @@ namespace IBIMSGen.Hangers
                 TaskDialog.Show("Error", "Linked Revit has not Floors to Host Hangers." + Environment.NewLine + "Make sure that Linked Revit is Structural discipline and has Floors.");
                 return Result.Failed;
             }
-
-            FilteredElementCollector fec1 = new FilteredElementCollector(doc).OfClass(typeof(FamilyInstance));
-            ElementCategoryFilter ecf1 = new ElementCategoryFilter(BuiltInCategory.OST_DuctFitting);
-            IList<Element> AllDuctFits = fec1.WherePasses(ecf1).ToList();
-            IList<Element> ductfits = new List<Element>();
+            fec1 = new FilteredElementCollector(doc).OfClass(typeof(FamilyInstance));
+            ecf1 = new ElementCategoryFilter(BuiltInCategory.OST_DuctFitting);
+            AllDuctFits = fec1.WherePasses(ecf1).ToList();
+            ductfits = new List<Element>();
             foreach (Element dft in AllDuctFits)
             {
                 XYZ dpi = ((LocationPoint)dft.Location).Point;
@@ -457,121 +373,24 @@ namespace IBIMSGen.Hangers
                     ductfits.Add(dft);
                 }
             }
-
-            double GetSpace(List<double> dias, List<double> spacs, double DIA)
-            {
-                int co = 0; double spc = 0;
-                foreach (double d in dias)
-                {
-                    if (dias[0] == -10)
-                    {
-                        spc = spacs[0];
-                        break;
-                    }
-                    else if (Math.Round(DIA, 5) <= Math.Round(d, 5))
-                    {
-                        if (Math.Round(DIA, 5) == Math.Round(d, 5))
-                        {
-                            spc = spacs[co];
-                        }
-                        else
-                        {
-                            if (co == 0)
-                            {
-                                spc = spacs[co];
-                            }
-                            else
-                            {
-                                spc = spacs[co - 1];
-                            }
-                        }
-                        break;
-                    }
-                    co++;
-                }
-                if (spc == 0)
-                {
-                    spc = spacs.Last();
-                }
-                return spc;
-            }
-            List<List<double>> ListAdd(int R)
-            {
-                List<List<double>> list = new List<List<double>>();
-                List<double> dias = new List<double>();
-                List<double> spacs = new List<double>();
-                int coun = 0;
-                foreach (string ss in AllWorksetsDIMS[R][0])
-                {
-                    double dia = Convert.ToDouble(ss); double spac = Convert.ToDouble(AllWorksetsDIMS[R][1][coun]);
-                    if (dia != 0 && spac != 0)
-                    {
-                        dias.Add(dia); spacs.Add(spac / 304.8);
-                    }
-                    coun++;
-                }
-                list.Add(dias); list.Add(spacs);
-                return list;
-            }
-
-            List<double> WSdias = ListAdd(1)[0];
-            List<double> WSspcs = ListAdd(1)[1];
-            List<double> CHWdias = ListAdd(2)[0];
-            List<double> CHWspcs = ListAdd(2)[1];
-            List<double> DRdias = ListAdd(3)[0];
-            List<double> DRespcs = ListAdd(3)[1];
-            List<double> Firedias = ListAdd(4)[0];
-            List<double> Firespcs = ListAdd(4)[1];
-
-            double SysSpacing(int rankk, double dia)
-            {
-                double spac = 0;
-                if (rankk == 1)
-                {
-                    spac = GetSpace(WSdias, WSspcs, dia);
-                }
-                else if (rankk == 2)
-                {
-                    spac = GetSpace(CHWdias, CHWspcs, dia);
-                }
-                else if (rankk == 3)
-                {
-                    spac = GetSpace(DRdias, DRespcs, dia);
-                }
-                else if (rankk == 4)
-                {
-                    spac = GetSpace(Firedias, Firespcs, dia);
-                }
-                return spac;
-            }
-
-            int GetSystemRank(string wst)
-            {
-                int R = -1; int a = 0;
-                foreach (List<string> ls in AllWorksetNames)
-                {
-                    foreach (string w in ls)
-                    {
-                        if (w == wst)
-                        {
-                            R = a;
-                            break;
-                        }
-                    }
-                    a++;
-                }
-                return R;
-            }
-
-            List<List<double>> Alldiameters = new List<List<double>>() { WSdias, CHWdias, DRdias, Firedias };
-
+            WSdias = ListAdd(1)[0];
+            WSspcs = ListAdd(1)[1];
+            CHWdias = ListAdd(2)[0];
+            CHWspcs = ListAdd(2)[1];
+            DRdias = ListAdd(3)[0];
+            DRespcs = ListAdd(3)[1];
+            Firedias = ListAdd(4)[0];
+            Firespcs = ListAdd(4)[1];
+            Alldiameters = new List<List<double>>() { WSdias, CHWdias, DRdias, Firedias };
             //===============================================================================================
-
-
-            List<XYZ> HOs = new List<XYZ>(); List<List<XYZ>> hangptsss = new List<List<XYZ>>();
-            List<double> Belevs = new List<double>(); List<double> Dhs = new List<double>();
-            List<double> Dws = new List<double>(); List<int> ffls = new List<int>();
-            List<double> insthicks = new List<double>(); IList<Element> DUCTS = new List<Element>(); Element eee = null;
+            HOs = new List<XYZ>();
+            hangptsss = new List<List<XYZ>>();
+            Belevs = new List<double>();
+            Dhs = new List<double>();
+            Dws = new List<double>();
+            ffls = new List<int>();
+            insthicks = new List<double>();
+            DUCTS = new List<Element>();
             foreach (Element d in ducts)
             {
                 double s = 0;
@@ -645,7 +464,6 @@ namespace IBIMSGen.Hangers
                         }
                     }
                 }
-
                 XYZ P0 = c.Evaluate(0, true); XYZ Pf = c.Evaluate(1, true); List<XYZ> p0p1 = new List<XYZ>() { P0, Pf };
                 List<XYZ> dps = Decorder(pts, c); List<XYZ> pps = Decorder(p0p1, c);
                 XYZ dir = Line.CreateBound(pps[0], pps[1]).Direction.Normalize();
@@ -655,10 +473,8 @@ namespace IBIMSGen.Hangers
                     cc = Line.CreateBound(Ps, Pe) as Curve;
                 }
                 catch { continue; }
-
                 HOs.Add(HO); Dws.Add(Dw); Dhs.Add(Dh); insthicks.Add(insothic); Belevs.Add(Belev);
                 List<XYZ> hangpts = new List<XYZ>();
-
                 if (dps.Count == 0) // No ductfittings
                 {
                     if (c.Length > Ngd && c.Length <= 4 * f)
@@ -770,19 +586,22 @@ namespace IBIMSGen.Hangers
                 }
                 hangptsss.Add(hangpts); DUCTS.Add(d);
             }
-
-            List<double> HangDias1 = new List<double>() { 17, 22, 27, 34, 42, 52, 65, 67, 77, 82, 92, 102, 112, 127, 152, 162, 202 };
-            List<double> HangDias2 = new List<double>() { 227, 252, 317, 352, 402 };
-
-            List<double> pelevs = new List<double>(); List<double> pdias = new List<double>();
-            List<double> emes = new List<double>(); List<double> smes = new List<double>();
-            List<double> slps = new List<double>(); List<XYZ> HOps = new List<XYZ>();
-            List<XYZ> PipePSs = new List<XYZ>(); List<ElementId> plvlids = new List<ElementId>();
-            List<bool> Firebool = new List<bool>(); List<XYZ> FOps = new List<XYZ>();
-            List<List<XYZ>> pangptsss = new List<List<XYZ>>(); List<Element> PIPES = new List<Element>();
+            HangDias1 = new List<double>() { 17, 22, 27, 34, 42, 52, 65, 67, 77, 82, 92, 102, 112, 127, 152, 162, 202 };
+            HangDias2 = new List<double>() { 227, 252, 317, 352, 402 };
+            pdias = new List<double>();
+            smes = new List<double>();
+            HOps = new List<XYZ>();
+            plvlids = new List<ElementId>();
+            FOps = new List<XYZ>();
+            PIPES = new List<Element>();
+            pelevs = new List<double>();
+            emes = new List<double>();
+            slps = new List<double>();
+            PipePSs = new List<XYZ>();
+            Firebool = new List<bool>();
+            pangptsss = new List<List<XYZ>>();
             foreach (Element p in pipes)
             {
-
                 WorksetId wsid = p.WorksetId;
                 string ws = worksetnames[worksetIDs.IndexOf(wsid)];
                 int Rank = GetSystemRank(ws);
@@ -846,7 +665,6 @@ namespace IBIMSGen.Hangers
                 double sme = p.LookupParameter("Start Middle Elevation").AsDouble(); smes.Add(sme);
                 double eme = p.LookupParameter("End Middle Elevation").AsDouble(); emes.Add(eme);
                 double slp = p.LookupParameter("Slope").AsDouble(); slps.Add(slp);
-
                 if (c.Length > Ng && c.Length <= ff)
                 {
                     AddAdd(c.Evaluate(0.50, true), pangpts);
@@ -873,11 +691,13 @@ namespace IBIMSGen.Hangers
                 pangptsss.Add(pangpts); PIPES.Add(p);
                 HOps.Add(FOp); FOps.Add(HOp);
             }
-
-            List<double> widthes = new List<double>(); List<ElementId> plvids = new List<ElementId>();
-            List<double> pelevsct = new List<double>(); List<List<XYZ>> CTPS = new List<List<XYZ>>();
-            List<Element> CTS = new List<Element>();
-            List<XYZ> HOcts = new List<XYZ>(); List<XYZ> FOcts = new List<XYZ>();
+            widthes = new List<double>();
+            plvids = new List<ElementId>();
+            pelevsct = new List<double>();
+            CTPS = new List<List<XYZ>>();
+            CTS = new List<Element>();
+            HOcts = new List<XYZ>();
+            FOcts = new List<XYZ>();
             foreach (Element p in cables)
             {
                 Curve c = ((LocationCurve)p.Location).Curve; double Ng = 100 / 304.8; double ff = 500 / 304.80;
@@ -892,12 +712,10 @@ namespace IBIMSGen.Hangers
                 }
                 catch { continue; }
                 List<XYZ> pps = new List<XYZ>(); List<XYZ> pangpts = new List<XYZ>();
-
                 double width = p.LookupParameter("Width").AsDouble(); widthes.Add(width);
                 ElementId plvlid = p.LookupParameter("Reference Level").AsElementId(); plvids.Add(plvlid);
                 double BE = p.LookupParameter("Bottom Elevation").AsDouble();
                 double pelev = ((Level)doc.GetElement(plvlid)).Elevation + BE; pelevsct.Add(pelev);
-
                 if (c.Length > Ng && c.Length <= ff)
                 {
                     AddAdd(c.Evaluate(0.50, true), pangpts);
@@ -922,50 +740,8 @@ namespace IBIMSGen.Hangers
                 CTPS.Add(pangpts); CTS.Add(p);
                 HOcts.Add(FOp); FOcts.Add(HOp);
             }
-
-
-            void AddAdd(XYZ p, List<XYZ> pss)
-            {
-                if (!pss.Contains(p))
-                {
-                    pss.Add(p);
-                }
-            }
             string err = ""; int errco = 0;
             //====================================================================================================
-            Face GetFaces(Element ele)
-            {
-                Face face = null;
-                Options optt = app.NewGeometryOptions();
-                optt.View = doc.ActiveView;
-                Solid s1 = null;
-                optt.ComputeReferences = true;
-                GeometryElement gele = ele.get_Geometry(optt);
-                foreach (GeometryObject geo in gele)
-                {
-                    GeometryInstance Gi = geo as GeometryInstance;
-                    foreach (GeometryObject gi in Gi.GetInstanceGeometry())
-                    {
-                        Solid g = gi as Solid;
-                        if (g != null && g.Volume != 0)
-                        {
-                            s1 = g;
-                            break;
-                        }
-                    }
-                }
-                if (s1 != null)
-                {
-                    foreach (Face fa in s1.Faces)
-                    {
-                        if (Math.Round(((PlanarFace)fa).FaceNormal.Z, 2) == -1)
-                        {
-                            face = fa; break;
-                        }
-                    }
-                }
-                return face;
-            }
             //====================================================================================================
             using (Transaction trans = new Transaction(doc, "IBIMS_Hangers"))
             {
@@ -1067,8 +843,6 @@ namespace IBIMSGen.Hangers
                     }
                     h++;
                 }
-
-
                 int pir = 0;
                 foreach (Element pip in PIPES)
                 {
@@ -1240,12 +1014,10 @@ namespace IBIMSGen.Hangers
                             hang.LookupParameter("Width").Set(widthes[ctco] + 100 / 304.8);
                             hang.LookupParameter("ROD 1").Set(ROD);
                             hang.LookupParameter("ROD 2").Set(ROD);
-
                         }
                     }
                     ctco++;
                 }
-
                 if (errco > 0)
                 {
                     TaskDialog.Show("Warning", errco + " Pipes have not Hangers." + Environment.NewLine + err);
@@ -1254,8 +1026,154 @@ namespace IBIMSGen.Hangers
             }
             return Result.Succeeded;
         }
+        void AddAdd(XYZ p, List<XYZ> pss)
+        {
+            if (!pss.Contains(p))
+            {
+                pss.Add(p);
+            }
+        }
+        Face GetFaces(Element ele)
+        {
+            Face face = null;
+            options.View = doc.ActiveView;
+            Solid s1 = null;
+            options.ComputeReferences = true;
+            GeometryElement gele = ele.get_Geometry(options);
+            foreach (GeometryObject geo in gele)
+            {
+                GeometryInstance Gi = geo as GeometryInstance;
+                foreach (GeometryObject gi in Gi.GetInstanceGeometry())
+                {
+                    Solid g = gi as Solid;
+                    if (g != null && g.Volume != 0)
+                    {
+                        s1 = g;
+                        break;
+                    }
+                }
+            }
+            if (s1 != null)
+            {
+                foreach (Face fa in s1.Faces)
+                {
+                    if (Math.Round(((PlanarFace)fa).FaceNormal.Z, 2) == -1)
+                    {
+                        face = fa; break;
+                    }
+                }
+            }
+            return face;
+        }
+        double GetSpace(List<double> dias, List<double> spacs, double DIA)
+        {
+            int co = 0; double spc = 0;
+            foreach (double d in dias)
+            {
+                if (dias[0] == -10)
+                {
+                    spc = spacs[0];
+                    break;
+                }
+                else if (Math.Round(DIA, 5) <= Math.Round(d, 5))
+                {
+                    if (Math.Round(DIA, 5) == Math.Round(d, 5))
+                    {
+                        spc = spacs[co];
+                    }
+                    else
+                    {
+                        if (co == 0)
+                        {
+                            spc = spacs[co];
+                        }
+                        else
+                        {
+                            spc = spacs[co - 1];
+                        }
+                    }
+                    break;
+                }
+                co++;
+            }
+            if (spc == 0)
+            {
+                spc = spacs.Last();
+            }
+            return spc;
+        }
+        List<List<double>> ListAdd(int R)
+        {
+            List<List<double>> list = new List<List<double>>();
+            List<double> dias = new List<double>();
+            List<double> spacs = new List<double>();
+            int coun = 0;
+            foreach (string ss in AllWorksetsDIMS[R][0])
+            {
+                double dia = Convert.ToDouble(ss); double spac = Convert.ToDouble(AllWorksetsDIMS[R][1][coun]);
+                if (dia != 0 && spac != 0)
+                {
+                    dias.Add(dia); spacs.Add(spac / 304.8);
+                }
+                coun++;
+            }
+            list.Add(dias); list.Add(spacs);
+            return list;
+        }
+        double SysSpacing(int rankk, double dia)
+        {
+            double spac = 0;
+            if (rankk == 1)
+            {
+                spac = GetSpace(WSdias, WSspcs, dia);
+            }
+            else if (rankk == 2)
+            {
+                spac = GetSpace(CHWdias, CHWspcs, dia);
+            }
+            else if (rankk == 3)
+            {
+                spac = GetSpace(DRdias, DRespcs, dia);
+            }
+            else if (rankk == 4)
+            {
+                spac = GetSpace(Firedias, Firespcs, dia);
+            }
+            return spac;
+        }
+        int GetSystemRank(string wst)
+        {
+            int R = -1; int a = 0;
+            foreach (List<string> ls in AllWorksetNames)
+            {
+                foreach (string w in ls)
+                {
+                    if (w == wst)
+                    {
+                        R = a;
+                        break;
+                    }
+                }
+                a++;
+            }
+            return R;
+        }
+        DialogResult td(object g)
+        {
+            return MessageBox.Show(g + " ");
+        }
+        List<XYZ> Decorder(List<XYZ> oldlist, Curve cu)
+        {
+            List<XYZ> newlist = new List<XYZ>();
+            if (Math.Round(((Line)cu).Direction.Normalize().Y, 3) == 0)
+            {
+                newlist = oldlist.OrderByDescending(a => a.X).ToList();
+            }
+            else
+            {
+                newlist = oldlist.OrderByDescending(a => a.Y).ToList();
+            }
+            return newlist;
+        }
     }
-
 }
-
-
