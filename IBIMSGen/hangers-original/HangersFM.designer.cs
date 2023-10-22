@@ -1,4 +1,4 @@
-﻿namespace IBIMSGen.Hangers
+﻿namespace IBIMS_MEP
 {
     partial class HangersFM
     {

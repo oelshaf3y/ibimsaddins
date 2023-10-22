@@ -12,10 +12,8 @@ using System.Windows.Forms;
 using Autodesk.Revit.DB.Electrical;
 using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.DB.Mechanical;
-using System.Text;
-using System.Drawing;
 
-namespace IBIMSGen.Hangers
+namespace IBIMS_MEP
 {
     public class filterselpdc : ISelectionFilter
     {
@@ -1255,7 +1253,5 @@ namespace IBIMSGen.Hangers
             return Result.Succeeded;
         }
     }
-
 }
-
 

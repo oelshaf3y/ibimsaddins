@@ -106,6 +106,13 @@
     <Compile Include="ElecEquipCeilings\PlaceLightsUi.Designer.cs">
       <DependentUpon>PlaceLightsUi.cs</DependentUpon>
     </Compile>
+    <Compile Include="Hangers\Hangers.cs" />
+    <Compile Include="Hangers\HangersFM.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Hangers\HangersFM.Designer.cs">
+      <DependentUpon>HangersFM.cs</DependentUpon>
+    </Compile>
     <Compile Include="ReplaceFamilies\Replace.cs" />
     <Compile Include="ReplaceFamilies\ReplaceUI.cs">
       <SubType>Form</SubType>
@@ -174,6 +181,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ElecEquipCeilings\PlaceLightsUi.resx">
       <DependentUpon>PlaceLightsUi.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Hangers\HangersFM.resx">
+      <DependentUpon>HangersFM.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Penetration\PenetrationForm.resx">
       <DependentUpon>PenetrationForm.cs</DependentUpon>

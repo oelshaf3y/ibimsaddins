@@ -1,5 +1,4 @@
-﻿using Autodesk.Revit.DB.Mechanical;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,13 +8,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace IBIMSGen.Hangers
+namespace IBIMS_MEP
 {
-
     public partial class HangersFM : Form
     {
 
-        public bool canc; public bool ook; public int lnk = -1; public int dup; public bool selc; public int frin, toin;
+        public bool canc; public bool ook; public int lnk =-1; public int dup;  public bool selc; public int frin,toin;
         public List<string> worksetnames = new List<string>(); public List<string> Linkes = new List<string>();
         public List<List<string>> AllworksetsNames = new List<List<string>>(); public List<string> Levels = new List<string>();
         public List<List<List<string>>> AllworksetsDIMS = new List<List<List<string>>>();
@@ -28,17 +26,17 @@ namespace IBIMSGen.Hangers
         //public List<string> DRdias = new List<string>() { "12","15", "20", "25", "28", "32", "40", "50", "75", "110", "125", "160", "200", "250", "315" };
         //public List<string> WSdias = new List<string>() { "15", "20", "25", "32", "40", "50","65", "80","90", "100","125", "150","200","250","300","350" };
         //public List<string> CHWdias = new List<string>() { "15", "20", "25", "32", "40", "50", "65", "80", "90", "100", "125", "150", "200", "250", "300", "350" };
-        public List<string> DRdias = new List<string>() { "20", "25", "32", "40", "50", "75", "110", "125", "130" };
-        public List<string> WSdias = new List<string>() { "20", "25", "32", "40", "50", "75", "110", "125", "130" };
+        public List<string> DRdias = new List<string>() { "20", "25" , "32", "40", "50", "75", "110", "125","130" };
+        public List<string> WSdias = new List<string>() { "20", "25" , "32", "40", "50", "75", "110", "125" ,"130"};
         public List<string> CHWdias = new List<string>() { "15", "20", "25", "32", "40", "50", "65", "80", "100", "125", "150", "200", "250", "300", "350", "400" };
         public List<string> Firedias = new List<string>() { "15", "20", "25", "32", "40", "50", "65", "80", "90", "100", "125", "150", "200", "250", "300", "350" };
         //public List<double> DRspcs = new List<double>() { 530, 610, 685, 720, 760, 840, 915, 1065, 1370, 1525, 1680, 1830,1830,1830,1830 };
         //public List<double> WSspcs = new List<double>() { 1800, 2400, 2400, 2700, 3000, 3000, 3300, 3600, 3700, 3900, 4200, 4500, 4500, 4500, 4500, 4500 };
         //public List<double> CHWspcs = new List<double>() { 1800, 2400, 2400, 2700, 3000, 3000, 3300, 3600, 3700, 3900, 4200, 4500, 4500, 4500, 4500, 4500 };
-        public List<double> DRspcs = new List<double>() { 1000, 1000, 1000, 1000, 1065, 1370, 1525, 1680, 1830 };
-        public List<double> WSspcs = new List<double>() { 1000, 1000, 1000, 1000, 1065, 1370, 1525, 1680, 1830 };
-        public List<double> CHWspcs = new List<double>() { 2100, 2100, 2100, 2400, 2700, 3100, 3400, 3600, 4300, 4300, 5100, 5800, 6100, 7000, 7600, 8200 };
-        public List<double> Firespcs = new List<double>() { 1800, 2400, 2400, 2700, 3000, 3000, 3300, 3600, 3700, 3900, 4200, 4500, 4500, 4500, 4500, 4500 };
+        public List<double> DRspcs = new List<double>() {1000,1000,1000,1000,1065,1370,1525,1680,1830 };
+        public List<double> WSspcs = new List<double>() {1000,1000,1000,1000,1065,1370,1525,1680,1830 };
+        public List<double> CHWspcs = new List<double>() { 2100,2100,2100,2400,2700,3100,3400,3600,4300,4300,5100,5800,6100,7000,7600,8200};
+        public List<double> Firespcs = new List<double>() { 1800, 2400, 2400, 2700, 3000, 3000, 3300, 3600, 3700, 3900, 4200,4500,4500,4500,4500,4500 };
         public void textlev(TextBox txtbx, double defu, double min, double max)
         {
             try
@@ -53,7 +51,7 @@ namespace IBIMSGen.Hangers
                 txtbx.Text = defu.ToString();
             }
         }
-        DataGridView DGVCreator(List<string> sizes = null, List<double> spaces = null, bool duct = false)
+        DataGridView DGVCreator(List<string> sizes = null , List<double> spaces = null,bool duct=false)
         {
             DataGridView d = new DataGridView();
             d.DefaultCellStyle.NullValue = "0";
@@ -77,7 +75,7 @@ namespace IBIMSGen.Hangers
             }
             else
             {
-                sizes = new List<string>() { "1", "533.4", "838.2", "1041.4", "1524" };
+                sizes = new List<string>() { "1","533.4","838.2", "1041.4","1524" };
                 List<string> sizes2 = new List<string>() { "508", "812.8", "1016", "1524", "10000" };
                 spaces = new List<double>() { 3000, 2500, 2500, 2000, 1500 };
                 d.Columns.Add("Size1", "Size from (mm)");
@@ -124,18 +122,18 @@ namespace IBIMSGen.Hangers
             }
             return uss;
         }
-        public UserControl US(string name, bool vis = false, List<string> sizes = null, List<double> spaces = null)
+        public UserControl US(string name, bool vis = false,List<string> sizes = null, List<double> spaces = null)
         {
             UserControl us = new UserControl();
             us.Name = name;
             panel1.Controls.Add(us);
             us.Dock = DockStyle.Fill;
             Panel pl = new Panel(); Panel pc = new Panel(); Panel pr = new Panel(); Panel pb = new Panel();
-            us.Controls.Add(pl); us.Controls.Add(pc); us.Controls.Add(pr); us.Controls.Add(pb); pb.BackColor = Color.Snow; pb.BorderStyle = BorderStyle.FixedSingle;
+            us.Controls.Add(pl);  us.Controls.Add(pc); us.Controls.Add(pr); us.Controls.Add(pb); pb.BackColor = Color.Snow; pb.BorderStyle = BorderStyle.FixedSingle;
             pb.Dock = DockStyle.Bottom; pb.Height = 50; pl.Dock = DockStyle.Left; pl.Width = 300;
-            pr.Dock = DockStyle.Right; pr.Width = 300;
+            pr.Dock = DockStyle.Right; pr.Width = 300; 
             //pc.Dock = DockStyle.Fill;
-
+             
             CheckedListBox clb = new CheckedListBox();
             pl.Controls.Add(clb);
             foreach (string ss in worksetnames)
@@ -144,14 +142,14 @@ namespace IBIMSGen.Hangers
             }
             clb.Location = new Point(211, 38);
             clb.Dock = DockStyle.Fill; clb.BorderStyle = BorderStyle.None;
-            clb.Font = new Font("Microsoft JhengHei", 13, FontStyle.Regular, GraphicsUnit.Pixel);
+            clb.Font = new Font("Microsoft JhengHei", 13,FontStyle.Regular,GraphicsUnit.Pixel);
             clb.CheckOnClick = true;
             ComboBox cbx = new ComboBox(); Label lab = new Label();
-            pb.Controls.Add(cbx); pb.Controls.Add(lab); lab.Location = new Point(210, 20);
+            pb.Controls.Add(cbx); pb.Controls.Add(lab); lab.Location = new Point(210, 20); 
             lab.Size = new Size(180, 13); lab.Text = "Duplicate table from: ";
             lab.Font = new Font("Arial", 14, FontStyle.Regular, GraphicsUnit.Pixel);
             cbx.Location = new Point(390, 15); cbx.Size = new Size(150, 15);
-            cbx.Enabled = false;
+            cbx.Enabled = false;    
             cbx.SelectedIndexChanged += Cbx_SelectedIndexChanged;
 
             DataGridView dgv = null;
@@ -166,9 +164,9 @@ namespace IBIMSGen.Hangers
             pr.Controls.Add(dgv);
             dgv.Dock = DockStyle.Fill;
             dgv.Location = new Point(600, 30); dgv.RowHeadersVisible = false;
-            TextBox tb = new TextBox(); pr.Controls.Add(tb);
+            TextBox tb = new TextBox(); pr.Controls.Add(tb); 
             tb.Location = new Point(120, 100); tb.Visible = false; tb.Text = "2000"; tb.Leave += Tb_Leave;
-            Label lbb = new Label(); pr.Controls.Add(lbb); lbb.Size = new Size(180, 18); lbb.Text = "Spacing in ( mm ): ";
+            Label lbb = new Label(); pr.Controls.Add(lbb); lbb.Size = new Size(180, 18); lbb.Text = "Spacing in ( mm ): "; 
             lbb.Font = new Font("Arial", 14, FontStyle.Regular, GraphicsUnit.Pixel); lbb.Visible = false; lbb.Location = new Point(115, 60);
             if (vis) { us.Visible = true; }
             else { us.Visible = false; }
@@ -181,7 +179,7 @@ namespace IBIMSGen.Hangers
         }
 
 
-
+        
         private void Cbx_SelectedIndexChanged(object sender, EventArgs e)
         {
             dup = ((ComboBox)sender).SelectedIndex;
@@ -257,7 +255,7 @@ namespace IBIMSGen.Hangers
             }
             return go;
         }
-
+        
         void ListAdd(string name)
         {
             foreach (Control c in panel1.Controls)
@@ -270,12 +268,12 @@ namespace IBIMSGen.Hangers
                     {
                         worksetcats.Add(worksetnames[ii]);
                     }
-                    AllworksetsNames.Add(worksetcats);
+                    AllworksetsNames.Add(worksetcats); 
                     break;
                 }
             }
         }
-        void DGVAdd(string name)
+        void DGVAdd( string name)
         {
             foreach (Control c in panel1.Controls)
             {
@@ -327,7 +325,7 @@ namespace IBIMSGen.Hangers
                 {
                     if (c.Name == name)
                     {
-                        c.Visible = true; uc = (UserControl)c;
+                        c.Visible = true; uc = (UserControl)c; 
                     }
                     else
                     {
@@ -369,7 +367,7 @@ namespace IBIMSGen.Hangers
                 cbx.Enabled = true;
                 cbx.Items.Clear();
                 cbx.Items.Add("New Table");
-                foreach (Control c in panel3.Controls)
+                foreach (Control c in panel3.Controls )
                 {
                     if (c is Button && c.Text != "Ducts")
                     {
@@ -399,13 +397,13 @@ namespace IBIMSGen.Hangers
                 button1.DialogResult = DialogResult.None;
                 MessageBox.Show("Select a Revit Link before Run.");
             }
-            else if (!Go())
+             else if (!Go())
             {
                 ook = false;
                 button1.DialogResult = DialogResult.None;
                 MessageBox.Show("Value Must be Integar and greater than 0.");
             }
-            else
+            else 
             {
                 ListAdd("Duc");
                 ListAdd("WS");
@@ -466,7 +464,7 @@ namespace IBIMSGen.Hangers
                 {
                     if (c is UserControl && c.Name.Contains("System"))
                     {
-                        DataGridView d = (DataGridView)c.Controls[2].Controls[0];
+                        DataGridView d=(DataGridView)c.Controls[2].Controls[0];
                         List<List<string>> DIMS = new List<List<string>>();
                         if (d.Enabled == true)
                         {
@@ -507,23 +505,23 @@ namespace IBIMSGen.Hangers
             }
             frin = comboBox2.SelectedIndex; toin = comboBox3.SelectedIndex;
         }
-
+            
         private void button2_Click(object sender, EventArgs e)
         {
             canc = true;
         }
         private void Form7_Load(object sender, EventArgs e)
         {
-            foreach (string ss in Linkes) { comboBox1.Items.Add(ss); }
+            foreach(string ss in Linkes) { comboBox1.Items.Add(ss); }
             foreach (string ss in Levels) { comboBox2.Items.Add(ss); comboBox3.Items.Add(ss); }
-            Duc = US("Duc", true);
-            Wuc = US("WS", false, WSdias, WSspcs);
-            CWuc = US("CHW", false, CHWdias, CHWspcs);
-            DRuc = US("DR", false, DRdias, DRspcs);
-            FFuc = US("FF", false, Firedias, Firespcs);
+            Duc = US("Duc",true);
+            Wuc = US("WS",false,WSdias,WSspcs);
+            CWuc = US("CHW",false,CHWdias,CHWspcs);
+            DRuc = US("DR",false,DRdias,DRspcs);
+            FFuc = US("FF",false,Firedias,Firespcs);
             LastB = FFbt;
-            comboBox2.SelectedItem = Levels[0]; comboBox2.SelectedIndex = 0;
-            comboBox3.SelectedItem = Levels[1]; comboBox3.SelectedIndex = 1;
+            comboBox2.SelectedItem = Levels[0]; comboBox2.SelectedIndex= 0;
+            comboBox3.SelectedItem = Levels[1]; comboBox3.SelectedIndex =1;
         }
         private void Ductbt_Click(object sender, EventArgs e)
         {
@@ -559,7 +557,7 @@ namespace IBIMSGen.Hangers
             {
                 MessageBox.Show("Value Must be Integar and greater than 0.");
             }
-        }
+        } 
 
 
         private void DRbt_Click(object sender, EventArgs e)
@@ -589,13 +587,13 @@ namespace IBIMSGen.Hangers
         private void button3_Click(object sender, EventArgs e)
         {
             button3.DialogResult = DialogResult.None;
-            Button b = new Button();
+            Button b = new Button(); 
             b.Click += B_Click;
-            panel3.Controls.Add(b);
-            b.Location = new Point(LastB.Location.X, LastB.Location.Y + 50);
-            b.Size = LastB.Size;
-            b.BackColor = LastB.BackColor;
-            b.Font = LastB.Font; b.ForeColor = LastB.ForeColor; b.FlatStyle = FlatStyle.Flat;
+            panel3.Controls.Add(b); 
+            b.Location = new Point(LastB.Location.X, LastB.Location.Y+50);
+            b.Size= LastB.Size; 
+            b.BackColor = LastB.BackColor; 
+            b.Font = LastB.Font; b.ForeColor = LastB.ForeColor; b.FlatStyle= FlatStyle.Flat;
             b.FlatAppearance.BorderSize = 0;
             string s = "System " + (panel3.Controls.Count - 5).ToString();
             b.Text = s; b.Name = s;
@@ -617,7 +615,7 @@ namespace IBIMSGen.Hangers
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            lnk = comboBox1.SelectedIndex;
+            lnk=comboBox1.SelectedIndex;
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
@@ -654,7 +652,7 @@ namespace IBIMSGen.Hangers
 
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {
-            if (radioButton1.Checked) { selc = true; panel7.Enabled = false; }
+            if(radioButton1.Checked) { selc = true; panel7.Enabled = false; }
             else { selc = false; panel7.Enabled = true; }
         }
 
