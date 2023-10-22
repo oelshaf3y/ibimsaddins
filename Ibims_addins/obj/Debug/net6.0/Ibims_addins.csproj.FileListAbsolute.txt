@@ -1,0 +1,15 @@
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\Ibims_addins\bin\Debug\net6.0\Ibims_addins.exe
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\Ibims_addins\bin\Debug\net6.0\Ibims_addins.deps.json
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\Ibims_addins\bin\Debug\net6.0\Ibims_addins.runtimeconfig.json
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\Ibims_addins\bin\Debug\net6.0\Ibims_addins.dll
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\Ibims_addins\bin\Debug\net6.0\Ibims_addins.pdb
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\Ibims_addins\obj\Debug\net6.0\Ibims_addins.csproj.AssemblyReference.cache
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\Ibims_addins\obj\Debug\net6.0\Ibims_addins.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\Ibims_addins\obj\Debug\net6.0\Ibims_addins.AssemblyInfoInputs.cache
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\Ibims_addins\obj\Debug\net6.0\Ibims_addins.AssemblyInfo.cs
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\Ibims_addins\obj\Debug\net6.0\Ibims_addins.csproj.CoreCompileInputs.cache
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\Ibims_addins\obj\Debug\net6.0\Ibims_addins.dll
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\Ibims_addins\obj\Debug\net6.0\refint\Ibims_addins.dll
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\Ibims_addins\obj\Debug\net6.0\Ibims_addins.pdb
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\Ibims_addins\obj\Debug\net6.0\Ibims_addins.genruntimeconfig.cache
+C:\Users\str9\source\repos\oelshaf3y\ibimsaddins\Ibims_addins\obj\Debug\net6.0\ref\Ibims_addins.dll

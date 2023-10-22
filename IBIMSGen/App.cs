@@ -114,6 +114,12 @@ namespace IBIMSGen
                 ToolTip = "Delete All CAD Imports From The Entire Project."
             };
 
+            PushButtonData ColorCables = new PushButtonData("Color code for wires", "Color Wires", assemblyName, "IBIMSGen.ColorCable.Coloring")
+            {
+                LargeImage = Properties.Resources.colorCables.ToImageSource(),
+                Image = Properties.Resources.colorCables_s.ToImageSource(),
+                ToolTip = "Color Code for wires in the project (find & replace method)"
+            };
 
             genTools.AddItem(copyCallouts);
             genTools.AddItem(clash);
@@ -121,7 +127,8 @@ namespace IBIMSGen
             Arch.AddItem(RoomSections);
             systems.AddItem(BWork);
             systems.AddItem(Lights);
-            systems.AddStackedItems(CenterElement,Fillet, CutLines);
+            systems.AddStackedItems(CenterElement, ColorCables);
+            systems.AddStackedItems(Fillet, CutLines);
             return Result.Succeeded;
         }
     }

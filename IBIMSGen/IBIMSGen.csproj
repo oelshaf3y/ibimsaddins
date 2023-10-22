@@ -87,10 +87,18 @@
       <DependentUpon>loading.cs</DependentUpon>
     </Compile>
     <Compile Include="BlockWork.cs" />
+    <Compile Include="ColorCable\Coloring.cs" />
+    <Compile Include="ColorCable\ColoringUi.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ColorCable\ColoringUi.Designer.cs">
+      <DependentUpon>ColoringUi.cs</DependentUpon>
+    </Compile>
     <Compile Include="DeleteCad.cs" />
     <Compile Include="ElecCables\CablesTrim.cs" />
     <Compile Include="ElecCables\Fillet.cs" />
     <Compile Include="AlignBetween2Pts.cs" />
+    <Compile Include="ElecEquipCeilings\ceilingFloorSelectionFilter.cs" />
     <Compile Include="ElecEquipCeilings\CeilingLightsPlacement.cs" />
     <Compile Include="ElecEquipCeilings\PlaceLightsUi.cs">
       <SubType>Form</SubType>
@@ -160,6 +168,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ClashViewer\loading.resx">
       <DependentUpon>loading.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ColorCable\ColoringUi.resx">
+      <DependentUpon>ColoringUi.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ElecEquipCeilings\PlaceLightsUi.resx">
       <DependentUpon>PlaceLightsUi.cs</DependentUpon>
@@ -287,6 +298,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\delete cad-s.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\colorCables-s.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\colorCables.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

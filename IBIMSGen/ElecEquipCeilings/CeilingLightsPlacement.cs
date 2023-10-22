@@ -29,7 +29,7 @@ namespace IBIMSGen.ElecEquipCeilings
             Reference refFace;
             try
             {
-                refFace = uidoc.Selection.PickObject(ObjectType.PointOnElement, "pick Host");
+                refFace = uidoc.Selection.PickObject(ObjectType.PointOnElement, new ceilingFloorSelectionFilter(), "Pick Host");
             }
             catch
             {
@@ -72,7 +72,7 @@ namespace IBIMSGen.ElecEquipCeilings
                 ElementMulticategoryFilter ceilingsAndFloors = new ElementMulticategoryFilter(new BuiltInCategory[] { BuiltInCategory.OST_Floors, BuiltInCategory.OST_Ceilings });
                 XYZ p1, p2, p3, p4;
                 Line l12, l23;
-                
+
                 try
                 {
 
@@ -99,7 +99,7 @@ namespace IBIMSGen.ElecEquipCeilings
                 }
 
                 Element elem = doc.GetElement(refFace);
-                if(elem is RevitLinkInstance)
+                if (elem is RevitLinkInstance)
                 {
                     RevitLinkInstance rli = elem as RevitLinkInstance;
                     Document LinkDoc = rli.GetLinkDocument();

@@ -70,11 +70,11 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(12, 9);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(372, 39);
+            this.label1.Size = new System.Drawing.Size(375, 39);
             this.label1.TabIndex = 1;
             this.label1.Text = "this app should create views for each clash point exported from navisworks.\r\nfor " +
-    "this app to work you should export tests results (Sepaated or combined)\r\nas xml," +
-    " then import the xml file below.\r\n";
+    "this app to work you should export tests results (Separated or combined)\r\nas xml" +
+    ", then import the xml file below.\r\n";
             // 
             // label2
             // 

@@ -21,10 +21,12 @@ namespace IBIMSGen
 
 
             FilteredElementCollector fec = new FilteredElementCollector(doc).OfClass(typeof(CADLinkType));
-            if(fec.Count()==0 ) { TaskDialog.Show("Info", "No more DWG Imports In The Project."); }
+            int count = fec.Count();
+            if (count==0 ) { TaskDialog.Show("Info", "No more DWG Imports In The Project.");return Result.Succeeded; }
             Transaction tr = new Transaction(doc, "Delete CAD Imports");
             tr.Start();
             doc.Delete(fec.Select(x => x.Id).ToArray());
+            TaskDialog.Show("Done",$"Successfully deleted {count} CAD Files.");
             tr.Commit();
             tr.Dispose();
             return Result.Succeeded;

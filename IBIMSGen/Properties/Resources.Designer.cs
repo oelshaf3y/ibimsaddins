@@ -143,6 +143,26 @@ namespace IBIMSGen.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
+        internal static System.Drawing.Icon colorCables {
+            get {
+                object obj = ResourceManager.GetObject("colorCables", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon colorCables_s {
+            get {
+                object obj = ResourceManager.GetObject("colorCables_s", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
         internal static System.Drawing.Icon CutLines {
             get {
                 object obj = ResourceManager.GetObject("CutLines", resourceCulture);
