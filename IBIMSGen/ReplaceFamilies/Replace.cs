@@ -3,13 +3,13 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Structure;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
-using Microsoft.Office.Interop.Excel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Media.Imaging;
 
 namespace IBIMSGen.ReplaceFamilies
 {
@@ -111,6 +111,7 @@ namespace IBIMSGen.ReplaceFamilies
         private bool replaceElement(XYZ location, FamilySymbol fs, Element elem)
         {
             FamilyInstance fam;
+            var rot = ((LocationPoint)elem.Location).Rotation;
             try
             {
 
@@ -187,6 +188,7 @@ namespace IBIMSGen.ReplaceFamilies
 
                 }
             }
+            fam.Location.Rotate(Line.CreateUnbound(location,XYZ.BasisZ),rot);
             doc.Delete(elem.Id);
             uidoc.Selection.SetElementIds(new List<ElementId>() { fam.Id });
             return true;
