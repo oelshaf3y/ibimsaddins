@@ -16,7 +16,7 @@ namespace IBIMSGen.Penetration
         public FamilySymbol familySymbol;
         public XYZ sleeveDir;
         RevitLinkInstance rli;
-        public PenetratingElement(Element element, WorksetId worksetId,
+        public PenetratingElement(Element element, Workset workset,
             double width, double height, double insulationThickness, Curve axis,
             FamilySymbol familySymbol)
         {

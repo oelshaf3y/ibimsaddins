@@ -116,6 +116,7 @@
     </Compile>
     <Compile Include="Hangers\PipeHanger.cs" />
     <Compile Include="Hangers\SelectionFilterPDC.cs" />
+    <Compile Include="Hangers\TrayHanger.cs" />
     <Compile Include="ReplaceFamilies\Replace.cs" />
     <Compile Include="ReplaceFamilies\ReplaceUI.cs">
       <SubType>Form</SubType>
