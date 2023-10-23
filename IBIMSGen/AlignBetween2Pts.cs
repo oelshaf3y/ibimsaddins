@@ -24,9 +24,14 @@ namespace IBIMSGen
             options.ComputeReferences = true;
             if (doc.ActiveView is View3D) { TaskDialog.Show("Error", "Active View Can't be 3D!"); return Result.Failed; }
             Element elem = null;
-            elem = uidoc.Selection.GetElementIds().Select(x => doc.GetElement(x)).First();
-            if (elem == null)
+            try
             {
+
+                elem = uidoc.Selection.GetElementIds().Select(x => doc.GetElement(x)).First();
+            }
+            catch
+            {
+
                 try
                 {
                     elem = doc.GetElement(uidoc.Selection.PickObject(ObjectType.Element, "Select Elements you'd like to center"));

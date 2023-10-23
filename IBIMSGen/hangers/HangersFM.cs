@@ -523,7 +523,8 @@ namespace IBIMSGen.Hangers
             FFuc = US("FF", false, Firedias, Firespcs);
             LastB = FFbt;
             comboBox2.SelectedItem = Levels[0]; comboBox2.SelectedIndex = 0;
-            comboBox3.SelectedItem = Levels[1]; comboBox3.SelectedIndex = 1;
+            comboBox3.SelectedItem = Levels[1]; comboBox3.SelectedIndex = comboBox3.Items.Count - 1;
+
         }
         private void Ductbt_Click(object sender, EventArgs e)
         {
