@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
+    <Compile Include="ElecCables\CableTraysElevations.cs" />
     <Compile Include="CallOutsCopy.cs" />
     <Compile Include="ClashViewer\clashBalls.cs">
       <SubType>Form</SubType>
@@ -114,7 +115,9 @@
     <Compile Include="Hangers\HangersFM.Designer.cs">
       <DependentUpon>HangersFM.cs</DependentUpon>
     </Compile>
+    <Compile Include="Hangers\HangersTrial.cs" />
     <Compile Include="Hangers\PipeHanger.cs" />
+    <Compile Include="Hangers\QuadTree.cs" />
     <Compile Include="Hangers\SelectionFilterPDC.cs" />
     <Compile Include="Hangers\TrayHanger.cs" />
     <Compile Include="ReplaceFamilies\Replace.cs" />
@@ -318,6 +321,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\colorCables.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\cableTray.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\cableTray-s.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

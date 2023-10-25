@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Electrical;
+using Autodesk.Revit.DB.Structure;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
-using Autodesk.Revit.Attributes;
-using Autodesk.Revit.DB.Structure;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Line = Autodesk.Revit.DB.Line;
 using Parameter = Autodesk.Revit.DB.Parameter;
-using Autodesk.Revit.DB.Electrical;
-using System.Text;
 
 namespace IBIMSGen.Hangers
 {
@@ -328,7 +328,7 @@ namespace IBIMSGen.Hangers
             //===============================================================================================
 
             #region Ducts
-            td(ducts.Count.ToString()); 
+            td(ducts.Count.ToString());
             foreach (Element duct in ducts)
             {
                 double spacingFin = 0;
@@ -373,7 +373,7 @@ namespace IBIMSGen.Hangers
                 // getting the duct fitting points that intersects the curve line.
                 // then offsets the hangers by a margin that insures the hangers will never intersect the fitting.
                 List<Element> nearDuctFits = ductfits.OrderBy(x => ((LocationPoint)x.Location).Point.DistanceTo(ductMidPt))
-                    .Where(x=>((LocationPoint)x.Location).Point.DistanceTo(ductMidPt)<ductCurve.Length).ToList();
+                    .Where(x => ((LocationPoint)x.Location).Point.DistanceTo(ductMidPt) < ductCurve.Length).ToList();
                 foreach (Element fitting in nearDuctFits)
                 {
                     double angle = 0;

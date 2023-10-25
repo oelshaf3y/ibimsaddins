@@ -83,6 +83,26 @@ namespace IBIMSGen.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
+        internal static System.Drawing.Icon cableTray {
+            get {
+                object obj = ResourceManager.GetObject("cableTray", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon cableTray_s {
+            get {
+                object obj = ResourceManager.GetObject("cableTray_s", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
         internal static System.Drawing.Icon callouts {
             get {
                 object obj = ResourceManager.GetObject("callouts", resourceCulture);

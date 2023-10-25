@@ -160,7 +160,11 @@ namespace IBIMSGen.ReplaceFamilies
                         }
                         //host = host.CreateReferenceInLink();
                     }
-                    fam = doc.Create.NewFamilyInstance(host, location, famins.FacingOrientation, fs);
+                    else
+                    {
+
+                        fam = doc.Create.NewFamilyInstance(host, location, famins.FacingOrientation, fs);
+                    }
 
 
 
@@ -188,7 +192,10 @@ namespace IBIMSGen.ReplaceFamilies
 
                 }
             }
-            fam.Location.Rotate(Line.CreateUnbound(location,XYZ.BasisZ),rot);
+            double rotation = 0;
+            if (rot > Math.PI * 2) rotation = 2 * Math.PI - rot;
+            //if (fam.FacingFlipped) rotation = Math.PI - rot;
+            fam.Location.Rotate(Line.CreateUnbound(location, XYZ.BasisZ), rotation);
             doc.Delete(elem.Id);
             uidoc.Selection.SetElementIds(new List<ElementId>() { fam.Id });
             return true;

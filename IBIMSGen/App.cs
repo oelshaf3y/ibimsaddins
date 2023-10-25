@@ -120,6 +120,12 @@ namespace IBIMSGen
                 Image = Properties.Resources.colorCables_s.ToImageSource(),
                 ToolTip = "Color Code for wires in the project (find & replace method)"
             };
+            PushButtonData cableTrayHeights = new PushButtonData("Tray's Height Offset", "Trays' Height", assemblyName, "IBIMSGen.ElecCables.CableTraysElevations")
+            {
+                LargeImage = Properties.Resources.cableTray.ToImageSource(),
+                Image = Properties.Resources.cableTray_s.ToImageSource(),
+                ToolTip = "Get Trays' Height Offset From The Nearest Slab Above."
+            };
 
             genTools.AddItem(copyCallouts);
             genTools.AddItem(clash);
@@ -128,7 +134,7 @@ namespace IBIMSGen
             systems.AddItem(BWork);
             systems.AddItem(Lights);
             systems.AddStackedItems(CenterElement, ColorCables);
-            systems.AddStackedItems(Fillet, CutLines);
+            systems.AddStackedItems(Fillet, CutLines,cableTrayHeights);
             return Result.Succeeded;
         }
     }
