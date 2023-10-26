@@ -83,6 +83,7 @@ namespace IBIMSGen.ElecCables
 
                     double height = elem.LookupParameter("Height").AsDouble();
                     string heightOffset = Math.Round((nearestPt.Z - midPoint.Z - height / 2) * 304.8).ToString();
+                    //DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel)).SetShape(new List<GeometryObject> { Line.CreateBound(midPoint, nearestPt) });
                     if (selection) sb.AppendLine(heightOffset + " mm ");
                     elem.LookupParameter("Comments").Set(heightOffset + " mm ");
                 }

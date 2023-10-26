@@ -11,9 +11,9 @@ namespace IBIMSGen.Hangers
         public double ductHeight;
         public double insoThick;
         public double botElevation;
-        public List<XYZ> hangPts;
+        public List<Support> supports;
 
-        public DuctHanger(Element duct, XYZ ductPerpendicular, double ductWidth, double ductHeight, double insoThick, double botElevation, List<XYZ> hangPts)
+        public DuctHanger(Element duct, XYZ ductPerpendicular, double ductWidth, double ductHeight, double insoThick, double botElevation, List<Support> supports)
         {
             this.duct = duct;
             this.ductPerpendicular = ductPerpendicular;
@@ -21,7 +21,7 @@ namespace IBIMSGen.Hangers
             this.ductHeight = ductHeight;
             this.insoThick = insoThick;
             this.botElevation = botElevation;
-            this.hangPts = hangPts;
+            this.supports = supports;
         }
     }
 }
