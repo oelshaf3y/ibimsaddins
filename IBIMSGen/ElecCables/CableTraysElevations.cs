@@ -85,11 +85,19 @@ namespace IBIMSGen.ElecCables
                     string heightOffset = Math.Round((nearestPt.Z - midPoint.Z - height / 2) * 304.8).ToString();
                     //DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel)).SetShape(new List<GeometryObject> { Line.CreateBound(midPoint, nearestPt) });
                     if (selection) sb.AppendLine(heightOffset + " mm ");
-                    elem.LookupParameter("Comments").Set(heightOffset + " mm ");
+                    try
+                    {
+
+                    elem.LookupParameter("CTH").Set(heightOffset + " mm ");
+                    }
+                    catch
+                    {
+                        td("Cable Trays must have a parameter called CTH - text - instance");
+                    }
                 }
                 if (selection) { sb.AppendLine(" and"); } else { sb.AppendLine("Cable Trays heights offset of this active view"); }
 
-                sb.Append(" have been stored in comments.");
+                sb.Append(" have been stored in CTH.");
                 td(sb.ToString());
                 tr.Commit();
                 tr.Dispose();

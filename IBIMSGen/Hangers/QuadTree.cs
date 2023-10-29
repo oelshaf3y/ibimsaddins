@@ -52,9 +52,9 @@ namespace IBIMSGen.Hangers
         private void subdevide()
         {
             subdevided = true;
-            double midx = (Right - Left) / 2;
-            double midy = (Top - Bottom) / 2;
-            double midz = (Up - Down) / 2;
+            double midx = (Right + Left) / 2;
+            double midy = (Top + Bottom) / 2;
+            double midz = (Up + Down) / 2;
             NorthEastUp = new QuadTree(midx, Top, Right, midy, Up, midz);
             NorthEastDown = new QuadTree(midx, Top, Right, midy, midz, Down);
             NorthWestUp = new QuadTree(Left, Top, midx, midy, Up, midz);
@@ -64,6 +64,9 @@ namespace IBIMSGen.Hangers
             SouthWestUp = new QuadTree(Left, midy, midx, Bottom, Up, midz);
             SouthWestDown = new QuadTree(Left, midy, midx, Bottom, midz, Down);
         }
+
+
+
         public List<Element> query(Boundary range)
         {
             List<Element> result = new List<Element>();
@@ -101,26 +104,26 @@ namespace IBIMSGen.Hangers
         }
         public bool intersects(Boundary other)
         {
-            return !(Top < other.Bottom || Bottom > other.Top || Left > other.Right || Right < other.Left || Up < other.Bottom || Bottom > other.Top);
+            return !(Top < other.Bottom || Bottom > other.Top || Left > other.Right || Right < other.Left || Up < other.Down || Down > other.Up);
         }
         public bool contains(Element elem)
         {
-            XYZ point = getLocation(elem);
-
-            return !(point.X > Right || point.X < Left || point.Y > Top || point.Y < Bottom || point.Z < Down || point.Z > Up);
+            List<XYZ> points = getLocation(elem);
+            return points.Where(point => (point.X < Right && point.X > Left && point.Y < Top && point.Y > Bottom && point.Z < Up && point.Z > Down)).Any();
         }
-        private XYZ getLocation(Element elem)
+        private List<XYZ> getLocation(Element elem)
         {
             Location location = elem.Location;
             if (location is LocationPoint)
             {
-                return ((LocationPoint)location).Point;
+                return new List<XYZ> { ((LocationPoint)location).Point };
             }
             else
             {
                 Curve curve = ((LocationCurve)location).Curve;
-                return curve.Evaluate(0.5, true);
+                return new List<XYZ> { curve.Evaluate(0, true), curve.Evaluate(0.5, true), curve.Evaluate(1, true) };
             }
         }
     }
+
 }

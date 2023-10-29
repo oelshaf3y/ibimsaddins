@@ -53,7 +53,7 @@ namespace IBIMSGen.Rooms
             if (ceilings == null) { return Result.Failed; }
             viewForSection = vft.Where(x => ((ViewFamilyType)x).ViewFamily == ViewFamily.Section).FirstOrDefault();
             viewForCeiling = vft.Where(l => (l as ViewFamilyType).ViewFamily == ViewFamily.CeilingPlan).First();
-            viewForFlooring = vft.Where(l => (l as ViewFamilyType).ViewFamily == ViewFamily.Detail).FirstOrDefault();
+            viewForFlooring = vft.Where(l => (l as ViewFamilyType).ViewFamily == ViewFamily.FloorPlan).FirstOrDefault();
 
             UI = new RoomsUI(doc, viewTempsIds, titleBlocks.ToList());
             UI.ShowDialog();
@@ -182,8 +182,15 @@ namespace IBIMSGen.Rooms
                         {
                             VFC = ViewPlan.Create(doc, viewForCeiling.Id, topLevel.Id);
                         }
-
-                        View up = ViewSection.CreateCallout(doc, VFC.Id, viewForCeiling.Id, new XYZ(minX - 1.5, minY - 1.5, minZ + 3.5), new XYZ(maxX + 1.50, maxY + 1.5, maxZ + 5));
+                        BoundingBoxXYZ bx = new BoundingBoxXYZ();
+                        bx.Min = new XYZ(minX - 1.5, minY - 1.5, minZ + 3.5);
+                        bx.Max = new XYZ(maxX + 1.50, maxY + 1.5, maxZ + 5);
+                        bx.Transform = Transform.Identity;
+                        VFC.CropBox = bx;
+                        VFC.CropBoxActive = true;
+                        VFC.CropBoxVisible = true;
+                        View up = VFC;
+                        //View up = ViewSection.CreateCallout(doc, VFC.Id, viewForCeiling.Id, new XYZ(minX - 1.5, minY - 1.5, minZ + 3.5), new XYZ(maxX + 1.50, maxY + 1.5, maxZ + 5));
                         BoundingBoxXYZ bxUp = new BoundingBoxXYZ();
                         if (UI.celingVTId != null)
                         {
@@ -220,9 +227,17 @@ namespace IBIMSGen.Rooms
                         {
                             VFF = ViewPlan.Create(doc, viewForFlooring.Id, botLevel.Id);
                         }
+                        BoundingBoxXYZ bxd = new BoundingBoxXYZ();
+                        bxd.Min = new XYZ(minX - 1.5, minY - 1.5, 0);
+                        bxd.Max = new XYZ(maxX + 1.5, maxY + 1.5, 0);
+                        bxd.Transform = Transform.Identity;
+                        VFF.CropBox = bxd;
+                        VFF.CropBoxActive = true;
+                        VFF.CropBoxVisible = true;
                         for (int i = 0; i < 3; i++)
                         {
-                            View down = ViewSection.CreateCallout(doc, VFF.Id, viewForFlooring.Id, new XYZ(minX - 1.5, minY - 1.5, 0), new XYZ(maxX + 1.5, maxY + 1.5, 0));
+                            ElementId downId = VFF.Duplicate(ViewDuplicateOption.AsDependent);
+                            View down = doc.GetElement(downId) as View;
                             if (tempIds[i] != null)
                             {
                                 down.ViewTemplateId = tempIds[i];

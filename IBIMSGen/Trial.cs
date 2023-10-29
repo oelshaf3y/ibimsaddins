@@ -29,20 +29,28 @@ namespace IBIMSGen
             sb = new StringBuilder();
             List<RevitLinkInstance> links = new FilteredElementCollector(doc).OfClass(typeof(RevitLinkInstance)).Cast<RevitLinkInstance>().ToList();
             List<Solid> solids = new List<Solid>();
+            Transaction tr = new Transaction(doc);
+            tr.Start("Draw");
             foreach (RevitLinkInstance rli in links)
             {
                 Document linkdoc = rli.GetLinkDocument();
                 var floors = new FilteredElementCollector(linkdoc).OfCategory(BuiltInCategory.OST_Floors).WhereElementIsNotElementType().ToList();
                 foreach (Element floor in floors)
                 {
-                    solids.Add(getSolid(floor));
+                    Solid s = getSolid(floor);
+                    if (s != null)
+                    {
+
+                        try
+                        {
+                            DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel)).SetShape(new List<GeometryObject> { s });
+                        }
+                        catch { }
+                    }
                 }
-                sb.AppendLine(floors.Count.ToString());
+                //sb.AppendLine(floors.Count.ToString());
             }
-            TaskDialog.Show("Err",sb.ToString());
-            Transaction tr = new Transaction(doc);
-            tr.Start("Draw");
-            DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel)).SetShape(solids.Cast<GeometryObject>().ToArray());
+            TaskDialog.Show("Err", sb.ToString());
             tr.Commit();
             tr.Dispose();
             //TaskDialog.Show("Info", sb.ToString());
