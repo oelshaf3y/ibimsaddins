@@ -87,7 +87,7 @@ namespace IBIMSGen.Hangers
                 //return Result.Failed;
             }
             watch.Stop();
-            sb.AppendLine($"check time for ramilies is {watch.ElapsedMilliseconds } ");
+            sb.AppendLine($"check time for ramilies is {watch.ElapsedMilliseconds} ");
             watch.Restart();
             linksFEC = new FilteredElementCollector(doc).OfClass(typeof(RevitLinkInstance));
             LinksNames = linksFEC.Cast<RevitLinkInstance>()
@@ -119,7 +119,7 @@ namespace IBIMSGen.Hangers
                 }
             }
             meanFloorHeight = floorHeights.Average();
-
+            //td((meanFloorHeight * 304.8 / 1000).ToString());
             worksets = new FilteredWorksetCollector(doc).Where(x => x.Kind == WorksetKind.UserWorkset).ToList();
             worksetnames = worksets.Select(x => x.Name).ToList();
             worksetIDs = worksets.Select(x => x.Id).ToList();
@@ -159,7 +159,7 @@ namespace IBIMSGen.Hangers
 
 
             watch.Stop();
-            sb.AppendLine($"time for calculating info {watch.ElapsedMilliseconds }");
+            sb.AppendLine($"time for calculating info {watch.ElapsedMilliseconds}");
             watch.Restart();
             try
             {
@@ -321,12 +321,12 @@ namespace IBIMSGen.Hangers
                 .OfClass(typeof(FamilyInstance))
                 //.Where(x => selectionBoundary.contains(x))
                 .ToList();
-            double minx = ductfits.Select(x => ((LocationPoint)x.Location).Point.X).Min() - meanFloorHeight / 2;
-            double miny = ductfits.Select(x => ((LocationPoint)x.Location).Point.Y).Min() - meanFloorHeight / 2;
-            double minz = ductfits.Select(x => ((LocationPoint)x.Location).Point.Z).Min() - meanFloorHeight / 2;
-            double maxx = ductfits.Select(x => ((LocationPoint)x.Location).Point.X).Max() + meanFloorHeight / 2;
-            double maxy = ductfits.Select(x => ((LocationPoint)x.Location).Point.Y).Max() + meanFloorHeight / 2;
-            double maxz = ductfits.Select(x => ((LocationPoint)x.Location).Point.Z).Max() + meanFloorHeight / 2;
+            double minx = ductfits.Select(x => ((LocationPoint)x.Location).Point.X).Min() - (meanFloorHeight / 2);
+            double miny = ductfits.Select(x => ((LocationPoint)x.Location).Point.Y).Min() - (meanFloorHeight / 2);
+            double minz = ductfits.Select(x => ((LocationPoint)x.Location).Point.Z).Min() - (meanFloorHeight / 2);
+            double maxx = ductfits.Select(x => ((LocationPoint)x.Location).Point.X).Max() + (meanFloorHeight / 2);
+            double maxy = ductfits.Select(x => ((LocationPoint)x.Location).Point.Y).Max() + (meanFloorHeight / 2);
+            double maxz = ductfits.Select(x => ((LocationPoint)x.Location).Point.Z).Max() + (meanFloorHeight / 2);
 
             QuadTree ductTree = new QuadTree(minx, maxy, maxx, miny, maxz, minz);
             QuadTree fitsTree = new QuadTree(minx, maxy, maxx, miny, maxz, minz);
@@ -417,10 +417,10 @@ namespace IBIMSGen.Hangers
 
                             }
                         }
-                        floorRight += (meanFloorHeight) / 2;
-                        floorLeft -= (meanFloorHeight) / 2;
-                        floorTop += (meanFloorHeight) / 2;
-                        floorBottom -= (meanFloorHeight) / 2;
+                        floorRight += (meanFloorHeight / 2);
+                        floorLeft -= (meanFloorHeight / 2);
+                        floorTop += (meanFloorHeight / 2);
+                        floorBottom -= (meanFloorHeight / 2);
                         floorUp += (meanFloorHeight / 2);
                         floorDown -= (meanFloorHeight / 2);
                         //Boundary floorRange = new Boundary(double.MinValue, double.MaxValue, double.MaxValue, double.MinValue, double.MaxValue, double.MinValue);
@@ -1023,7 +1023,6 @@ namespace IBIMSGen.Hangers
             IList<Solid> solids = new List<Solid>();
             try
             {
-
                 GeometryElement geo = elem.get_Geometry(options);
                 if (geo.FirstOrDefault() is Solid)
                 {

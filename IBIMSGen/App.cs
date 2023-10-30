@@ -107,12 +107,6 @@ namespace IBIMSGen
                 ToolTip = "Distribute Lighting Fixtures in a certain area"
             };
 
-            PushButtonData RemoveCad = new PushButtonData("Remove CAD Imports", "Remove CAD", assemblyName, "IBIMSGen.DeleteCad")
-            {
-                LargeImage = Properties.Resources.delete_cad.ToImageSource(),
-                Image = Properties.Resources.delete_cad_s.ToImageSource(),
-                ToolTip = "Delete All CAD Imports From The Entire Project."
-            };
 
             PushButtonData ColorCables = new PushButtonData("Color code for wires", "Color Wires", assemblyName, "IBIMSGen.ColorCable.Coloring")
             {
@@ -127,9 +121,25 @@ namespace IBIMSGen
                 ToolTip = "Get Trays' Height Offset From The Nearest Slab Above."
             };
 
+            PushButtonData RemoveCad = new PushButtonData("Remove CAD Imports", "Remove CAD", assemblyName, "IBIMSGen.DeleteCad")
+            {
+                LargeImage = Properties.Resources.delete_cad.ToImageSource(),
+                Image = Properties.Resources.delete_cad_s.ToImageSource(),
+                ToolTip = "Delete All CAD Imports From The Entire Project."
+            };
+
+            PushButtonData sections = new PushButtonData("Make 2 Sections", "2 Sections", assemblyName, "IBIMSGen.ElementSections")
+            {
+                LargeImage = Properties.Resources.section.ToImageSource(),
+                Image = Properties.Resources.section_s.ToImageSource(),
+                ToolTip = "Make two perpendicular sections for the selected element(s)."
+            };
+
             genTools.AddItem(copyCallouts);
             genTools.AddItem(clash);
-            genTools.AddStackedItems(ReplaceElements,SelectSimilarDL, RemoveCad);
+            genTools.AddStackedItems(ReplaceElements,SelectSimilarDL);
+            genTools.AddStackedItems(RemoveCad, sections);
+
             Arch.AddItem(RoomSections);
             systems.AddItem(BWork);
             systems.AddItem(Lights);

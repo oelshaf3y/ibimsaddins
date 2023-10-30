@@ -107,6 +107,7 @@
     <Compile Include="ElecEquipCeilings\PlaceLightsUi.Designer.cs">
       <DependentUpon>PlaceLightsUi.cs</DependentUpon>
     </Compile>
+    <Compile Include="ElementSections.cs" />
     <Compile Include="Hangers\DuctHanger.cs" />
     <Compile Include="Hangers\Hangers.cs" />
     <Compile Include="Hangers\HangersFM.cs">
@@ -328,6 +329,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\cableTray-s.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\section-s.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\section.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -22,7 +22,14 @@ namespace IBIMSGen
             IList<ElementId> selection = uidoc.Selection.GetElementIds().ToList().ToList();
             if (selection.Count == 0)
             {
+                try
+                {
                 selection = uidoc.Selection.PickObjects(Autodesk.Revit.UI.Selection.ObjectType.Element, "Select Elements").Select(x => doc.GetElement(x).Id).ToList();
+                }
+                catch
+                {
+                    return Result.Cancelled;
+                }
             }
             foreach (ElementId id in selection)
             {
@@ -37,6 +44,7 @@ namespace IBIMSGen
                     }
                 }
             }
+
             FilteredElementCollector detailLines = new FilteredElementCollector(doc, doc.ActiveView.Id);
             detailLines.OfCategory(BuiltInCategory.OST_Lines);
 
@@ -54,6 +62,7 @@ namespace IBIMSGen
                     }
                 }
             }
+
             Collection<ElementId> newSelection = new Collection<ElementId>(selection);
             uidoc.Selection.SetElementIds(newSelection);
 

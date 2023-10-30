@@ -10,7 +10,7 @@ namespace IBIMSGen.Hangers
 {
     public class QuadTree
     {
-        int Capacity = 4;
+        int Capacity = 8;
         Boundary Boundary;
         List<Element> elems;
         QuadTree NorthEastUp, NorthWestUp, SouthEastUp, SouthWestUp, NorthEastDown, NorthWestDown, SouthEastDown, SouthWestDown;
