@@ -117,6 +117,12 @@
       <DependentUpon>HangersFM.cs</DependentUpon>
     </Compile>
     <Compile Include="Hangers\HangersTrial.cs" />
+    <Compile Include="Hangers\HangerUC.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Hangers\HangerUC.Designer.cs">
+      <DependentUpon>HangerUC.cs</DependentUpon>
+    </Compile>
     <Compile Include="Hangers\PipeHanger.cs" />
     <Compile Include="Hangers\QuadTree.cs" />
     <Compile Include="Hangers\SelectionFilterPDC.cs" />
@@ -193,6 +199,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Hangers\HangersFM.resx">
       <DependentUpon>HangersFM.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Hangers\HangerUC.resx">
+      <DependentUpon>HangerUC.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Penetration\PenetrationForm.resx">
       <DependentUpon>PenetrationForm.cs</DependentUpon>

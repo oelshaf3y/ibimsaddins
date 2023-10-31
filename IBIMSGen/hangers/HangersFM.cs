@@ -15,92 +15,53 @@ namespace IBIMSGen.Hangers
     public partial class HangersFM : Form
     {
 
-        public bool canc; public bool ook; public int lnk = -1; public int dup; public bool selc; public int frin, toin;
-        public List<string> worksetnames = new List<string>(); public List<string> Linkes = new List<string>();
-        public List<List<string>> AllworksetsNames = new List<List<string>>(); public List<string> Levels = new List<string>();
-        public List<List<List<string>>> AllworksetsDIMS = new List<List<List<string>>>();
-        public UserControl Duc = null;
-        public UserControl Wuc = null;
-        public UserControl CWuc = null;
-        public UserControl DRuc = null;
-        public UserControl FFuc = null;
-        public Button LastB = null;
-        //public List<string> DRdias = new List<string>() { "12","15", "20", "25", "28", "32", "40", "50", "75", "110", "125", "160", "200", "250", "315" };
-        //public List<string> WSdias = new List<string>() { "15", "20", "25", "32", "40", "50","65", "80","90", "100","125", "150","200","250","300","350" };
-        //public List<string> CHWdias = new List<string>() { "15", "20", "25", "32", "40", "50", "65", "80", "90", "100", "125", "150", "200", "250", "300", "350" };
-        public List<string> DRdias = new List<string>() { "20", "25", "32", "40", "50", "75", "110", "125", "130" };
-        public List<string> WSdias = new List<string>() { "20", "25", "32", "40", "50", "75", "110", "125", "130" };
-        public List<string> CHWdias = new List<string>() { "15", "20", "25", "32", "40", "50", "65", "80", "100", "125", "150", "200", "250", "300", "350", "400" };
-        public List<string> Firedias = new List<string>() { "15", "20", "25", "32", "40", "50", "65", "80", "90", "100", "125", "150", "200", "250", "300", "350" };
-        //public List<double> DRspcs = new List<double>() { 530, 610, 685, 720, 760, 840, 915, 1065, 1370, 1525, 1680, 1830,1830,1830,1830 };
-        //public List<double> WSspcs = new List<double>() { 1800, 2400, 2400, 2700, 3000, 3000, 3300, 3600, 3700, 3900, 4200, 4500, 4500, 4500, 4500, 4500 };
-        //public List<double> CHWspcs = new List<double>() { 1800, 2400, 2400, 2700, 3000, 3000, 3300, 3600, 3700, 3900, 4200, 4500, 4500, 4500, 4500, 4500 };
-        public List<double> DRspcs = new List<double>() { 1000, 1000, 1000, 1000, 1065, 1370, 1525, 1680, 1830 };
-        public List<double> WSspcs = new List<double>() { 1000, 1000, 1000, 1000, 1065, 1370, 1525, 1680, 1830 };
-        public List<double> CHWspcs = new List<double>() { 2100, 2100, 2100, 2400, 2700, 3100, 3400, 3600, 4300, 4300, 5100, 5800, 6100, 7000, 7600, 8200 };
-        public List<double> Firespcs = new List<double>() { 1800, 2400, 2400, 2700, 3000, 3000, 3300, 3600, 3700, 3900, 4200, 4500, 4500, 4500, 4500, 4500 };
-        public void textlev(TextBox txtbx, double defu, double min, double max)
+        public bool canc, ook, selc;
+        public int dup, frin, toin, linkIndex = -1;
+        public List<string> worksetnames, Links, Levels;
+        public List<List<string>> AllworksetsNames;
+        public List<List<Dictionary<string, double>>> AllworksetsDIMS;
+        public UserControl Duc, Wuc, CWuc, DRuc, FFuc;
+        public Button lastButton = null;
+        public List<double> DRdias, WSdias, CHWdias, Firedias, DRspcs, WSspcs, CHWspcs, Firespcs;
+
+        public HangersFM(List<string> linksNames, List<string> worksetNames, List<string> levelsNames)
         {
-            try
-            {
-                if (Convert.ToDouble(txtbx.Text) < min || Convert.ToDouble(txtbx.Text) > max)
-                {
-                    txtbx.Text = defu.ToString();
-                }
-            }
-            catch (FormatException)
-            {
-                txtbx.Text = defu.ToString();
-            }
+            InitializeComponent();
+            DRdias = new List<double>() { 20, 25, 32, 40, 50, 75, 110, 125, 130 };
+            WSdias = new List<double>() { 20, 25, 32, 40, 50, 75, 110, 125, 130 };
+            CHWdias = new List<double>() { 15, 20, 25, 32, 40, 50, 65, 80, 100, 125, 150, 200, 250, 300, 350, 400 };
+            Firedias = new List<double>() { 15, 20, 25, 32, 40, 50, 65, 80, 90, 100, 125, 150, 200, 250, 300, 350 };
+            DRspcs = new List<double>() { 1000, 1000, 1000, 1000, 1065, 1370, 1525, 1680, 1830 };
+            WSspcs = new List<double>() { 1000, 1000, 1000, 1000, 1065, 1370, 1525, 1680, 1830 };
+            CHWspcs = new List<double>() { 2100, 2100, 2100, 2400, 2700, 3100, 3400, 3600, 4300, 4300, 5100, 5800, 6100, 7000, 7600, 8200 };
+            Firespcs = new List<double>() { 1800, 2400, 2400, 2700, 3000, 3000, 3300, 3600, 3700, 3900, 4200, 4500, 4500, 4500, 4500, 4500 };
+            AllworksetsDIMS = new List<List<Dictionary<string, double>>>();
+            AllworksetsNames = new List<List<string>>();
+            worksetnames = worksetNames;
+            Links = linksNames;
+            Levels = levelsNames;
+            Duc = null; Wuc = null; CWuc = null; DRuc = null; FFuc = null;
         }
-        DataGridView DGVCreator(List<string> sizes = null, List<double> spaces = null, bool duct = false)
+        private void Form7_Load(object sender, EventArgs e)
         {
-            DataGridView d = new DataGridView();
-            d.DefaultCellStyle.NullValue = "0";
-            d.CellLeave += D_CellLeave;
-            if (!duct)
-            {
-                if (sizes == null) { sizes = new List<string>(); }
-                if (spaces == null) { spaces = new List<double>(); }
-                d.Columns.Add("Size", "Size ( mm )");
-                d.Columns.Add("Spacing", "Spacing ( mm )");
-                d.Columns[0].Width = 150; d.Columns[1].Width = 146;
-                if (sizes.Count == 0) { d.RowCount = 12; }
-                else { d.RowCount = sizes.Count; }
-                int o = 0;
-                foreach (string s in sizes)
-                {
-                    d[0, o].Value = s;
-                    d[1, o].Value = spaces[o];
-                    o++;
-                }
-            }
-            else
-            {
-                sizes = new List<string>() { "1", "533.4", "838.2", "1041.4", "1524" };
-                List<string> sizes2 = new List<string>() { "508", "812.8", "1016", "1524", "10000" };
-                spaces = new List<double>() { 3000, 2500, 2500, 2000, 1500 };
-                d.Columns.Add("Size1", "Size from (mm)");
-                d.Columns.Add("Size2", "Size to (mm)");
-                d.Columns.Add("Spacing", "Spacing (mm)");
-                d.Columns[0].Width = 98; d.Columns[1].Width = 98; d.Columns[2].Width = 100;
-                d.RowCount = sizes.Count;
-                int o = 0;
-                foreach (string s in sizes)
-                {
-                    d[0, o].Value = s;
-                    d[1, o].Value = sizes2[o];
-                    d[2, o].Value = spaces[o];
-                    o++;
-                }
-            }
-            return d;
+            comboBox1.Items.AddRange(Links.ToArray());
+            comboBox2.Items.AddRange(Levels.ToArray());
+            comboBox3.Items.AddRange(Levels.ToArray());
+            Duc = createUserControl("Duc", true);
+            Wuc = createUserControl("WS", false, WSdias, WSspcs);
+            CWuc = createUserControl("CHW", false, CHWdias, CHWspcs);
+            DRuc = createUserControl("DR", false, DRdias, DRspcs);
+            FFuc = createUserControl("FF", false, Firedias, Firespcs);
+            lastButton = FFButton;
+            comboBox2.SelectedIndex = 0;
+            comboBox3.SelectedIndex = comboBox3.Items.Count - 1;
+
         }
 
         private void D_CellLeave(object sender, DataGridViewCellEventArgs e)
         {
-            DataGridView dd = (DataGridView)sender;
-            foreach (DataGridViewRow row in dd.Rows)
+            DataGridView dgv = (DataGridView)sender;
+            foreach (DataGridViewRow row in dgv.Rows)
             {
                 foreach (DataGridViewCell cell in row.Cells)
                 {
@@ -111,81 +72,70 @@ namespace IBIMSGen.Hangers
                 }
             }
         }
-        UserControl ActiveUS()
+        UserControl getActiveUI()
         {
-            UserControl uss = null;
             foreach (UserControl us in panel1.Controls)
             {
-                if (us.Visible == true)
-                {
-                    uss = us;
-                    break;
-                }
+                if (us.Visible == true) return us;
             }
-            return uss;
+            return null;
         }
-        public UserControl US(string name, bool vis = false, List<string> sizes = null, List<double> spaces = null)
+
+        public UserControl createUserControl(string name, bool vis = false, List<double> sizes = null, List<double> spaces = null)
         {
-            UserControl us = new UserControl();
-            us.Name = name;
-            panel1.Controls.Add(us);
-            us.Dock = DockStyle.Fill;
-            Panel pl = new Panel(); Panel pc = new Panel(); Panel pr = new Panel(); Panel pb = new Panel();
-            us.Controls.Add(pl); us.Controls.Add(pc); us.Controls.Add(pr); us.Controls.Add(pb); pb.BackColor = Color.Snow; pb.BorderStyle = BorderStyle.FixedSingle;
-            pb.Dock = DockStyle.Bottom; pb.Height = 50; pl.Dock = DockStyle.Left; pl.Width = 300;
-            pr.Dock = DockStyle.Right; pr.Width = 300;
-            //pc.Dock = DockStyle.Fill;
-
-            CheckedListBox clb = new CheckedListBox();
-            pl.Controls.Add(clb);
-            foreach (string ss in worksetnames)
+            UserControl userControl = new HangerUC();
+            userControl.Name = name;
+            panel1.Controls.Add(userControl);
+            userControl.Dock = DockStyle.Fill;
+            CheckedListBox worksetNames = userControl.Controls.Find("worksetNames", true).First() as CheckedListBox;
+            worksetNames.Items.AddRange(worksetnames.ToArray());
+            ComboBox copyFromCB = userControl.Controls.Find("copyFromCB", true).First() as ComboBox;
+            copyFromCB.SelectedIndexChanged += copyFrom_SelectedIndexChanged;
+            DataGridView dgv = userControl.Controls.Find("dgv", true).First() as DataGridView;
+            dgv.DefaultCellStyle.NullValue = 0;
+            dgv.CellLeave += D_CellLeave;
+            if (name != "Duc")
             {
-                clb.Items.Add(ss);
-            }
-            clb.Location = new Point(211, 38);
-            clb.Dock = DockStyle.Fill; clb.BorderStyle = BorderStyle.None;
-            clb.Font = new Font("Microsoft JhengHei", 13, FontStyle.Regular, GraphicsUnit.Pixel);
-            clb.CheckOnClick = true;
-            ComboBox cbx = new ComboBox(); Label lab = new Label();
-            pb.Controls.Add(cbx); pb.Controls.Add(lab); lab.Location = new Point(210, 20);
-            lab.Size = new Size(180, 13); lab.Text = "Duplicate table from: ";
-            lab.Font = new Font("Arial", 14, FontStyle.Regular, GraphicsUnit.Pixel);
-            cbx.Location = new Point(390, 15); cbx.Size = new Size(150, 15);
-            cbx.Enabled = false;
-            cbx.SelectedIndexChanged += Cbx_SelectedIndexChanged;
-
-            DataGridView dgv = null;
-            if (name == "Duc")
-            {
-                dgv = DGVCreator(sizes, spaces, true);
+                if (sizes == null) { sizes = new List<double>(); }
+                if (spaces == null) { spaces = new List<double>(); }
+                dgv.Columns.Add("Size", "Size ( mm )");
+                dgv.Columns.Add("Spacing", "Spacing ( mm )");
+                dgv.Columns[0].Width = 150;
+                dgv.Columns[1].Width = 146;
+                if (sizes.Count == 0) { dgv.RowCount = 12; }
+                else { dgv.RowCount = sizes.Count; }
+                for (int i = 0; i < sizes.Count; i++)
+                {
+                    dgv[0, i].Value = sizes[i];
+                    dgv[1, i].Value = spaces[i];
+                }
             }
             else
             {
-                dgv = DGVCreator(sizes, spaces);
+                sizes = new List<double>() { 1, 533.4, 838.2, 1041.4, 1524 };
+                List<string> sizes2 = new List<string>() { "508", "812.8", "1016", "1524", "10000" };
+                spaces = new List<double>() { 3000, 2500, 2500, 2000, 1500 };
+                dgv.Columns.Add("Size1", "Size from (mm)");
+                dgv.Columns.Add("Size2", "Size to (mm)");
+                dgv.Columns.Add("Spacing", "Spacing (mm)");
+                dgv.Columns[0].Width = 98;
+                dgv.Columns[1].Width = 98;
+                dgv.Columns[2].Width = 100;
+                dgv.RowCount = sizes.Count;
+                for (int i = 0; i < sizes.Count; i++)
+                {
+                    dgv[0, i].Value = sizes[i];
+                    dgv[1, i].Value = sizes2[i];
+                    dgv[2, i].Value = spaces[i];
+                }
             }
-            pr.Controls.Add(dgv);
-            dgv.Dock = DockStyle.Fill;
-            dgv.Location = new Point(600, 30); dgv.RowHeadersVisible = false;
-            TextBox tb = new TextBox(); pr.Controls.Add(tb);
-            tb.Location = new Point(120, 100); tb.Visible = false; tb.Text = "2000"; tb.Leave += Tb_Leave;
-            Label lbb = new Label(); pr.Controls.Add(lbb); lbb.Size = new Size(180, 18); lbb.Text = "Spacing in ( mm ): ";
-            lbb.Font = new Font("Arial", 14, FontStyle.Regular, GraphicsUnit.Pixel); lbb.Visible = false; lbb.Location = new Point(115, 60);
-            if (vis) { us.Visible = true; }
-            else { us.Visible = false; }
-            return us;
+
+            return userControl;
         }
-
-        private void Tb_Leave(object sender, EventArgs e)
-        {
-            textlev((TextBox)sender, 2000, 500, 10000);
-        }
-
-
-
-        private void Cbx_SelectedIndexChanged(object sender, EventArgs e)
+        private void copyFrom_SelectedIndexChanged(object sender, EventArgs e)
         {
             dup = ((ComboBox)sender).SelectedIndex;
-            DataGridView neww = ActiveUS().Controls[2].Controls[0] as DataGridView;
+            DataGridView neww = getActiveUI().Controls.Find("dgv", true).FirstOrDefault() as DataGridView;
             if (dup == 0)
             {
                 neww.RowCount = 12;
@@ -204,7 +154,7 @@ namespace IBIMSGen.Hangers
                 {
                     if (((ComboBox)sender).Items[dup].ToString().Contains(c.Name.ToString()))
                     {
-                        old = c.Controls[2].Controls[0] as DataGridView;
+                        old = c.Controls.Find("dgv", true).FirstOrDefault() as DataGridView;
                         break;
                     }
                 }
@@ -219,106 +169,55 @@ namespace IBIMSGen.Hangers
             }
         }
 
-        bool Go()
+        bool isValidDims()
         {
-            bool go = true;
-            DataGridView activeD = null;
-            activeD = (DataGridView)ActiveUS().Controls[2].Controls[0];
+            DataGridView activeD = (DataGridView)getActiveUI().Controls.Find("dgv", true)?.FirstOrDefault() as DataGridView;
             foreach (DataGridViewRow row in activeD.Rows)
             {
                 foreach (DataGridViewCell cell in row.Cells)
                 {
-                    try
+                    double x;
+                    bool conv = double.TryParse(cell.Value.ToString(), out x);
+                    if (cell.Value != null && !conv || x < 0)
                     {
-                        if (cell.Value != null)
-                        {
-                            if (Convert.ToDouble(cell.Value) < 0)
-                            {
-                                cell.ErrorText = "Value Must be Integar and greater than 0.";
-                            }
-                        }
-                    }
-                    catch (FormatException)
-                    {
-                        cell.ErrorText = "Value Must be Integar and greater than 0.";
+                        return false;
                     }
                 }
             }
-            foreach (DataGridViewRow row in activeD.Rows)
-            {
-                foreach (DataGridViewCell cell in row.Cells)
-                {
-                    if (cell.ErrorText != "")
-                    {
-                        go = false;
-                        break;
-                    }
-                }
-            }
-            return go;
+            return true;
         }
 
-        void ListAdd(string name)
+        void getWorksetDims(string name)
         {
-            foreach (Control c in panel1.Controls)
+            Control c = panel1.Controls.Find(name, true).First();
+            DataGridView d = (DataGridView)c.Controls.Find("dgv", true).FirstOrDefault();
+            List<Dictionary<string, double>> newDims = new List<Dictionary<string, double>>();
+
+            if (d.Enabled == true)
             {
-                if (c is UserControl && c.Name == name)
+                for (int i = 0; i < d.RowCount; i++)
                 {
-                    CheckedListBox clb = c.Controls[0].Controls[0] as CheckedListBox;
-                    List<string> worksetcats = new List<string>();
-                    foreach (int ii in clb.CheckedIndices)
-                    {
-                        worksetcats.Add(worksetnames[ii]);
-                    }
-                    AllworksetsNames.Add(worksetcats);
-                    break;
+                    double size = Convert.ToDouble(d[0, i].Value);
+                    double spacing = Convert.ToDouble(d[1, i].Value);
+                    Dictionary<string, double> dict = new Dictionary<string, double>();
+                    dict.Add("size", size);
+                    dict.Add("spacing", spacing);
+                    newDims.Add(dict);
+
                 }
+                AllworksetsDIMS.Add(newDims);
             }
-        }
-        void DGVAdd(string name)
-        {
-            foreach (Control c in panel1.Controls)
+            else
             {
-                if (c is UserControl && c.Name == name)
-                {
-                    DataGridView d = (DataGridView)c.Controls[2].Controls[0];
-                    List<List<string>> DIMS = new List<List<string>>();
-                    if (d.Enabled == true)
-                    {
-                        for (int i = 0; i < 2; i++)
-                        {
-                            List<string> list = new List<string>();
-                            for (int j = 0; j < d.RowCount; j++)
-                            {
-                                if (d[i, j].Value != null)
-                                {
-                                    list.Add(d[i, j].Value.ToString());
-                                }
-                                else
-                                {
-                                    list.Add("0");
-                                }
-                            }
-                            DIMS.Add(list);
-                        }
-                        AllworksetsDIMS.Add(DIMS);
-                        break;
-                    }
-                    else
-                    {
-                        TextBox t = (TextBox)c.Controls[2].Controls[1];
-                        List<string> list1 = new List<string>();
-                        List<string> list2 = new List<string>();
-                        list1.Add("-10"); DIMS.Add(list1);
-                        list2.Add(t.Text); DIMS.Add(list2);
-                        AllworksetsDIMS.Add(DIMS);
-                        break;
-                    }
-                }
+                TextBox t = (TextBox)c.Controls.Find("allSizesSpacing", true).FirstOrDefault();
+                Dictionary<string, double> dict = new Dictionary<string, double>();
+                dict["spacing"] = Convert.ToDouble(t.Text);
+                newDims.Add(dict);
+                AllworksetsDIMS.Add(newDims);
             }
         }
 
-        void USvis(string name)
+        void showUserControl(string name)
         {
             UserControl uc = null;
             foreach (Control c in panel1.Controls)
@@ -335,7 +234,7 @@ namespace IBIMSGen.Hangers
                     }
                 }
             }
-            DataGridView dd = uc.Controls[2].Controls[0] as DataGridView;
+            DataGridView dd = uc.Controls.Find("dgv", true).FirstOrDefault() as DataGridView;
             if (dd.Enabled)
             {
                 checkBox1.Checked = false;
@@ -345,7 +244,7 @@ namespace IBIMSGen.Hangers
                 checkBox1.Checked = true;
             }
         }
-        void btnclr(string btname)
+        void buttonClicked(string btname)
         {
             foreach (Control c in panel3.Controls)
             {
@@ -359,12 +258,12 @@ namespace IBIMSGen.Hangers
                     else
                     {
                         c.ForeColor = Color.Brown;
-                        c.BackColor = Color.Snow;
+                        c.BackColor = Color.Gainsboro;
                     }
                 }
             }
-            ComboBox cbx = ActiveUS().Controls[3].Controls[0] as ComboBox;
-            if (ActiveUS().Name.Contains("System"))
+            ComboBox cbx = getActiveUI().Controls.Find("copyFromCB", true).FirstOrDefault() as ComboBox;
+            if (getActiveUI().Name.Contains("System"))
             {
                 cbx.Enabled = true;
                 cbx.Items.Clear();
@@ -382,122 +281,99 @@ namespace IBIMSGen.Hangers
                 cbx.Enabled = false;
             }
         }
-        public HangersFM()
-        {
-            InitializeComponent();
-        }
-
-
 
         private void button1_Click(object sender, EventArgs e)
         {
-            AllworksetsNames = new List<List<string>>();
-            AllworksetsDIMS = new List<List<List<string>>>();
-            if (lnk == -1)
+            if (linkIndex == -1)
             {
                 ook = false;
                 button1.DialogResult = DialogResult.None;
                 MessageBox.Show("Select a Revit Link before Run.");
             }
-            else if (!Go())
+            else if (!isValidDims())
             {
                 ook = false;
                 button1.DialogResult = DialogResult.None;
-                MessageBox.Show("Value Must be Integar and greater than 0.");
+                MessageBox.Show("Size or Spacing Value must be a number and greater than 0!");
             }
             else
             {
-                ListAdd("Duc");
-                ListAdd("WS");
-                ListAdd("CHW");
-                ListAdd("DR");
-                ListAdd("FF");
-                foreach (Control c in panel1.Controls)
+
+                CheckedListBox ductList = panel1.Controls.Find("Duc", true).First().Controls.Find("worksetNames", true).FirstOrDefault() as CheckedListBox;
+                CheckedListBox WSList = panel1.Controls.Find("WS", true).First().Controls.Find("worksetNames", true).FirstOrDefault() as CheckedListBox;
+                CheckedListBox CHWList = panel1.Controls.Find("CHW", true).First().Controls.Find("worksetNames", true).FirstOrDefault() as CheckedListBox;
+                CheckedListBox DRList = panel1.Controls.Find("DR", true).First().Controls.Find("worksetNames", true).FirstOrDefault() as CheckedListBox;
+                CheckedListBox FFList = panel1.Controls.Find("FF", true).First().Controls.Find("worksetNames", true).FirstOrDefault() as CheckedListBox;
+
+                AllworksetsNames.Add(ductList.CheckedItems.Cast<string>().ToList());
+                AllworksetsNames.Add(WSList.CheckedItems.Cast<string>().ToList());
+                AllworksetsNames.Add(CHWList.CheckedItems.Cast<string>().ToList());
+                AllworksetsNames.Add(DRList.CheckedItems.Cast<string>().ToList());
+                AllworksetsNames.Add(FFList.CheckedItems.Cast<string>().ToList());
+
+
+                foreach (Control cont in panel1.Controls)
                 {
-                    if (c is UserControl && c.Name.Contains("System"))
+                    if (cont is UserControl && cont.Name.Contains("System"))
                     {
-                        CheckedListBox clb = c.Controls[0].Controls[0] as CheckedListBox;
-                        List<string> list = new List<string>();
-                        foreach (int ii in clb.CheckedIndices)
-                        {
-                            list.Add(worksetnames[ii]);
-                        }
-                        AllworksetsNames.Add(list);
-                        break;
+                        CheckedListBox clb = cont.Controls.Find("worksetNames", true).FirstOrDefault() as CheckedListBox;
+                        AllworksetsNames.Add(clb.CheckedItems.Cast<string>().ToList());
                     }
                 }
-                foreach (Control c in panel1.Controls)
+                Control c = panel1.Controls.Find("Duc", true).First();
+                DataGridView ductSizesList = c.Controls.Find("dgv", true).First() as DataGridView;
+                List<Dictionary<string, double>> DIMS = new List<Dictionary<string, double>>();
+                if (ductSizesList.Enabled)
                 {
-                    if (c is UserControl && c.Name == "Duc")
+
+                    for (int j = 0; j < ductSizesList.RowCount; j++)
                     {
-                        DataGridView d = (DataGridView)c.Controls[2].Controls[0];
-                        List<List<string>> DIMS = new List<List<string>>();
+                        Dictionary<string, double> dict = new Dictionary<string, double>();
+                        dict["from"] = Convert.ToDouble(ductSizesList[0, j].Value.ToString());
+                        dict["to"] = Convert.ToDouble(ductSizesList[1, j].Value.ToString());
+                        dict["spacing"] = Convert.ToDouble(ductSizesList[2, j].Value.ToString());
+                        DIMS.Add(dict);
+                    }
+
+                    AllworksetsDIMS.Add(DIMS);
+                }
+                else
+                {
+                    TextBox t = (TextBox)c.Controls.Find("allSizesSpacing", true).First();
+                    Dictionary<string, double> dict = new Dictionary<string, double>();
+                    dict["spacing"] = Convert.ToDouble(t.Text);
+                    DIMS.Add(dict);
+                    AllworksetsDIMS.Add(DIMS);
+                }
+
+                getWorksetDims("WS");
+                getWorksetDims("CHW");
+                getWorksetDims("DR");
+                getWorksetDims("FF");
+                foreach (Control control in panel1.Controls)
+                {
+                    if (control is UserControl && c.Name.Contains("System"))
+                    {
+                        DataGridView d = (DataGridView)control.Controls.Find("dgv", true).FirstOrDefault();
+                        DIMS = new List<Dictionary<string, double>>();
                         if (d.Enabled == true)
                         {
-                            for (int i = 0; i < 3; i++)
+                            for (int j = 0; j < d.RowCount; j++)
                             {
-                                List<string> list = new List<string>();
-                                for (int j = 0; j < d.RowCount; j++)
-                                {
-                                    list.Add(d[i, j].Value.ToString());
-                                }
-                                DIMS.Add(list);
+                                Dictionary<string, double> dict = new Dictionary<string, double>();
+                                dict["size"] = Convert.ToDouble(d[0, j].Value.ToString());
+                                dict["spacing"] = Convert.ToDouble(d[1, j].Value.ToString());
+                                DIMS.Add(dict);
                             }
                             AllworksetsDIMS.Add(DIMS);
-                            break;
                         }
                         else
                         {
-                            TextBox t = (TextBox)c.Controls[2].Controls[1];
-                            List<string> list1 = new List<string>();
-                            List<string> list2 = new List<string>();
-                            list1.Add("-10"); DIMS.Add(list1);
-                            list2.Add(t.Text); DIMS.Add(list2);
+                            TextBox t = (TextBox)c.Controls.Find("allSizesSpacing", true).FirstOrDefault();
+                            Dictionary<string, double> dict = new Dictionary<string, double>();
+                            dict["spacing"] = Convert.ToDouble(t.Text);
+                            DIMS.Add(dict);
                             AllworksetsDIMS.Add(DIMS);
-                            break;
-                        }
-                    }
-                }
-                DGVAdd("WS");
-                DGVAdd("CHW");
-                DGVAdd("DR");
-                DGVAdd("FF");
-                foreach (Control c in panel1.Controls)
-                {
-                    if (c is UserControl && c.Name.Contains("System"))
-                    {
-                        DataGridView d = (DataGridView)c.Controls[2].Controls[0];
-                        List<List<string>> DIMS = new List<List<string>>();
-                        if (d.Enabled == true)
-                        {
-                            for (int i = 0; i < 2; i++)
-                            {
-                                List<string> list = new List<string>();
-                                for (int j = 0; j < d.RowCount; j++)
-                                {
-                                    if (d[i, j].Value != null)
-                                    {
-                                        list.Add(d[i, j].Value.ToString());
-                                    }
-                                    else
-                                    {
-                                        list.Add("0");
-                                    }
-                                }
-                                DIMS.Add(list);
-                            }
-                            AllworksetsDIMS.Add(DIMS);
-                            break;
-                        }
-                        else
-                        {
-                            TextBox t = (TextBox)c.Controls[2].Controls[1];
-                            List<string> list1 = new List<string>();
-                            List<string> list2 = new List<string>();
-                            list1.Add("-10"); DIMS.Add(list1);
-                            list2.Add(t.Text); DIMS.Add(list2);
-                            AllworksetsDIMS.Add(DIMS);
-                            break;
                         }
                     }
                 }
@@ -505,153 +381,138 @@ namespace IBIMSGen.Hangers
                 button1.DialogResult = DialogResult.OK;
                 this.Close();
             }
-            frin = comboBox2.SelectedIndex; toin = comboBox3.SelectedIndex;
+            frin = comboBox2.SelectedIndex;
+            toin = comboBox3.SelectedIndex;
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
             canc = true;
         }
-        private void Form7_Load(object sender, EventArgs e)
-        {
-            foreach (string ss in Linkes) { comboBox1.Items.Add(ss); }
-            foreach (string ss in Levels) { comboBox2.Items.Add(ss); comboBox3.Items.Add(ss); }
-            Duc = US("Duc", true);
-            Wuc = US("WS", false, WSdias, WSspcs);
-            CWuc = US("CHW", false, CHWdias, CHWspcs);
-            DRuc = US("DR", false, DRdias, DRspcs);
-            FFuc = US("FF", false, Firedias, Firespcs);
-            LastB = FFbt;
-            comboBox2.SelectedItem = Levels[0]; comboBox2.SelectedIndex = 0;
-            comboBox3.SelectedItem = Levels[1]; comboBox3.SelectedIndex = comboBox3.Items.Count - 1;
 
-        }
         private void Ductbt_Click(object sender, EventArgs e)
         {
-            if (Go())
+            if (isValidDims())
             {
-                USvis("Duc"); btnclr(Ductbt.Name);
+                showUserControl("Duc");
+                buttonClicked(ductButton.Name);
             }
             else
             {
-                MessageBox.Show("Value Must be Integar and greater than 0.");
+                MessageBox.Show("Size or Spacing Value must be a number and greater than 0!");
             }
         }
 
         private void WSbt_Click(object sender, EventArgs e)
         {
-            if (Go())
+            if (isValidDims())
             {
-                USvis("WS"); btnclr(WSbt.Name);
+                showUserControl("WS");
+                buttonClicked(WSButton.Name);
             }
             else
             {
-                MessageBox.Show("Value Must be Integar and greater than 0.");
+                MessageBox.Show("Size or Spacing Value must be a number and greater than 0!");
             }
         }
 
         private void CHWbt_Click(object sender, EventArgs e)
         {
-            if (Go())
+            if (isValidDims())
             {
-                USvis("CHW"); btnclr(CHWbt.Name);
+                showUserControl("CHW");
+                buttonClicked(CHWButton.Name);
             }
             else
             {
-                MessageBox.Show("Value Must be Integar and greater than 0.");
+                MessageBox.Show("Size or Spacing Value must be a number and greater than 0!");
             }
         }
 
 
         private void DRbt_Click(object sender, EventArgs e)
         {
-            if (Go())
+            if (isValidDims())
             {
-                USvis("DR"); btnclr(DRbt.Name);
+                showUserControl("DR");
+                buttonClicked(DRButton.Name);
             }
             else
             {
-                MessageBox.Show("Value Must be Integar and greater than 0.");
+                MessageBox.Show("Size or Spacing Value must be a number and greater than 0!");
             }
         }
 
         private void FFbt_Click(object sender, EventArgs e)
         {
-            if (Go())
+            if (isValidDims())
             {
-                USvis("FF"); btnclr(FFbt.Name);
+                showUserControl("FF");
+                buttonClicked(FFButton.Name);
             }
             else
             {
-                MessageBox.Show("Value Must be Integar and greater than 0.");
+                MessageBox.Show("Size or Spacing Value must be a number and greater than 0!");
             }
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void addSystem(object sender, EventArgs e)
         {
             button3.DialogResult = DialogResult.None;
-            Button b = new Button();
-            b.Click += B_Click;
-            panel3.Controls.Add(b);
-            b.Location = new Point(LastB.Location.X, LastB.Location.Y + 50);
-            b.Size = LastB.Size;
-            b.BackColor = LastB.BackColor;
-            b.Font = LastB.Font; b.ForeColor = LastB.ForeColor; b.FlatStyle = FlatStyle.Flat;
-            b.FlatAppearance.BorderSize = 0;
-            string s = "System " + (panel3.Controls.Count - 5).ToString();
-            b.Text = s; b.Name = s;
-            UserControl uc6 = US(s);
-            LastB = b;
+            Button systemButton = new Button();
+            systemButton.Click += genButtonClicked;
+            panel3.Controls.Add(systemButton);
+            systemButton.Location = new Point(lastButton.Location.X, lastButton.Location.Y + 50);
+            systemButton.Size = lastButton.Size;
+            systemButton.BackColor = lastButton.BackColor;
+            systemButton.Font = lastButton.Font; systemButton.ForeColor = lastButton.ForeColor; systemButton.FlatStyle = FlatStyle.Flat;
+            systemButton.FlatAppearance.BorderSize = 0;
+            string systemName = "System " + (panel3.Controls.Count - 5).ToString();
+            systemButton.Text = systemName; systemButton.Name = systemName;
+            UserControl newUserControl = createUserControl(systemName);
+            lastButton = systemButton;
         }
 
-        private void B_Click(object sender, EventArgs e)
+        private void genButtonClicked(object sender, EventArgs e)
         {
-            if (Go())
+            if (isValidDims())
             {
-                USvis(((Button)sender).Text); btnclr(((Button)sender).Text);
+                showUserControl(((Button)sender).Text);
+                buttonClicked(((Button)sender).Text);
             }
             else
             {
-                MessageBox.Show("Value Must be Integar and greater than 0.");
+                MessageBox.Show("Size or Spacing Value must be a number and greater than 0!");
             }
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            lnk = comboBox1.SelectedIndex;
+            linkIndex = comboBox1.SelectedIndex;
         }
 
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        private void fixedSpacing_CheckedChanged(object sender, EventArgs e)
         {
-            DataGridView d = ActiveUS().Controls[2].Controls[0] as DataGridView;
-            TextBox tb = ActiveUS().Controls[2].Controls[1] as TextBox;
-            Label lbb = ActiveUS().Controls[2].Controls[2] as Label;
+            DataGridView dgv = getActiveUI().Controls.Find("dgv", true).FirstOrDefault() as DataGridView;
+            TextBox textBox = getActiveUI().Controls.Find("allSizesSpacing", true).FirstOrDefault() as TextBox;
+            Label label = getActiveUI().Controls.Find("fixedSpacingLabel", true).FirstOrDefault() as Label;
             if (checkBox1.Checked)
             {
-                d.Visible = false;
-                d.Enabled = false;
-                tb.Visible = true;
-                lbb.Visible = true;
+                dgv.Visible = false;
+                dgv.Enabled = false;
+                textBox.Visible = true;
+                label.Visible = true;
             }
             else
             {
-                d.Visible = true;
-                d.Enabled = true;
-                tb.Visible = false;
-                lbb.Visible = false;
+                dgv.Visible = true;
+                dgv.Enabled = true;
+                textBox.Visible = false;
+                label.Visible = false;
 
             }
         }
 
-        private void panel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
-        private void panel2_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
 
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {

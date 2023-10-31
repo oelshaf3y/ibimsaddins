@@ -25,7 +25,7 @@ namespace IBIMSGen.Hangers
         Document LinkDoc;
         List<Level> levels;
         List<List<string>> AllWorksetNames;
-        List<List<List<string>>> AllWorksetsDIMS;
+        List<List<Dictionary<string,double>>> AllWorksetsDIMS;
         IList<Element> MechanicalEquipment, ducts, pipes, cables, floors, floooors, ductfits;
         IList<Reference> mechRefs, linkedRefs;
         List<Face> floorFacesUp, floorFacesDown;
@@ -42,7 +42,6 @@ namespace IBIMSGen.Hangers
         {
             uidoc = commandData.Application.ActiveUIDocument;
             doc = uidoc.Document;
-            UI = new HangersFM();
             options = new Options();
             options.ComputeReferences = true;
             ductHangers = new List<DuctHanger>();
@@ -80,7 +79,6 @@ namespace IBIMSGen.Hangers
                 TaskDialog.Show("Error", "There are no Loaded Linked Revit detected in Project.");
                 return Result.Failed;
             }
-            UI.Linkes = LinksNames;
             levelsFEC = new FilteredElementCollector(doc).OfClass(typeof(Level));
             levels = levelsFEC.Cast<Level>().OrderBy(x => x.Elevation).ToList();
             levelsNames = levels.Select(x => x.Name).ToList();
@@ -95,15 +93,17 @@ namespace IBIMSGen.Hangers
                 TaskDialog.Show("Error", "Document has no UserWorksets.");
                 return Result.Failed;
             }
-            UI.worksetnames = worksetnames;
-            UI.Levels = levelsNames;
+            UI = new HangersFM(LinksNames,worksetnames,levelsNames);
+            //UI.Links = LinksNames;
+            //UI.worksetnames = worksetnames;
+            //UI.Levels = levelsNames;
             UI.ShowDialog();
             if (UI.canc)
             {
                 return Result.Cancelled;
             }
             RLI = linksFEC.Cast<RevitLinkInstance>()
-                .Where(x => ((RevitLinkType)doc.GetElement(x.GetTypeId())).Name == LinksNames[UI.lnk]).First();
+                .Where(x => ((RevitLinkType)doc.GetElement(x.GetTypeId())).Name == LinksNames[UI.linkIndex]).First();
             LinkDoc = RLI.GetLinkDocument();
 
             AllWorksetNames = UI.AllworksetsNames;
@@ -315,14 +315,14 @@ namespace IBIMSGen.Hangers
 
 
             //HACK | modified >>> needs refactoring
-            waterSupplyDiams = AllWorksetsDIMS[1][0].Select(x => Convert.ToDouble(x)).Where(x => x != 0).ToList();
-            waterSupplySpaces = AllWorksetsDIMS[1][1].Select(x => Convert.ToDouble(x) / 304.8).Where(x => x != 0).ToList();
-            chilledWaterDiams = AllWorksetsDIMS[2][0].Select(x => Convert.ToDouble(x)).Where(x => x != 0).ToList();
-            chilledWaterSpaces = AllWorksetsDIMS[2][1].Select(x => Convert.ToDouble(x) / 304.8).Where(x => x != 0).ToList();
-            drainageDiams = AllWorksetsDIMS[3][0].Select(x => Convert.ToDouble(x)).Where(x => x != 0).ToList();
-            drainageSpaces = AllWorksetsDIMS[3][1].Select(x => Convert.ToDouble(x) / 304.8).Where(x => x != 0).ToList();
-            fireDiams = AllWorksetsDIMS[4][0].Select(x => Convert.ToDouble(x)).Where(x => x != 0).ToList();
-            fireSpaces = AllWorksetsDIMS[4][1].Select(x => Convert.ToDouble(x) / 304.8).Where(x => x != 0).ToList();
+            waterSupplyDiams = AllWorksetsDIMS[1].Select(x => x["size"]).Where(x => x != 0).ToList();
+            waterSupplySpaces = AllWorksetsDIMS[1].Select(x => x["spacing"] / 304.8).Where(x => x != 0).ToList();
+            chilledWaterDiams = AllWorksetsDIMS[2].Select(x => x["size"]).Where(x => x != 0).ToList();
+            chilledWaterSpaces = AllWorksetsDIMS[2].Select(x => x["spacing"] / 304.8).Where(x => x != 0).ToList();
+            drainageDiams = AllWorksetsDIMS[3].Select(x => x["size"]).Where(x => x != 0).ToList();
+            drainageSpaces = AllWorksetsDIMS[3].Select(x => x["spacing"] / 304.8).Where(x => x != 0).ToList();
+            fireDiams = AllWorksetsDIMS[4].Select(x => x["size"]).Where(x => x != 0).ToList();
+            fireSpaces = AllWorksetsDIMS[4].Select(x => x["spacing"] / 304.8).Where(x => x != 0).ToList();
 
 
             //===============================================================================================
@@ -339,15 +339,15 @@ namespace IBIMSGen.Hangers
             //    catch { ductWidth = duct.LookupParameter("Diameter").AsDouble(); }
             //    if (AllWorksetsDIMS[0].Count == 2)
             //    {
-            //        spacingFin = Convert.ToDouble(AllWorksetsDIMS[0][1][0]);
+            //        spacingFin = AllWorksetsDIMS[0][1][0];
             //    }
             //    else
             //    {
             //        for (int j = 0; j < AllWorksetsDIMS[0][0].Count; j++)
             //        {
-            //            double from = Convert.ToDouble(AllWorksetsDIMS[0][0][j]);
-            //            double to = Convert.ToDouble(AllWorksetsDIMS[0][1][j]);
-            //            double spacing = Convert.ToDouble(AllWorksetsDIMS[0][2][j]);
+            //            double from = AllWorksetsDIMS[0][0][j];
+            //            double to = AllWorksetsDIMS[0][1][j];
+            //            double spacing = AllWorksetsDIMS[0][2][j];
             //            if (ductWidth * 304.8 > from && ductWidth * 304.8 <= to)
             //            {
             //                spacingFin = spacing / 304.8;
