@@ -37,6 +37,8 @@
             this.panel3 = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
             this.copyFromCB = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.useDims = new System.Windows.Forms.CheckBox();
             this.checkListPanel.SuspendLayout();
             this.sizesPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
@@ -45,6 +47,7 @@
             // 
             // checkListPanel
             // 
+            this.checkListPanel.Controls.Add(this.label2);
             this.checkListPanel.Controls.Add(this.worksetNames);
             this.checkListPanel.Location = new System.Drawing.Point(0, 0);
             this.checkListPanel.Name = "checkListPanel";
@@ -54,15 +57,16 @@
             // worksetNames
             // 
             this.worksetNames.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.worksetNames.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.worksetNames.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.worksetNames.FormattingEnabled = true;
-            this.worksetNames.Location = new System.Drawing.Point(0, 0);
+            this.worksetNames.Location = new System.Drawing.Point(0, 22);
             this.worksetNames.Name = "worksetNames";
-            this.worksetNames.Size = new System.Drawing.Size(209, 367);
+            this.worksetNames.Size = new System.Drawing.Size(209, 345);
             this.worksetNames.TabIndex = 0;
             // 
             // sizesPanel
             // 
+            this.sizesPanel.Controls.Add(this.useDims);
             this.sizesPanel.Controls.Add(this.allSizesSpacing);
             this.sizesPanel.Controls.Add(this.fixedSpacingLabel);
             this.sizesPanel.Controls.Add(this.dgv);
@@ -94,11 +98,10 @@
             // 
             this.dgv.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgv.Location = new System.Drawing.Point(0, 0);
             this.dgv.Name = "dgv";
             this.dgv.RowHeadersVisible = false;
-            this.dgv.Size = new System.Drawing.Size(300, 311);
+            this.dgv.Size = new System.Drawing.Size(300, 278);
             this.dgv.TabIndex = 0;
             // 
             // panel3
@@ -113,11 +116,12 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(3, 15);
+            this.label1.Location = new System.Drawing.Point(0, 24);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(107, 13);
             this.label1.TabIndex = 1;
             this.label1.Text = "Duplicate table from:";
+            this.label1.Visible = false;
             // 
             // copyFromCB
             // 
@@ -125,10 +129,30 @@
             this.copyFromCB.Enabled = false;
             this.copyFromCB.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.copyFromCB.FormattingEnabled = true;
-            this.copyFromCB.Location = new System.Drawing.Point(116, 12);
+            this.copyFromCB.Location = new System.Drawing.Point(113, 21);
             this.copyFromCB.Name = "copyFromCB";
             this.copyFromCB.Size = new System.Drawing.Size(104, 21);
             this.copyFromCB.TabIndex = 0;
+            this.copyFromCB.Visible = false;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(3, 3);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(191, 13);
+            this.label2.TabIndex = 1;
+            this.label2.Text = "Check Link Name Where System Exists";
+            // 
+            // useDims
+            // 
+            this.useDims.AutoSize = true;
+            this.useDims.Location = new System.Drawing.Point(3, 284);
+            this.useDims.Name = "useDims";
+            this.useDims.Size = new System.Drawing.Size(214, 17);
+            this.useDims.TabIndex = 2;
+            this.useDims.Text = "Use these dimensions with my selection";
+            this.useDims.UseVisualStyleBackColor = true;
             // 
             // HangerUC
             // 
@@ -140,6 +164,7 @@
             this.Name = "HangerUC";
             this.Size = new System.Drawing.Size(520, 370);
             this.checkListPanel.ResumeLayout(false);
+            this.checkListPanel.PerformLayout();
             this.sizesPanel.ResumeLayout(false);
             this.sizesPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
@@ -160,5 +185,7 @@
         public System.Windows.Forms.CheckedListBox worksetNames;
         public System.Windows.Forms.ComboBox copyFromCB;
         public System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.CheckBox useDims;
     }
 }

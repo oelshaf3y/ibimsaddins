@@ -39,8 +39,13 @@ namespace IBIMSGen.Hangers
         List<PipeHanger> pipeHangers;
         List<TrayHanger> trayHangers;
         double meanFloorHeight, ductOffset, negLength;
+        StringBuilder sb;
+        double minx = double.MaxValue, miny = double.MaxValue, minz = double.MaxValue;
+        double maxx = double.MinValue, maxy = double.MinValue, maxz = double.MinValue;
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet element)
         {
+            sb = new StringBuilder();
             Stopwatch watch = new Stopwatch();
             watch.Start();
             uidoc = commandData.Application.ActiveUIDocument;
@@ -52,7 +57,6 @@ namespace IBIMSGen.Hangers
             ductHangers = new List<DuctHanger>();
             pipeHangers = new List<PipeHanger>();
             trayHangers = new List<TrayHanger>();
-            StringBuilder sb = new StringBuilder();
             mechRefs = new List<Reference>();
             linkedRefs = new List<Reference>();
             ducts = new List<Element>();
@@ -78,7 +82,7 @@ namespace IBIMSGen.Hangers
             if (ductHanger == null || pipeHanger20 == null || pipeHanger200 == null || pipeHanger2 == null)
             {
                 TaskDialog.Show("Error", "Please Load Supports Family.\n" + nullfams.ToString());
-                //return Result.Failed;
+                return Result.Failed;
             }
             watch.Stop();
             sb.AppendLine($"check time for ramilies is {watch.ElapsedMilliseconds} ");
@@ -122,10 +126,7 @@ namespace IBIMSGen.Hangers
                 TaskDialog.Show("Error", "Document has no UserWorksets.");
                 return Result.Failed;
             }
-            UI = new HangersFM(LinksNames, worksetnames, levelsNames);
-            UI.Links = LinksNames;
-            UI.worksetnames = worksetnames;
-            UI.Levels = levelsNames;
+            UI = new HangersFM(LinksNames, levelsNames);
             UI.ShowDialog();
             if (UI.canc)
             {
@@ -150,18 +151,11 @@ namespace IBIMSGen.Hangers
             try
             {
                 mechRefs = uidoc.Selection.PickObjects(ObjectType.Element, new SelectionFilterPDC(), "Select Pipes / Ducts / CableTrays.");
-
-                //TODO | modify getSystemRank
-
                 foreach (Reference reference in mechRefs)
                 {
                     Element e = doc.GetElement(reference);
                     if (e.Category.Name == "Ducts")
                     {
-                        WorksetId wsid = e.WorksetId;
-                        string ws = worksetnames[worksetIDs.IndexOf(wsid)];
-                        if (GetSystemRank(ws) != 0) continue;
-
                         Curve ductCurve = ((LocationCurve)e.Location).Curve;
                         double s1 = Math.Round(e.LookupParameter("Start Middle Elevation").AsDouble(), 6);
                         double s2 = Math.Round(e.LookupParameter("End Middle Elevation").AsDouble(), 6);
@@ -169,14 +163,9 @@ namespace IBIMSGen.Hangers
                         {
                             ducts.Add(e);
                         }
-
                     }
                     else if (e.Category.Name == "Pipes")
                     {
-                        WorksetId wsid = e.WorksetId;
-                        string ws = worksetnames[worksetIDs.IndexOf(wsid)];
-                        if (GetSystemRank(ws) == -1 || GetSystemRank(ws) == 0) continue;
-
                         Curve pipeCurve = ((LocationCurve)e.Location).Curve;
                         if (pipeCurve.Length >= negLength && Math.Abs(Math.Round(((Line)pipeCurve).Direction.Normalize().Z, 3)) != 1)
                         {
@@ -288,63 +277,45 @@ namespace IBIMSGen.Hangers
                 return Result.Failed;
             }
 
-            //<getting region of the quad tree>
-            //double offset = ducts.OrderBy(x => ((LocationCurve)x.Location).Curve.Length).Select(x => ((LocationCurve)x.Location).Curve.Length).Max() * 0.6;
-            //double minfx = ducts.Select(x => Math.Min(((LocationCurve)x.Location).Curve.GetEndPoint(0).X, ((LocationCurve)x.Location).Curve.GetEndPoint(1).X)).Min() - meanFloorHeight / 2;
-            //double minfy = ducts.Select(x => Math.Min(((LocationCurve)x.Location).Curve.GetEndPoint(0).Y, ((LocationCurve)x.Location).Curve.GetEndPoint(1).Y)).Min() - meanFloorHeight / 2;
-            //double minfz = ducts.Select(x => Math.Min(((LocationCurve)x.Location).Curve.GetEndPoint(0).Z, ((LocationCurve)x.Location).Curve.GetEndPoint(1).Z)).Min() - meanFloorHeight / 2;
-            //double maxfx = ducts.Select(x => Math.Max(((LocationCurve)x.Location).Curve.GetEndPoint(0).X, ((LocationCurve)x.Location).Curve.GetEndPoint(1).X)).Max() + meanFloorHeight / 2;
-            //double maxfy = ducts.Select(x => Math.Max(((LocationCurve)x.Location).Curve.GetEndPoint(0).Y, ((LocationCurve)x.Location).Curve.GetEndPoint(1).Y)).Max() + meanFloorHeight / 2;
-            //double maxfz = ducts.Select(x => Math.Max(((LocationCurve)x.Location).Curve.GetEndPoint(0).Z, ((LocationCurve)x.Location).Curve.GetEndPoint(1).Z)).Max() + meanFloorHeight / 2;
-            //<getting region of the quad tree>
-
-            //Boundary selectionBoundary = new Boundary(minfx, maxfy, maxfx, minfy, maxfz, minfz);
-
-            int count = 0;
             //List<ElementId> ids = new List<ElementId>();
             ductfits = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_DuctFitting)
                 .OfClass(typeof(FamilyInstance))
                 //.Where(x => selectionBoundary.contains(x))
                 .ToList();
-            double minx = ductfits.Select(x => ((LocationPoint)x.Location).Point.X).Min() - (meanFloorHeight / 2);
-            double miny = ductfits.Select(x => ((LocationPoint)x.Location).Point.Y).Min() - (meanFloorHeight / 2);
-            double minz = ductfits.Select(x => ((LocationPoint)x.Location).Point.Z).Min() - (meanFloorHeight / 2);
-            double maxx = ductfits.Select(x => ((LocationPoint)x.Location).Point.X).Max() + (meanFloorHeight / 2);
-            double maxy = ductfits.Select(x => ((LocationPoint)x.Location).Point.Y).Max() + (meanFloorHeight / 2);
-            double maxz = ductfits.Select(x => ((LocationPoint)x.Location).Point.Z).Max() + (meanFloorHeight / 2);
 
+            getQuadTreeDims();
             QuadTree ductTree = new QuadTree(minx, maxy, maxx, miny, maxz, minz);
             QuadTree fitsTree = new QuadTree(minx, maxy, maxx, miny, maxz, minz);
-            //td("before adding ducts");
+            QuadTree pipesTree = new QuadTree(minx, maxy, maxx, miny, maxz, minz);
+            QuadTree traysTree = new QuadTree(minx, maxy, maxx, miny, maxz, minz);
+
             foreach (Element duct in ducts)
             {
-                if (ductTree.insert(duct))
-                {
-                    //ids.Add(duct.Id);
-                    count++;
-                }
-
+                ductTree.insert(duct);
             }
-            //td("ducts= " + count.ToString() + " of " + ducts.Count.ToString());
-            count = 0;
             foreach (Element fitting in ductfits)
             {
-                if (fitsTree.insert(fitting))
-                {
-                    count++;
-                    //ids.Add(fitting.Id);
-                }
-                //sb.AppendLine("fitting added: " + getLocation(fitting));
+                fitsTree.insert(fitting);
             }
-            //td("fits= " + count.ToString() + " of " + ductfits.Count.ToString());
+            foreach (Element pipe in pipes)
+            {
+                pipesTree.insert(pipe);
+            }
+            td($"Cable trays count is :{cables.Count}");
+            double count = 0;
+            foreach (Element tray in cables)
+            {
+                if (traysTree.insert(tray)) count++;
+            }
+            td($"Count: {count}");
             watch.Stop();
             sb.AppendLine($"time to quadtree elements {watch.ElapsedMilliseconds}");
-
+            //Transaction tr = new Transaction(doc, "draw");
+            //tr.Start();
             foreach (Element ele in floors)
             {
                 watch.Restart();
-                //ids.Add(ele.Id);
                 double floorLeft = double.MaxValue;
                 double floorBottom = double.MaxValue;
                 double floorRight = double.MinValue;
@@ -413,244 +384,29 @@ namespace IBIMSGen.Hangers
                         Boundary floorRange = new Boundary(floorLeft, floorTop, floorRight, floorBottom, floorUp, floorDown);
                         List<Element> ductsInRange = ductTree.query(floorRange);
                         List<Element> fitsInRange = fitsTree.query(floorRange);
+                        List<Element> pipesInRange = pipesTree.query(floorRange);
+                        List<Element> traysInRange = traysTree.query(floorRange);
 
-                        //if (ductsInRange.Count > 0) sb.AppendLine("ducts in range " + ductsInRange.Count.ToString());
-                        //if (fitsInRange.Count > 0) sb.AppendLine("fits in range " + fitsInRange.Count.ToString());
-                        //td("in range " + ductsInRange.Count.ToString());
                         watch.Stop();
                         sb.AppendLine($"floor loop {watch.ElapsedMilliseconds}");
                         watch.Restart();
                         processDucts(ductsInRange, fitsInRange, solid.Faces, floorUp, floorDown);
                         watch.Stop();
                         sb.AppendLine($"Proccess ducts end {watch.ElapsedMilliseconds}");
-
-                        //td(ductHangers.Count.ToString());
-                        //sb.Append("(" + Math.Floor(minx).ToString() + ",");
-                        //sb.Append(Math.Floor(maxy).ToString() + ",");
-                        //sb.Append(Math.Floor(maxx).ToString() + ",");
-                        //sb.Append(Math.Floor(miny).ToString() + ",");
-                        //sb.Append(Math.Floor(maxz).ToString() + ",");
-                        //sb.Append(Math.Floor(minz).ToString() + ")");
-
-                        //sb.Append("\n(" + Math.Floor(floorLeft).ToString() + ",");
-                        //sb.Append(Math.Floor(floorTop).ToString() + ",");
-                        //sb.Append(Math.Floor(floorRight).ToString() + ",");
-                        //sb.Append(Math.Floor(floorBottom).ToString() + ",");
-                        //sb.Append(Math.Floor(floorUp).ToString() + ",");
-                        //sb.Append(Math.Floor(floorDown).ToString() + ")");
-                        //td(sb.ToString());
-                        //floorFacesUp.Add(solid.Faces.get_Item(1)); //upperface
-                        //floorFacesDown.Add(solid.Faces.get_Item(0)); //lowerface
-                        //floorElevations.Add(elevationAtBot);
-                        //XYZ southWestDown = new XYZ(floorLeft, floorBottom, floorDown);
-                        //XYZ southWestUp = new XYZ(floorLeft, floorBottom, floorUp);
-                        //XYZ northWestDown = new XYZ(floorLeft, floorTop, floorDown);
-                        //XYZ northWestUp = new XYZ(floorLeft, floorTop, floorUp);
-                        //XYZ northEastUp = new XYZ(floorRight, floorTop, floorUp);
-                        //XYZ northEastDown = new XYZ(floorRight, floorTop, floorDown);
-                        //XYZ southEastUp = new XYZ(floorRight, floorBottom, floorUp);
-                        //XYZ southEastDown = new XYZ(floorRight, floorBottom, floorDown);
-                        //List<GeometryObject> lines = new List<GeometryObject>();
-                        //lines.Add(Line.CreateBound(southWestDown, southEastDown));
-                        //lines.Add(Line.CreateBound(southWestDown, northWestDown));
-                        //lines.Add(Line.CreateBound(southWestDown, southWestUp));
-
-                        //lines.Add(Line.CreateBound(northEastDown, southEastDown));
-                        //lines.Add(Line.CreateBound(northEastDown, northWestDown));
-                        //lines.Add(Line.CreateBound(northEastDown, northEastUp));
-
-                        //lines.Add(Line.CreateBound(southWestUp, southEastUp));
-                        //lines.Add(Line.CreateBound(southWestUp, northWestUp));
-                        //lines.Add(Line.CreateBound(northEastUp, northWestUp));
-                        //lines.Add(Line.CreateBound(northEastUp, southEastUp));
-                        //lines.Add(Line.CreateBound(northWestUp, northWestDown));
-                        //lines.Add(Line.CreateBound(southEastDown, southEastUp));
-
-                        //Transaction tr = new Transaction(doc, "Draw");
-                        //tr.Start();
-                        //DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel)).SetShape(lines);
-                        //tr.Commit();
-                        //tr.Dispose();
+                        watch.Restart();
+                        processPipes(ele as Floor, pipesInRange, solid.Faces, floorUp, floorDown, elevationAtBot);
+                        watch.Stop();
+                        sb.AppendLine($"Proccess Pipes end {watch.ElapsedMilliseconds}");
+                        watch.Restart();
+                        processTrays(traysInRange, solid.Faces, floorUp, floorDown);
+                        watch.Stop();
+                        sb.AppendLine($"Proccess trays end {watch.ElapsedMilliseconds}");
                     }
                 }
             }
-            //lines = new List<GeometryObject>();
-            //XYZ sbp1 = new XYZ(selectionBoundary.Left, selectionBoundary.Bottom, selectionBoundary.Down);
-            //XYZ sbp2 = new XYZ(selectionBoundary.Left, selectionBoundary.Top, selectionBoundary.Down);
-            //XYZ sbp3 = new XYZ(selectionBoundary.Right, selectionBoundary.Top, selectionBoundary.Down);
-            //XYZ sbp4 = new XYZ(selectionBoundary.Right, selectionBoundary.Bottom, selectionBoundary.Down);
-
-            //XYZ sbp5 = new XYZ(selectionBoundary.Left, selectionBoundary.Bottom, selectionBoundary.Up);
-            //XYZ sbp6 = new XYZ(selectionBoundary.Left, selectionBoundary.Top, selectionBoundary.Up);
-            //XYZ sbp7 = new XYZ(selectionBoundary.Right, selectionBoundary.Top, selectionBoundary.Up);
-            //XYZ sbp8 = new XYZ(selectionBoundary.Right, selectionBoundary.Bottom, selectionBoundary.Up);
-
-
-            //lines.Add(Line.CreateBound(sbp1, sbp2));
-            //lines.Add(Line.CreateBound(sbp2, sbp3));
-            //lines.Add(Line.CreateBound(sbp3, sbp4));
-            //lines.Add(Line.CreateBound(sbp4, sbp1));
-
-            //lines.Add(Line.CreateBound(sbp5, sbp6));
-            //lines.Add(Line.CreateBound(sbp6, sbp7));
-            //lines.Add(Line.CreateBound(sbp7, sbp8));
-            //lines.Add(Line.CreateBound(sbp5, sbp8));
-
-            //lines.Add(Line.CreateBound(sbp1, sbp5));
-            //lines.Add(Line.CreateBound(sbp2, sbp6));
-            //lines.Add(Line.CreateBound(sbp3, sbp7));
-            //lines.Add(Line.CreateBound(sbp4, sbp8));
-            //DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel)).SetShape(lines);
-
-
-
-
-            //uidoc.Selection.SetElementIds(ids.ToArray());
-            //doc.ActiveView.IsolateElementsTemporary(ids.ToArray());
-            //td(sb.ToString());
-            #region Pipes
-            //foreach (Element pipe in pipes)
-            //{
-            //    bool isFireFighting = false;
-            //    WorksetId wsid = pipe.WorksetId;
-            //    string ws = worksetnames[worksetIDs.IndexOf(wsid)];
-            //    int Rank = GetSystemRank(ws);
-            //    sb.Clear();
-            //    foreach (var item in AllWorksetsDIMS[Rank])
-            //    {
-            //        sb.AppendLine(item["spacing"].ToString());
-            //    }
-            //    td(sb.ToString());
-            //    double newdia;
-            //    try
-            //    {
-
-            //        newdia = pipe.LookupParameter("Diameter").AsDouble() * 304.8; //mm
-            //    }
-            //    catch
-            //    {
-            //        continue;
-            //    }
-            //    double spacing = SysSpacing(AllWorksetsDIMS[Rank], newdia);
-            //    if (spacing == 0)
-            //    {
-            //        continue;
-            //    }
-            //    Curve pipeCurve = ((LocationCurve)pipe.Location).Curve;
-            //    double pipeOffset = 500 / 304.80;
-            //    XYZ pipeDirection = ((Line)pipeCurve).Direction.Normalize();
-            //    XYZ pipePerpendicular = new XYZ(-pipeDirection.Y, pipeDirection.X, pipeDirection.Z);
-            //    XYZ P0 = pipeCurve.Evaluate(0, true);
-            //    XYZ Pf = pipeCurve.Evaluate(1, true);
-            //    XYZ Ps = P0.Add(ductOffset * pipeDirection);
-            //    XYZ Pe = Pf.Add(-ductOffset * pipeDirection);
-            //    Curve hangCurve = null;
-            //    try
-            //    {
-            //        hangCurve = Line.CreateBound(Ps, Pe) as Curve;
-            //    }
-            //    catch { continue; }
-
-            //    if (Rank == 4)
-            //    {
-            //        isFireFighting = true;
-            //    }
-            //    List<XYZ> pps = new List<XYZ>();
-            //    List<XYZ> pipeHangPts = new List<XYZ>();
-            //    double pipeDiam = (newdia / 304.8) + (2 * pipe.LookupParameter("Insulation Thickness").AsDouble());
-            //    double hangerDiameter = -1;
-            //    foreach (double hangerDiam in HangDias)
-            //    {
-            //        if (pipeDiam <= (hangerDiam / 304.8))
-            //        {
-            //            hangerDiameter = hangerDiam / 304.8;
-            //            break;
-            //        }
-            //    }
-            //    if (hangerDiameter == -1) { hangerDiameter = 402 / 304.8; }
-            //    ElementId levelId = pipe.LookupParameter("Reference Level").AsElementId();
-            //    double outsideDiam = pipe.LookupParameter("Outside Diameter").AsDouble();
-            //    double pipeElevation = pipeCurve.GetEndPoint(0).Z - pipe.LookupParameter("Insulation Thickness").AsDouble();
-            //    double midElevStart = pipe.LookupParameter("Start Middle Elevation").AsDouble();
-            //    double midElevEnd = pipe.LookupParameter("End Middle Elevation").AsDouble();
-            //    double slope = pipe.LookupParameter("Slope").AsDouble();
-            //    if (pipeCurve.Length > negLength && pipeCurve.Length <= pipeOffset)
-            //    {
-            //        XYZ midPt = pipeCurve.Evaluate(0.50, true);
-            //        if (!pipeHangPts.Contains(midPt)) pipeHangPts.Add(midPt);
-            //    }
-            //    else if (pipeCurve.Length <= spacing && pipeCurve.Length > pipeOffset)
-            //    {
-            //        if (!pipeHangPts.Contains(Ps)) pipeHangPts.Add(Ps);
-            //        if (!pipeHangPts.Contains(Pe)) pipeHangPts.Add(Pe);
-            //    }
-            //    else if (pipeCurve.Length > spacing)
-            //    {
-            //        if (!pipeHangPts.Contains(Ps)) pipeHangPts.Add(Ps);
-            //        double n = Math.Ceiling(hangCurve.Length / spacing) - 1;
-            //        XYZ prev = Ps;
-            //        double Ns = (hangCurve.Length / (n + 1));
-            //        for (int i = 0; i < n; i++)
-            //        {
-            //            XYZ point = prev.Add(Ns * pipeDirection);
-            //            if (!pipeHangPts.Contains(point)) pipeHangPts.Add(point);
-            //            prev = point;
-            //        }
-            //        if (!pipeHangPts.Contains(Pe)) pipeHangPts.Add(Pe);
-            //    }
-
-            //    pipeHangers.Add(new PipeHanger(pipe, P0, isFireFighting, hangerDiameter, levelId, pipeElevation, midElevStart, midElevEnd, slope, pipeHangPts, pipeDirection, pipePerpendicular));
-            //}
-            #endregion
-
-            #region Cable Trays
-            //foreach (Element tray in cables)
-            //{
-            //    Curve trayCurve = ((LocationCurve)tray.Location).Curve;
-            //    double trayOffset = 500 / 304.80;
-            //    XYZ trayDir = ((Line)trayCurve).Direction.Normalize();
-            //    XYZ perpendicular = new XYZ(-trayDir.Y, trayDir.X, trayDir.Z);
-            //    XYZ P0 = trayCurve.Evaluate(0, true);
-            //    XYZ Pf = trayCurve.Evaluate(1, true);
-            //    XYZ Ps = P0.Add(ductOffset * trayDir);
-            //    XYZ Pe = Pf.Add(-ductOffset * trayDir);
-            //    double spacing0 = 1500 / 304.8;
-            //    Curve hangCurve = null;
-            //    try
-            //    {
-            //        hangCurve = Line.CreateBound(Ps, Pe) as Curve;
-            //    }
-            //    catch { continue; }
-            //    List<XYZ> trayHangPts = new List<XYZ>();
-            //    double width = tray.LookupParameter("Width").AsDouble();
-            //    ElementId levelId = tray.LookupParameter("Reference Level").AsElementId();
-            //    double botElevation = tray.LookupParameter("Bottom Elevation").AsDouble();
-            //    double elevation = ((Level)doc.GetElement(levelId)).Elevation + botElevation;
-            //    if (trayCurve.Length > negLength && trayCurve.Length <= trayOffset)
-            //    {
-            //        XYZ midPt = trayCurve.Evaluate(0.50, true);
-            //        if (!trayHangPts.Contains(midPt)) trayHangPts.Add(midPt);
-            //    }
-            //    else if (trayCurve.Length <= spacing0 && trayCurve.Length > trayOffset)
-            //    {
-            //        if (!trayHangPts.Contains(Ps)) trayHangPts.Add(Ps);
-            //        if (!trayHangPts.Contains(Pe)) trayHangPts.Add(Pe);
-            //    }
-            //    else if (trayCurve.Length > spacing0)
-            //    {
-            //        if (!trayHangPts.Contains(Ps)) trayHangPts.Add(Ps);
-            //        double n = Math.Floor((hangCurve.Length + (100 / 304.8)) / spacing0);
-            //        XYZ prevPt = Ps;
-            //        for (int i = 0; i < n; i++)
-            //        {
-            //            XYZ point = prevPt.Add(spacing0 * trayDir);
-            //            if (!trayHangPts.Contains(point)) trayHangPts.Add(point);
-            //            prevPt = point;
-            //        }
-            //    }
-            //    trayHangers.Add(new TrayHanger(tray, width, levelId, elevation, trayHangPts, trayDir, perpendicular));
-            //}
-            #endregion
+            //doc.ActiveView.IsolateElementsTemporary(ids);
+            //tr.Commit();
+            //tr.Dispose();
 
             //====================================================================================================
             //====================================================================================================
@@ -658,6 +414,49 @@ namespace IBIMSGen.Hangers
             commitTransaction();
             return Result.Succeeded;
         }
+
+        private void getQuadTreeDims()
+        {
+            List<double> minxGen = new List<double>(), minyGen = new List<double>(), minzGen = new List<double>(), maxxGen = new List<double>(), maxyGen = new List<double>(), maxzGen = new List<double>();
+            if (ductfits.Count > 0)
+            {
+                minxGen.Add(ductfits.Select(x => ((LocationPoint)x.Location).Point.X).Min());
+                minyGen.Add(ductfits.Select(x => ((LocationPoint)x.Location).Point.Y).Min());
+                minzGen.Add(ductfits.Select(x => ((LocationPoint)x.Location).Point.Z).Min());
+                maxxGen.Add(ductfits.Select(x => ((LocationPoint)x.Location).Point.X).Max());
+                maxyGen.Add(ductfits.Select(x => ((LocationPoint)x.Location).Point.Y).Max());
+                maxzGen.Add(ductfits.Select(x => ((LocationPoint)x.Location).Point.Z).Max());
+            }
+            if (pipes.Count > 0)
+            {
+                List<XYZ> pipesP0 = pipes.Select(p => ((LocationCurve)p.Location).Curve.GetEndPoint(0)).ToList();
+                List<XYZ> pipesP1 = pipes.Select(p => ((LocationCurve)p.Location).Curve.GetEndPoint(1)).ToList();
+                minxGen.Add(Math.Min(pipesP0.Select(x => x.X).Min(), pipesP1.Select(x => x.X).Min()));
+                minyGen.Add(Math.Min(pipesP0.Select(x => x.Y).Min(), pipesP1.Select(x => x.Y).Min()));
+                minzGen.Add(Math.Min(pipesP0.Select(x => x.Z).Min(), pipesP1.Select(x => x.Z).Min()));
+                maxxGen.Add(Math.Max(pipesP0.Select(x => x.X).Max(), pipesP1.Select(x => x.X).Max()));
+                maxyGen.Add(Math.Max(pipesP0.Select(x => x.Y).Max(), pipesP1.Select(x => x.Y).Max()));
+                maxzGen.Add(Math.Max(pipesP0.Select(x => x.Z).Max(), pipesP1.Select(x => x.Z).Max()));
+            }
+            if (cables.Count > 0)
+            {
+                List<XYZ> traysP0 = cables.Select(p => ((LocationCurve)p.Location).Curve.GetEndPoint(0)).ToList();
+                List<XYZ> traysP1 = cables.Select(p => ((LocationCurve)p.Location).Curve.GetEndPoint(1)).ToList();
+                minxGen.Add(Math.Min(traysP0.Select(x => x.X).Min(), traysP1.Select(x => x.X).Min()));
+                minyGen.Add(Math.Min(traysP0.Select(x => x.Y).Min(), traysP1.Select(x => x.Y).Min()));
+                minzGen.Add(Math.Min(traysP0.Select(x => x.Z).Min(), traysP1.Select(x => x.Z).Min()));
+                maxxGen.Add(Math.Max(traysP0.Select(x => x.X).Max(), traysP1.Select(x => x.X).Max()));
+                maxyGen.Add(Math.Max(traysP0.Select(x => x.Y).Max(), traysP1.Select(x => x.Y).Max()));
+                maxzGen.Add(Math.Max(traysP0.Select(x => x.Z).Max(), traysP1.Select(x => x.Z).Max()));
+            }
+            minx = minxGen.Min() - (meanFloorHeight / 2);
+            miny = minyGen.Min() - (meanFloorHeight / 2);
+            minz = minzGen.Min() - (meanFloorHeight / 2);
+            maxx = maxxGen.Max() + (meanFloorHeight / 2);
+            maxy = maxyGen.Max() + (meanFloorHeight / 2);
+            maxz = maxzGen.Max() + (meanFloorHeight / 2);
+        }
+
         void commitTransaction()
         {
             using (Transaction tr = new Transaction(doc, "Hangers"))
@@ -669,7 +468,7 @@ namespace IBIMSGen.Hangers
                 ductHanger.Activate();
                 pipeHanger2.Activate();
                 pipeHanger200.Activate();
-                td("Transaction" + ductHangers.Count.ToString());
+                //td("Transaction" + ductHangers.Count.ToString());
                 #region ducts
                 foreach (DuctHanger hanger in ductHangers)
                 {
@@ -691,339 +490,238 @@ namespace IBIMSGen.Hangers
                 #endregion
 
                 #region pipes
-                //foreach (PipeHanger pipeHanger in pipeHangers)
-                //{
-                //    int hangco = 0;
-                //    foreach (XYZ point in pipeHanger.pipeHangPts)
-                //    {
-                //        int fflu = -1; int ffld = -1; double ddu = double.MinValue; double ddd = double.MaxValue;
-                //        double Zd = 0; double Zu = 0; XYZ IP = null;
-                //        foreach (Face face in floorFacesDown)
-                //        {
-                //            Line ll = Line.CreateUnbound(point, XYZ.BasisZ);
-                //            IntersectionResultArray iraa = new IntersectionResultArray();
-                //            SetComparisonResult scr = face.Intersect(ll, out iraa);
-                //            if (iraa != null)
-                //            {
-                //                if (!iraa.IsEmpty)
-                //                {
-                //                    XYZ ip = iraa.get_Item(0).XYZPoint;
-                //                    double D = point.Z - ip.Z;
-                //                    if (D > 0 && D <= ddd)
-                //                    {
-                //                        ddd = D;
-                //                        ffld = floorFacesDown.IndexOf(face); Zd = ip.Z; IP = ip;
-                //                    }
-                //                    else if (D < 0 && D >= ddu)
-                //                    {
-                //                        ddu = D;
-                //                        fflu = floorFacesDown.IndexOf(face); Zu = ip.Z; IP = ip;
-                //                    }
-                //                }
-                //                else
-                //                {
-                //                    continue;
-                //                }
-                //            }
-                //            else
-                //            {
-                //                continue;
-                //            }
-                //        }
-                //        double hu = Math.Abs(Zu - point.Z);
-                //        double hd = Math.Abs(point.Z - Zd);
-                //        Face facee = null; int ffl = 0;
-                //        if (hu < hd && fflu != -1)
-                //        {
-                //            if (pipeHanger.isFireFighting)
-                //            {
-                //                FamilyInstance pangq = doc.Create.NewFamilyInstance(point, pipeHanger2, pipeHanger.pipePerpendicular, doc.GetElement(pipeHanger.levelId), StructuralType.NonStructural);
-                //                double q = 1;
-                //                if (pipeHanger.midElevEnd < pipeHanger.midElevStart)
-                //                {
-                //                    q = -1;
-                //                }
-                //                double ppeleve = pipeHanger.pipeElevation + (q * pipeHanger.slope * point.DistanceTo(pipeHanger.startPt));
-                //                double pofl = ppeleve - (3000 / 304.8);
-                //                pangq.LookupParameter("Diameter").Set(pipeHanger.hangerDiameter);
-                //                pangq.LookupParameter("Offset from Host").Set(pofl);
-                //                double pangelev = ppeleve - (3000 / 304.8);
-                //                if (floorElevations[fflu] > pangelev)
-                //                {
-                //                    //double ae = floorelevs[fflu] - pangelev;
-                //                    double ae = hu + (2995 / 304.8);
-                //                    pangq.LookupParameter("AnchorElevation").Set(ae);
-                //                }
-                //            }
-                //            else
-                //            {
-                //                facee = floorFacesDown[fflu]; ffl = fflu;
-                //            }
-                //        }
-                //        else if (hu > hd && ffld != -1)
-                //        {
-                //            facee = floorFacesUp[ffld]; ffl = ffld;
-                //        }
-                //        if (!pipeHanger.isFireFighting && facee != null)
-                //        {
-                //            Reference reffface = null;
-                //            if (Math.Round(Math.Abs(((PlanarFace)facee).FaceNormal.Z), 3) == 1)
-                //            {
-                //                if (facee.Reference.CreateLinkReference(RLI) != null) { reffface = facee.Reference.CreateLinkReference(RLI); }
-                //            }
-                //            else // Ramp
-                //            {
-                //                FilteredElementCollector airs = new FilteredElementCollector(doc).OfClass(typeof(FamilySymbol));
-                //                FamilySymbol fsair = null;
-                //                foreach (FamilySymbol fsa in airs)
-                //                {
-                //                    if (fsa.Name == "Air") { fsair = fsa; fsair.Activate(); }
-                //                }
-                //                FamilyInstance air = null;
-                //                air = doc.Create.NewFamilyInstance(IP, fsair, StructuralType.NonStructural);
-                //                doc.Regenerate();
-                //                Face faceair = GetFaces(air);
-                //                string refnew = air.UniqueId + ":0:INSTANCE:" + faceair.Reference.ConvertToStableRepresentation(doc);
-                //                reffface = Reference.ParseFromStableRepresentation(doc, refnew);
-                //            }
-                //            try
-                //            {
-                //                FamilySymbol FS = null;
-                //                if (pipeHanger.hangerDiameter > (202 / 304.8))
-                //                {
-                //                    FS = pipeHanger200;
-                //                }
-                //                else { FS = pipeHanger20; }
-                //                FS.Activate();
-                //                FamilyInstance pang = doc.Create.NewFamilyInstance(reffface, point, pipeHanger.pipeDirection, FS);
-                //                pang.LookupParameter("Schedule Level").Set(floors[ffl].LevelId);
-                //                Line ll = Line.CreateUnbound(point, XYZ.BasisZ);
-                //                double rr = pang.HandOrientation.AngleOnPlaneTo(pipeHanger.pipeDirection, XYZ.BasisZ);
-                //                IntersectionResultArray iraa = new IntersectionResultArray();
-                //                SetComparisonResult scr = facee.Intersect(ll, out iraa);
-                //                if (iraa != null && !iraa.IsEmpty)
-                //                {
-                //                    Curve cv = Line.CreateBound(point, iraa.get_Item(0).XYZPoint);
-                //                    pang.LookupParameter("Pipe_distance").Set(cv.Length - (0.5 * pipeHanger.hangerDiameter));
-                //                }
-                //                pang.LookupParameter("Pipe Outer Diameter").Set(pipeHanger.hangerDiameter);
-                //            }
-                //            catch
-                //            {
-                //                if (hangco == 0)
-                //                {
-                //                    errco++;
-                //                    err += pipeHanger.pipe.Id + "\n";
-                //                }
-                //            }
-                //        }
-                //        hangco++;
-                //    }
-                //}
+                foreach (PipeHanger pipeHanger in pipeHangers)
+                {
+                    foreach (Support support in pipeHanger.supports)
+                    {
+                        if (pipeHanger.isFireFighting)
+                        {
+                            FamilyInstance hangerFamInst = doc.Create.NewFamilyInstance(support.point, pipeHanger2, pipeHanger.pipePerpendicular, doc.GetElement(pipeHanger.levelId), StructuralType.NonStructural);
+                            double q = 1;
+                            if (pipeHanger.midElevEnd < pipeHanger.midElevStart)
+                            {
+                                q = -1;
+                            }
+                            double elev = pipeHanger.pipeElevation + (q * pipeHanger.slope * support.point.DistanceTo(pipeHanger.startPt));
+                            double pipeOffsetFromHost = elev - (3000 / 304.8);
+                            hangerFamInst.LookupParameter("Diameter").Set(pipeHanger.hangerDiameter);
+                            hangerFamInst.LookupParameter("Offset from Host").Set(pipeOffsetFromHost);
+                            hangerFamInst.LookupParameter("AnchorElevation").Set(support.rod);
+                        }
+                        else
+                        {
+                            Reference reference = null;
+                            if (Math.Round(Math.Abs(((PlanarFace)pipeHanger.lowerFace).FaceNormal.Z), 3) == 1)
+                            {
+                                if (pipeHanger.lowerFace.Reference.CreateLinkReference(RLI) != null) { reference = pipeHanger.lowerFace.Reference.CreateLinkReference(RLI); }
+                            }
+                            else // Ramp
+                            {
+                                FilteredElementCollector airs = new FilteredElementCollector(doc).OfClass(typeof(FamilySymbol));
+                                FamilySymbol fsair = null;
+                                foreach (FamilySymbol fsa in airs)
+                                {
+                                    if (fsa.Name == "Air") { fsair = fsa; fsair.Activate(); }
+                                }
+                                FamilyInstance air = null;
+                                air = doc.Create.NewFamilyInstance(support.point, fsair, StructuralType.NonStructural);
+                                doc.Regenerate();
+                                Face faceair = getSolid(air).Faces.get_Item(0);
+                                string refnew = air.UniqueId + ":0:INSTANCE:" + faceair.Reference.ConvertToStableRepresentation(doc);
+                                reference = Reference.ParseFromStableRepresentation(doc, refnew);
+                            }
+                            try
+                            {
+                                FamilySymbol FS = null;
+                                if (pipeHanger.hangerDiameter > (202 / 304.8))
+                                {
+                                    FS = pipeHanger200;
+                                }
+                                else { FS = pipeHanger20; }
+                                FS.Activate();
+                                FamilyInstance pang = doc.Create.NewFamilyInstance(reference, support.point, pipeHanger.pipeDirection, FS);
+                                pang.LookupParameter("Schedule Level").Set(pipeHanger.levelId);
+                                Line ll = Line.CreateUnbound(support.point, XYZ.BasisZ);
+                                double rr = pang.HandOrientation.AngleOnPlaneTo(pipeHanger.pipeDirection, XYZ.BasisZ);
+                                IntersectionResultArray iraa = new IntersectionResultArray();
+                                SetComparisonResult scr = pipeHanger.lowerFace.Intersect(ll, out iraa);
+                                if (iraa != null && !iraa.IsEmpty)
+                                {
+                                    Curve cv = Line.CreateBound(support.point, iraa.get_Item(0).XYZPoint);
+                                    pang.LookupParameter("Pipe_distance").Set(cv.Length - (0.5 * pipeHanger.hangerDiameter));
+                                }
+                                pang.LookupParameter("Pipe Outer Diameter").Set(pipeHanger.hangerDiameter);
+                            }
+                            catch
+                            {
+                                errco++;
+                                err += pipeHanger.pipe.Id + "\n";
+                            }
+                        }
+                    }
+                }
                 #endregion
 
                 #region trays
-                //foreach (TrayHanger tray in trayHangers)
-                //{
-                //    foreach (XYZ p in tray.hangPts)
-                //    {
-                //        int fflu = -1;
-                //        double ddu = double.MinValue;
-                //        double Zu = 0;
-                //        foreach (Face face in floorFacesDown)
-                //        {
-                //            Line ll = Line.CreateUnbound(p, XYZ.BasisZ);
-                //            IntersectionResultArray iraa = new IntersectionResultArray();
-                //            SetComparisonResult scr = face.Intersect(ll, out iraa);
-                //            if (iraa != null)
-                //            {
-                //                if (!iraa.IsEmpty)
-                //                {
-                //                    XYZ ip = iraa.get_Item(0).XYZPoint;
-                //                    double D = p.Z - ip.Z;
-                //                    if (D < 0 && D >= ddu)
-                //                    {
-                //                        ddu = D;
-                //                        fflu = floorFacesDown.IndexOf(face); Zu = ip.Z;
-                //                    }
-                //                }
-                //                else
-                //                {
-                //                    continue;
-                //                }
-                //            }
-                //            else
-                //            {
-                //                continue;
-                //            }
-                //        }
-                //        double hu = Math.Abs(Zu - p.Z); double ROD = hu;
-                //        if (fflu != -1)
-                //        {
-                //            XYZ PP = new XYZ(p.X, p.Y, tray.trayElevation); ductHanger.Activate();
-                //            FamilyInstance hang = doc.Create.NewFamilyInstance(PP, ductHanger, tray.trayPerpendicular, doc.GetElement(tray.levelId), StructuralType.NonStructural);
-                //            hang.LookupParameter("Width").Set(tray.trayWidth + 100 / 304.8);
-                //            hang.LookupParameter("ROD 1").Set(ROD);
-                //            hang.LookupParameter("ROD 2").Set(ROD);
-                //        }
-                //    }
-                //}
+                foreach (TrayHanger tray in trayHangers)
+                {
+                    foreach (Support support in tray.supports)
+                    {
+                        ductHanger.Activate();
+                        FamilyInstance hang = doc.Create.NewFamilyInstance(support.point, ductHanger, tray.trayPerpendicular, doc.GetElement(tray.levelId), StructuralType.NonStructural);
+                        hang.LookupParameter("Width").Set(tray.trayWidth + 100 / 304.8);
+                        hang.LookupParameter("ROD 1").Set(support.rod);
+                        hang.LookupParameter("ROD 2").Set(support.rod);
+                    }
+                }
                 #endregion
 
                 if (errco > 0)
                 {
-                    TaskDialog.Show("Warning", errco + " Pipes have no Hangers." + Environment.NewLine + err);
+                    TaskDialog.Show("Warning", errco + " Pipes don't have Hangers." + Environment.NewLine + err);
                 }
                 tr.Commit();
                 tr.Dispose();
             }
         }
 
-        Face GetFaces(Element ele)
+        private void processPipes(Floor floor, List<Element> pipesInRange, FaceArray faces, double floorUp, double floorDown, double elevationAtBot)
         {
-            Face face = null;
-            Solid s1 = null;
-            options.ComputeReferences = true;
-            GeometryElement gele = ele.get_Geometry(options);
-            foreach (GeometryObject geo in gele)
+            #region Pipes
+
+            foreach (Element pipe in pipesInRange)
             {
-                GeometryInstance Gi = geo as GeometryInstance;
-                foreach (GeometryObject gi in Gi.GetInstanceGeometry())
+                List<Support> pipeSupports = new List<Support>();
+                #region pipe
+                bool isFireFighting = false;
+
+                WorksetId wsid = pipe.WorksetId;
+                string ws = worksetnames[worksetIDs.IndexOf(wsid)];
+                double newdia, spacing;
+                try
                 {
-                    Solid g = gi as Solid;
-                    if (g != null && g.Volume != 0)
+
+                    newdia = pipe.LookupParameter("Diameter").AsDouble() * 304.8; //mm
+                }
+                catch
+                {
+                    continue;
+                }
+                Curve pipeCurve = ((LocationCurve)pipe.Location).Curve;
+                double pipeOffset = 500 / 304.80;
+                XYZ pipeDirection = ((Line)pipeCurve).Direction.Normalize();
+                XYZ pipePerpendicular = new XYZ(-pipeDirection.Y, pipeDirection.X, pipeDirection.Z);
+                XYZ P0 = pipeCurve.Evaluate(0, true);
+                XYZ Pf = pipeCurve.Evaluate(1, true);
+                XYZ Ps = P0.Add(ductOffset * pipeDirection);
+                XYZ Pe = Pf.Add(-ductOffset * pipeDirection);
+                Curve hangCurve = null;
+                int Rank;
+                try
+                {
+                    hangCurve = Line.CreateBound(Ps, Pe) as Curve;
+                }
+                catch { continue; }
+                if (pipe is RevitLinkInstance)
+                {
+                    RevitLinkType rlt = doc.GetElement(((RevitLinkInstance)pipe).GetTypeId()) as RevitLinkType;
+                    Rank = GetSystemRank(rlt.Name);
+                    spacing = SysSpacing(AllWorksetsDIMS[Rank], newdia);
+                    if (Rank == 4)
                     {
-                        s1 = g;
+                        isFireFighting = true;
+                    }
+                }
+                else
+                {
+                    spacing = SysSpacing(AllWorksetsDIMS.Where(x => x.First()["spacing"] != 0).First().ToList(), newdia);
+                }
+                if (spacing == 0)
+                {
+                    continue;
+                }
+
+                List<XYZ> pps = new List<XYZ>();
+                List<XYZ> pipeHangPts = new List<XYZ>();
+                double pipeDiam = (newdia / 304.8) + (2 * pipe.LookupParameter("Insulation Thickness").AsDouble());
+                double hangerDiameter = -1;
+                foreach (double hangerDiam in HangDias)
+                {
+                    if (pipeDiam <= (hangerDiam / 304.8))
+                    {
+                        hangerDiameter = hangerDiam / 304.8;
                         break;
                     }
                 }
-            }
-            if (s1 != null)
-            {
-                foreach (Face fa in s1.Faces)
+                if (hangerDiameter == -1) { hangerDiameter = 402 / 304.8; }
+                ElementId levelId = pipe.LookupParameter("Reference Level").AsElementId();
+                double outsideDiam = pipe.LookupParameter("Outside Diameter").AsDouble();
+                double pipeElevation = pipeCurve.GetEndPoint(0).Z - pipe.LookupParameter("Insulation Thickness").AsDouble();
+                double midElevStart = pipe.LookupParameter("Start Middle Elevation").AsDouble();
+                double midElevEnd = pipe.LookupParameter("End Middle Elevation").AsDouble();
+                double slope = pipe.LookupParameter("Slope").AsDouble();
+                if (pipeCurve.Length > negLength && pipeCurve.Length <= pipeOffset)
                 {
-                    if (Math.Round(((PlanarFace)fa).FaceNormal.Z, 2) == -1)
+                    XYZ midPt = pipeCurve.Evaluate(0.50, true);
+                    if (!pipeHangPts.Contains(midPt))
                     {
-                        face = fa; break;
+                        pipeHangPts.Add(midPt);
+                        double rod = getRod(midPt, faces);
+                        if (rod != 0) pipeSupports.Add(new Support(midPt, rod + 2995 / 304.8));
                     }
                 }
-            }
-            return face;
-        }
-
-        double SysSpacing(List<Dictionary<string, double>> dims, double diameter)
-        {
-            if (dims == null) { td("null"); return 0; }
-            if (dims.Count == 0) return 0;
-            else if (dims.Count == 1) return dims[0]["spacing"];
-            else if (dims.Where(x => Math.Round(diameter, 5) <= Math.Round(x["size"], 5)).Any())
-                return dims.Where(x => Math.Round(diameter, 5) <= Math.Round(x["size"], 5)).First()["spacing"] / 304.8;
-            else return dims.Last()["spacing"]/304.8;
-        }
-
-        int GetSystemRank(string worksetName)
-        {
-            for (int i = 0; i < AllWorksetNames.Count; i++)
-            {
-                List<string> worksetNamesList = AllWorksetNames[i];
-                if (worksetNamesList.Where(x => x == worksetName).Any()) return i;
-            }
-            return -1;
-        }
-
-        List<XYZ> decOrder(List<XYZ> oldlist, Curve cu)
-        {
-            if (Math.Round(((Line)cu).Direction.Normalize().Y, 3) == 0)
-            {
-                return oldlist.OrderByDescending(a => a.X).ToList();
-            }
-            else
-            {
-                return oldlist.OrderByDescending(a => a.Y).ToList();
-            }
-        }
-        void td(string message)
-        {
-            TaskDialog.Show("Info", message);
-        }
-
-        public Solid getSolid(Element elem)
-        {
-            IList<Solid> solids = new List<Solid>();
-            try
-            {
-                GeometryElement geo = elem.get_Geometry(options);
-                if (geo.FirstOrDefault() is Solid)
+                else if (pipeCurve.Length <= spacing && pipeCurve.Length > pipeOffset)
                 {
-                    Solid solid = (Solid)geo.FirstOrDefault();
-                    return SolidUtils.Clone(solid);
-                }
-                foreach (GeometryObject geometryObject in geo)
-                {
-                    if (geometryObject != null)
+                    if (!pipeHangPts.Contains(Ps))
                     {
-                        Solid solid = geometryObject as Solid;
-                        if (solid != null && solid.Volume > 0)
+                        pipeHangPts.Add(Ps);
+                        double rod = getRod(Ps, faces);
+                        if (rod != 0) pipeSupports.Add(new Support(Ps, rod + 2995 / 304.8));
+
+                    }
+                    if (!pipeHangPts.Contains(Pe))
+                    {
+                        pipeHangPts.Add(Pe);
+                        double rod = getRod(Pe, faces);
+                        if (rod != 0) pipeSupports.Add(new Support(Pe, rod + 2995 / 304.8));
+
+                    }
+                }
+                else if (pipeCurve.Length > spacing)
+                {
+                    if (!pipeHangPts.Contains(Ps)) pipeHangPts.Add(Ps);
+                    double n = Math.Ceiling(hangCurve.Length / spacing) - 1;
+                    XYZ prev = Ps;
+                    double Ns = (hangCurve.Length / (n + 1));
+                    for (int i = 0; i < n; i++)
+                    {
+                        XYZ point = prev.Add(Ns * pipeDirection);
+                        if (!pipeHangPts.Contains(point))
                         {
-                            solids.Add(solid);
-
+                            pipeHangPts.Add(point);
+                            double rod = getRod(point, faces);
+                            if (rod != 0) pipeSupports.Add(new Support(point, rod + 2995 / 304.8));
                         }
+                        prev = point;
                     }
-                }
-            }
-            catch
-            {
-            }
-            if (solids.Count == 0)
-            {
-                try
-                {
-                    GeometryElement geo = elem.get_Geometry(options);
-                    GeometryInstance geoIns = geo.FirstOrDefault() as GeometryInstance;
-                    if (geoIns != null)
+                    if (!pipeHangPts.Contains(Pe))
                     {
-                        GeometryElement geoElem = geoIns.GetInstanceGeometry();
-                        if (geoElem != null)
-                        {
-                            foreach (GeometryObject geometryObject in geoElem)
-                            {
-                                Solid solid = geometryObject as Solid;
-                                if (solid != null && solid.Volume > 0)
-                                {
-                                    solids.Add(solid);
-                                }
-                            }
-                        }
+                        pipeHangPts.Add(Pe);
+                        double rod = getRod(Pe, faces);
+                        if (rod != 0) pipeSupports.Add(new Support(Pe, rod + 2995 / 304.8));
+
                     }
                 }
-                catch
-                {
-                    throw new InvalidOperationException();
-                }
+                #endregion
+                pipeHangers.Add(new PipeHanger(pipe, P0, isFireFighting, hangerDiameter, levelId, pipeElevation, midElevStart, midElevEnd, slope, pipeSupports, pipeDirection, pipePerpendicular, faces.get_Item(0)));
             }
-            if (solids.Count > 0)
-            {
-                try
-                {
-
-                    return SolidUtils.Clone(solids.OrderByDescending(x => x.Volume).ElementAt(0));
-                }
-                catch
-                {
-                    return solids.OrderByDescending(x => x.Volume).ElementAt(0);
-                }
-            }
-            else
-            {
-                return null;
-            }
+            #endregion
         }
-
-        public void processDucts(List<Element> ducts, List<Element> ductFits, FaceArray faces, double up, double down)
+        public void processDucts(List<Element> ductsInRange, List<Element> fitsInRange, FaceArray faces, double up, double down)
         {
 
             #region Ducts
-            foreach (Element duct in ducts)
+            foreach (Element duct in ductsInRange)
             {
 
                 double spacingFin = 0;
@@ -1040,16 +738,15 @@ namespace IBIMSGen.Hangers
                 catch { ductWidth = duct.LookupParameter("Diameter").AsDouble(); }
                 if (AllWorksetsDIMS[0][0].Count == 1)
                 {
-                    spacingFin = AllWorksetsDIMS[0][0]["spacing"]/304.8;
+                    spacingFin = AllWorksetsDIMS[0][0]["spacing"] / 304.8;
                 }
                 else
                 {
                     if (AllWorksetsDIMS[0].Where(x => x["from"] < ductWidth * 304.8 && ductWidth * 304.8 <= x["to"]).Any())
-                        spacingFin = AllWorksetsDIMS[0].Where(x => x["from"] < ductWidth * 304.8 && ductWidth * 304.8 <= x["to"]).First()["spacing"]/304.8;
+                        spacingFin = AllWorksetsDIMS[0].Where(x => x["from"] < ductWidth * 304.8 && ductWidth * 304.8 <= x["to"]).First()["spacing"] / 304.8;
                 }
                 if (spacingFin == 0)
                 {
-                    td("no spacing found");
                     continue;
                 }
                 ElementId levelId = duct.LookupParameter("Reference Level").AsElementId();
@@ -1066,7 +763,7 @@ namespace IBIMSGen.Hangers
                 // getting the duct fitting points that intersects the curve line.
                 // then offsets the hangers by a margin that insures the hangers will never intersect the fitting.
 
-                List<Element> nearFits = ductfits.Where(x => region.contains(x)).ToList();
+                List<Element> nearFits = fitsInRange.Where(x => region.contains(x)).ToList();
                 foreach (Element fitting in nearFits)
                 {
                     double angle = 0;
@@ -1160,7 +857,6 @@ namespace IBIMSGen.Hangers
                 {
                     if (ductCurve.Length > negLength && ductCurve.Length <= 4 * ductOffset)
                     {
-                        td("0");
                         List<XYZ> fitPtsOrdered = decOrder(new List<XYZ>() { fittingPts[0], fittingPts[1], ductMidPt }, ductCurve);
                         if (fitPtsOrdered.IndexOf(ductMidPt) == 1)
                         {
@@ -1175,6 +871,7 @@ namespace IBIMSGen.Hangers
                             if (rod != 0) Supports.Add(new Support(point, rod)); // duct center
                         }
                     }
+
                     else if (ductCurve.Length <= spacingFin && ductCurve.Length > 4 * ductOffset)
                     {
 
@@ -1275,6 +972,198 @@ namespace IBIMSGen.Hangers
             #endregion
         }
 
+        public void processTrays(List<Element> traysInRange, FaceArray faces, double floorUp, double floorDown)
+        {
+            #region Cable Trays
+            foreach (Element tray in traysInRange)
+            {
+                Curve trayCurve = ((LocationCurve)tray.Location).Curve;
+                double trayOffset = 500 / 304.80;
+                XYZ trayDir = ((Line)trayCurve).Direction.Normalize();
+                XYZ perpendicular = new XYZ(-trayDir.Y, trayDir.X, trayDir.Z);
+                XYZ P0 = trayCurve.Evaluate(0, true);
+                XYZ Pf = trayCurve.Evaluate(1, true);
+                XYZ Ps = P0.Add(ductOffset * trayDir);
+                XYZ Pe = Pf.Add(-ductOffset * trayDir);
+                double spacing0 = 1500 / 304.8;
+                Curve hangCurve = null;
+                try
+                {
+                    hangCurve = Line.CreateBound(Ps, Pe) as Curve;
+                }
+                catch { continue; }
+                List<XYZ> trayHangPts = new List<XYZ>();
+                List<Support> supports = new List<Support>();
+                double width = tray.LookupParameter("Width").AsDouble();
+                ElementId levelId = tray.LookupParameter("Reference Level").AsElementId();
+                double botElevation = tray.LookupParameter("Bottom Elevation").AsDouble();
+                double elevation = ((Level)doc.GetElement(levelId)).Elevation + botElevation;
+                if (trayCurve.Length > negLength && trayCurve.Length <= trayOffset)
+                {
+                    XYZ midPt = trayCurve.Evaluate(0.50, true);
+                    if (!trayHangPts.Contains(midPt))
+                    {
+                        trayHangPts.Add(midPt);
+                        double rod = getRod(midPt, faces);
+                        XYZ PP = new XYZ(midPt.X, midPt.Y, elevation);
+                        if (rod != 0) supports.Add(new Support(PP, rod));
+                    }
+                }
+                else if (trayCurve.Length <= spacing0 && trayCurve.Length > trayOffset)
+                {
+                    if (!trayHangPts.Contains(Ps))
+                    {
+                        trayHangPts.Add(Ps);
+                        double rod = getRod(Ps, faces);
+                        XYZ PP = new XYZ(Ps.X, Ps.Y, elevation);
+                        if (rod != 0) supports.Add(new Support(PP, rod));
+                    }
+                    if (!trayHangPts.Contains(Pe))
+                    {
+                        trayHangPts.Add(Pe);
+                        double rod = getRod(Pe, faces);
+                        XYZ PP = new XYZ(Pe.X, Pe.Y, elevation);
+                        if (rod != 0) supports.Add(new Support(PP, rod));
+                    }
+                }
+                else if (trayCurve.Length > spacing0)
+                {
+                    if (!trayHangPts.Contains(Ps))
+                    {
+                        trayHangPts.Add(Ps);
+                        double rod = getRod(Ps, faces);
+                        XYZ PP = new XYZ(Ps.X, Ps.Y, elevation);
+                        if (rod != 0) supports.Add(new Support(PP, rod));
+                    }
+                    double n = Math.Floor((hangCurve.Length + (100 / 304.8)) / spacing0);
+                    XYZ prevPt = Ps;
+                    for (int i = 0; i < n; i++)
+                    {
+                        XYZ point = prevPt.Add(spacing0 * trayDir);
+                        if (!trayHangPts.Contains(point))
+                        {
+                            trayHangPts.Add(point);
+                            double rod = getRod(point, faces);
+                            XYZ PP = new XYZ(point.X, point.Y, elevation);
+                            if (rod != 0) supports.Add(new Support(PP, rod));
+                        }
+                        prevPt = point;
+                    }
+                }
+
+                trayHangers.Add(new TrayHanger(tray, width, levelId, supports, trayDir, perpendicular));
+            }
+            #endregion
+        }
+        double SysSpacing(List<Dictionary<string, double>> dims, double diameter)
+        {
+            if (dims == null) return 0;
+            if (dims.Count == 0) return 0;
+            else if (dims.Count == 1) return dims[0]["spacing"];
+            else if (dims.Where(x => Math.Round(diameter, 5) <= Math.Round(x["size"], 5)).Any())
+                return dims.Where(x => Math.Round(diameter, 5) <= Math.Round(x["size"], 5)).First()["spacing"] / 304.8;
+            else return dims.Last()["spacing"] / 304.8;
+        }
+
+        int GetSystemRank(string worksetName)
+        {
+            for (int i = 0; i < AllWorksetNames.Count; i++)
+            {
+                List<string> worksetNamesList = AllWorksetNames[i];
+                if (worksetNamesList.Where(x => x == worksetName).Any()) return i;
+            }
+            return -1;
+        }
+
+        List<XYZ> decOrder(List<XYZ> oldlist, Curve cu)
+        {
+            if (Math.Round(((Line)cu).Direction.Normalize().Y, 3) == 0)
+            {
+                return oldlist.OrderByDescending(a => a.X).ToList();
+            }
+            else
+            {
+                return oldlist.OrderByDescending(a => a.Y).ToList();
+            }
+        }
+        void td(string message)
+        {
+            TaskDialog.Show("Info", message);
+        }
+
+        public Solid getSolid(Element elem)
+        {
+            IList<Solid> solids = new List<Solid>();
+            try
+            {
+                GeometryElement geo = elem.get_Geometry(options);
+                if (geo.FirstOrDefault() is Solid)
+                {
+                    Solid solid = (Solid)geo.FirstOrDefault();
+                    return SolidUtils.Clone(solid);
+                }
+                foreach (GeometryObject geometryObject in geo)
+                {
+                    if (geometryObject != null)
+                    {
+                        Solid solid = geometryObject as Solid;
+                        if (solid != null && solid.Volume > 0)
+                        {
+                            solids.Add(solid);
+
+                        }
+                    }
+                }
+            }
+            catch
+            {
+            }
+            if (solids.Count == 0)
+            {
+                try
+                {
+                    GeometryElement geo = elem.get_Geometry(options);
+                    GeometryInstance geoIns = geo.FirstOrDefault() as GeometryInstance;
+                    if (geoIns != null)
+                    {
+                        GeometryElement geoElem = geoIns.GetInstanceGeometry();
+                        if (geoElem != null)
+                        {
+                            foreach (GeometryObject geometryObject in geoElem)
+                            {
+                                Solid solid = geometryObject as Solid;
+                                if (solid != null && solid.Volume > 0)
+                                {
+                                    solids.Add(solid);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    throw new InvalidOperationException();
+                }
+            }
+            if (solids.Count > 0)
+            {
+                try
+                {
+
+                    return SolidUtils.Clone(solids.OrderByDescending(x => x.Volume).ElementAt(0));
+                }
+                catch
+                {
+                    return solids.OrderByDescending(x => x.Volume).ElementAt(0);
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+
         private double getRod(XYZ p, FaceArray faces)
         {
             Line tempLine = Line.CreateUnbound(p, XYZ.BasisZ);
@@ -1292,9 +1181,8 @@ namespace IBIMSGen.Hangers
             }
             else
             {
-                return p.Z - ipWithLower.Z;
+                return 0;
             }
-
         }
     }
 }

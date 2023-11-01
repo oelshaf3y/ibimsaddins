@@ -8,18 +8,16 @@ namespace IBIMSGen.Hangers
         public Element tray;
         public double trayWidth;
         public ElementId levelId;
-        public double trayElevation;
-        public List<XYZ> hangPts;
+        public List<Support> supports;
         public XYZ trayDir;
         public XYZ trayPerpendicular;
 
-        public TrayHanger(Element tray, double trayWidth, ElementId levelId, double trayElevation, List<XYZ> hangPts, XYZ trayDir, XYZ trayPerpendicular)
+        public TrayHanger(Element tray, double trayWidth, ElementId levelId,List<Support> supports, XYZ trayDir, XYZ trayPerpendicular)
         {
             this.tray = tray;
             this.trayWidth = trayWidth;
             this.levelId = levelId;
-            this.trayElevation = trayElevation;
-            this.hangPts = hangPts;
+            this.supports = supports;
             this.trayDir = trayDir;
             this.trayPerpendicular = trayPerpendicular;
         }

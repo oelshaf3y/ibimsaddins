@@ -25,7 +25,7 @@ namespace IBIMSGen.Hangers
         Document LinkDoc;
         List<Level> levels;
         List<List<string>> AllWorksetNames;
-        List<List<Dictionary<string,double>>> AllWorksetsDIMS;
+        List<List<Dictionary<string, double>>> AllWorksetsDIMS;
         IList<Element> MechanicalEquipment, ducts, pipes, cables, floors, floooors, ductfits;
         IList<Reference> mechRefs, linkedRefs;
         List<Face> floorFacesUp, floorFacesDown;
@@ -93,7 +93,7 @@ namespace IBIMSGen.Hangers
                 TaskDialog.Show("Error", "Document has no UserWorksets.");
                 return Result.Failed;
             }
-            UI = new HangersFM(LinksNames,worksetnames,levelsNames);
+            UI = new HangersFM(LinksNames, levelsNames);
             //UI.Links = LinksNames;
             //UI.worksetnames = worksetnames;
             //UI.Levels = levelsNames;
@@ -616,7 +616,7 @@ namespace IBIMSGen.Hangers
                     if (!pipeHangPts.Contains(Pe)) pipeHangPts.Add(Pe);
                 }
 
-                pipeHangers.Add(new PipeHanger(pipe, P0, isFireFighting, hangerDiameter, levelId, pipeElevation, midElevStart, midElevEnd, slope, pipeHangPts, pipeDirection, pipePerpendicular));
+                //pipeHangers.Add(new PipeHanger(pipe, P0, isFireFighting, hangerDiameter, levelId, pipeElevation, midElevStart, midElevEnd, slope, pipeHangPts, pipeDirection, pipePerpendicular));
             }
             #endregion
 
@@ -665,7 +665,7 @@ namespace IBIMSGen.Hangers
                         prevPt = point;
                     }
                 }
-                trayHangers.Add(new TrayHanger(tray, width, levelId, elevation, trayHangPts, trayDir, perpendicular));
+                //trayHangers.Add(new TrayHanger(tray, width, levelId, elevation, trayHangPts, trayDir, perpendicular));
             }
             #endregion
 

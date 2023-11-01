@@ -1107,7 +1107,8 @@ namespace IBIMS_MEP
                                 continue;
                             }
                         }
-                        double hu = Math.Abs(Zu - p.Z); double hd = Math.Abs(p.Z - Zd);
+                        double hu = Math.Abs(Zu - p.Z); 
+                        double hd = Math.Abs(p.Z - Zd);
                         Face facee = null; int ffl = 0;
                         if (hu < hd && fflu != -1)
                         {

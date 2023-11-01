@@ -50,6 +50,8 @@
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.button3 = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.checkBox2 = new System.Windows.Forms.CheckBox();
+            this.ctButton = new System.Windows.Forms.Button();
             this.panel3.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel7.SuspendLayout();
@@ -96,6 +98,7 @@
             // panel3
             // 
             this.panel3.BackColor = System.Drawing.Color.Gainsboro;
+            this.panel3.Controls.Add(this.ctButton);
             this.panel3.Controls.Add(this.FFButton);
             this.panel3.Controls.Add(this.DRButton);
             this.panel3.Controls.Add(this.CHWButton);
@@ -274,6 +277,7 @@
             // panel4
             // 
             this.panel4.BackColor = System.Drawing.Color.Gainsboro;
+            this.panel4.Controls.Add(this.checkBox2);
             this.panel4.Controls.Add(this.checkBox1);
             this.panel4.Controls.Add(this.label1);
             this.panel4.Controls.Add(this.comboBox1);
@@ -344,6 +348,32 @@
             this.panel1.Size = new System.Drawing.Size(520, 370);
             this.panel1.TabIndex = 14;
             // 
+            // checkBox2
+            // 
+            this.checkBox2.AutoSize = true;
+            this.checkBox2.ForeColor = System.Drawing.Color.Brown;
+            this.checkBox2.Location = new System.Drawing.Point(393, 12);
+            this.checkBox2.Name = "checkBox2";
+            this.checkBox2.Size = new System.Drawing.Size(123, 17);
+            this.checkBox2.TabIndex = 7;
+            this.checkBox2.Text = "Use Linked Elements";
+            this.checkBox2.UseVisualStyleBackColor = true;
+            this.checkBox2.CheckedChanged += new System.EventHandler(this.checkBox2_CheckedChanged);
+            // 
+            // ctButton
+            // 
+            this.ctButton.FlatAppearance.BorderSize = 0;
+            this.ctButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.ctButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F);
+            this.ctButton.ForeColor = System.Drawing.Color.Brown;
+            this.ctButton.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.ctButton.Location = new System.Drawing.Point(0, 256);
+            this.ctButton.Name = "ctButton";
+            this.ctButton.Size = new System.Drawing.Size(170, 44);
+            this.ctButton.TabIndex = 3;
+            this.ctButton.Text = "Cable Trays";
+            this.ctButton.UseVisualStyleBackColor = true;
+            // 
             // HangersFM
             // 
             this.AcceptButton = this.button1;
@@ -402,5 +432,7 @@
         private System.Windows.Forms.RadioButton radioButton2;
         private System.Windows.Forms.RadioButton radioButton1;
         private System.Windows.Forms.Panel panel7;
+        private System.Windows.Forms.CheckBox checkBox2;
+        private System.Windows.Forms.Button ctButton;
     }
 }

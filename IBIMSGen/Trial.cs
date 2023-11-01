@@ -21,36 +21,14 @@ namespace IBIMSGen
         Options options;
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            TaskDialog.Show("Err", "here");
             options = new Options();
             options.ComputeReferences = true;
             uidoc = commandData.Application.ActiveUIDocument;
             doc = uidoc.Document;
             sb = new StringBuilder();
-            List<RevitLinkInstance> links = new FilteredElementCollector(doc).OfClass(typeof(RevitLinkInstance)).Cast<RevitLinkInstance>().ToList();
-            List<Solid> solids = new List<Solid>();
             Transaction tr = new Transaction(doc);
             tr.Start("Draw");
-            foreach (RevitLinkInstance rli in links)
-            {
-                Document linkdoc = rli.GetLinkDocument();
-                var floors = new FilteredElementCollector(linkdoc).OfCategory(BuiltInCategory.OST_Floors).WhereElementIsNotElementType().ToList();
-                foreach (Element floor in floors)
-                {
-                    Solid s = getSolid(floor);
-                    if (s != null)
-                    {
-
-                        try
-                        {
-                            DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel)).SetShape(new List<GeometryObject> { s });
-                        }
-                        catch { }
-                    }
-                }
-                //sb.AppendLine(floors.Count.ToString());
-            }
-            TaskDialog.Show("Err", sb.ToString());
+            //drawSolids();
             tr.Commit();
             tr.Dispose();
             //TaskDialog.Show("Info", sb.ToString());
@@ -85,7 +63,30 @@ namespace IBIMSGen
             }
         }
 
+        public void drawSolids()
+        {
+            List<RevitLinkInstance> links = new FilteredElementCollector(doc).OfClass(typeof(RevitLinkInstance)).Cast<RevitLinkInstance>().ToList();
+            List<Solid> solids = new List<Solid>();
+            foreach (RevitLinkInstance rli in links)
+            {
+                Document linkdoc = rli.GetLinkDocument();
+                var floors = new FilteredElementCollector(linkdoc).OfCategory(BuiltInCategory.OST_Floors).WhereElementIsNotElementType().ToList();
+                foreach (Element floor in floors)
+                {
+                    Solid s = getSolid(floor);
+                    if (s != null)
+                    {
 
+                        try
+                        {
+                            DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel)).SetShape(new List<GeometryObject> { s });
+                        }
+                        catch { }
+                    }
+                }
+                //sb.AppendLine(floors.Count.ToString());
+            }
+        }
 
         public Solid getSolid(Element elem)
         {

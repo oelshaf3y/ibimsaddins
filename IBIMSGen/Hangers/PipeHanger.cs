@@ -14,11 +14,12 @@ namespace IBIMSGen.Hangers
         public double midElevStart;
         public double midElevEnd;
         public double slope;
-        public List<XYZ> pipeHangPts;
+        public List<Support> supports;
         public XYZ pipeDirection;
         public XYZ pipePerpendicular;
+        public Face lowerFace;
 
-        public PipeHanger(Element pipe, XYZ startPt, bool isFireFighting, double hangerDiameter, ElementId levelId, double pipeElevation, double midElevStart, double midElevEnd, double slope, List<XYZ> pipeHangPts, XYZ pipeDirection, XYZ pipePerpendicular)
+        public PipeHanger(Element pipe, XYZ startPt, bool isFireFighting, double hangerDiameter, ElementId levelId, double pipeElevation, double midElevStart, double midElevEnd, double slope, List<Support> supports, XYZ pipeDirection, XYZ pipePerpendicular, Face lowerFace)
         {
             this.pipe = pipe;
             this.startPt = startPt;
@@ -29,9 +30,10 @@ namespace IBIMSGen.Hangers
             this.midElevStart = midElevStart;
             this.midElevEnd = midElevEnd;
             this.slope = slope;
-            this.pipeHangPts = pipeHangPts;
+            this.supports = supports;
             this.pipeDirection = pipeDirection;
             this.pipePerpendicular = pipePerpendicular;
+            this.lowerFace = lowerFace;
         }
     }
 }
