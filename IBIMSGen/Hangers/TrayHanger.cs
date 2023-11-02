@@ -11,8 +11,8 @@ namespace IBIMSGen.Hangers
         public List<Support> supports;
         public XYZ trayDir;
         public XYZ trayPerpendicular;
-
-        public TrayHanger(Element tray, double trayWidth, ElementId levelId,List<Support> supports, XYZ trayDir, XYZ trayPerpendicular)
+        public FamilySymbol familySymbol;
+        public TrayHanger(Element tray, double trayWidth, ElementId levelId,List<Support> supports, XYZ trayDir, XYZ trayPerpendicular, FamilySymbol familySymbol)
         {
             this.tray = tray;
             this.trayWidth = trayWidth;
@@ -20,6 +20,7 @@ namespace IBIMSGen.Hangers
             this.supports = supports;
             this.trayDir = trayDir;
             this.trayPerpendicular = trayPerpendicular;
+            this.familySymbol = familySymbol;
         }
     }
 }

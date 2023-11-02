@@ -22,13 +22,13 @@ namespace IBIMSGen.Hangers
         Document doc;
         HangersFM UI;
         FilteredElementCollector linksFEC, levelsFEC;
-        FamilySymbol ductHanger, pipeHanger20, pipeHanger2, pipeHanger200;
         List<string> LinksNames, levelsNames, worksetnames;
+        List<FamilySymbol> familySymbols;
         Document LinkDoc;
         List<Level> levels;
         List<List<string>> AllWorksetNames;
         List<List<Dictionary<string, double>>> AllWorksetsDIMS;
-        IList<Element> MechanicalEquipment, ducts, pipes, cables, floors, ductfits;
+        IList<Element> ducts, pipes, cables, floors, ductfits;
         IList<Reference> mechRefs, linkedRefs;
         List<double> HangDias;
         List<Workset> worksets;
@@ -68,22 +68,22 @@ namespace IBIMSGen.Hangers
             negLength = 100 / 304.80;
             HangDias = new List<double>() { 17, 22, 27, 34, 42, 52, 65, 67, 77, 82, 92, 102, 112, 127, 152, 162, 202, 227, 252, 317, 352, 402 };
 
-            MechanicalEquipment = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_GenericModel).OfClass(typeof(FamilySymbol)).ToList();
-            pipeHanger20 = MechanicalEquipment.Cast<FamilySymbol>().Where(x => x.FamilyName.Equals("02- PIPE HANGER ( 20 - 200 )"))?.FirstOrDefault() ?? null;
-            pipeHanger200 = MechanicalEquipment.Cast<FamilySymbol>().Where(x => x.FamilyName.Equals("01- PIPE HANGER ( +200 mm )"))?.FirstOrDefault() ?? null;
-            pipeHanger2 = MechanicalEquipment.Cast<FamilySymbol>().Where(x => x.FamilyName.Equals("Pipes Hanger 2"))?.FirstOrDefault() ?? null;
-            ductHanger = MechanicalEquipment.Cast<FamilySymbol>().Where(x => x.FamilyName.Equals("The Lower Bridge Duct Hanger"))?.FirstOrDefault() ?? null;
+            familySymbols = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_GenericModel).OfClass(typeof(FamilySymbol)).Cast<FamilySymbol>().ToList();
+            //pipeHanger20 = familySymbols.Where(x => x.FamilyName.Equals("02- PIPE HANGER ( 20 - 200 )"))?.FirstOrDefault() ?? null;
+            ////pipeHanger200 = familySymbols.Where(x => x.FamilyName.Equals("01- PIPE HANGER ( +200 mm )"))?.FirstOrDefault() ?? null;
+            //pipeHanger2 = familySymbols.Where(x => x.FamilyName.Equals("Pipes Hanger 2"))?.FirstOrDefault() ?? null;
+            //ductHanger = familySymbols.Where(x => x.FamilyName.Equals("The Lower Bridge Duct Hanger"))?.FirstOrDefault() ?? null;
 
             StringBuilder nullfams = new StringBuilder();
-            if (pipeHanger20 == null) { nullfams.AppendLine("02- PIPE HANGER ( 20 - 200 )"); }
-            if (pipeHanger200 == null) { nullfams.AppendLine("01- PIPE HANGER ( +200 mm )"); }
-            if (pipeHanger2 == null) { nullfams.AppendLine("Pipes Hanger 2"); }
-            if (ductHanger == null) { nullfams.AppendLine("The Lower Bridge Duct Hanger"); }
-            if (ductHanger == null || pipeHanger20 == null || pipeHanger200 == null || pipeHanger2 == null)
-            {
-                TaskDialog.Show("Error", "Please Load Supports Family.\n" + nullfams.ToString());
-                return Result.Failed;
-            }
+            //if (pipeHanger20 == null) { nullfams.AppendLine("02- PIPE HANGER ( 20 - 200 )"); }
+            //if (pipeHanger200 == null) { nullfams.AppendLine("01- PIPE HANGER ( +200 mm )"); }
+            //if (pipeHanger2 == null) { nullfams.AppendLine("Pipes Hanger 2"); }
+            //if (ductHanger == null) { nullfams.AppendLine("The Lower Bridge Duct Hanger"); }
+            //if (ductHanger == null || pipeHanger20 == null || pipeHanger200 == null || pipeHanger2 == null)
+            //{
+            //    TaskDialog.Show("Error", "Please Load Supports Family.\n" + nullfams.ToString());
+            //    return Result.Failed;
+            //}
             watch.Stop();
             sb.AppendLine($"check time for ramilies is {watch.ElapsedMilliseconds} ");
             watch.Restart();
@@ -126,7 +126,7 @@ namespace IBIMSGen.Hangers
                 TaskDialog.Show("Error", "Document has no UserWorksets.");
                 return Result.Failed;
             }
-            UI = new HangersFM(LinksNames, levelsNames);
+            UI = new HangersFM(LinksNames, levelsNames, familySymbols);
             UI.ShowDialog();
             if (UI.canc)
             {
@@ -464,20 +464,20 @@ namespace IBIMSGen.Hangers
                 tr.Start();
                 string err = ""; int errco = 0;
 
-                pipeHanger20.Activate();
-                ductHanger.Activate();
-                pipeHanger2.Activate();
-                pipeHanger200.Activate();
+                //pipeHanger20.Activate();
+                //ductHanger.Activate();
+                //pipeHanger2.Activate();
+                ////pipeHanger200.Activate();
                 //td("Transaction" + ductHangers.Count.ToString());
                 #region ducts
                 foreach (DuctHanger hanger in ductHangers)
                 {
-
+                    hanger.familySymbol.Activate();
                     if (hanger.supports.Count > 0)
                     {
                         foreach (Support support in hanger.supports)
                         {
-                            FamilyInstance hang = doc.Create.NewFamilyInstance(support.point, ductHanger, hanger.ductPerpendicular, hanger.duct, StructuralType.NonStructural);
+                            FamilyInstance hang = doc.Create.NewFamilyInstance(support.point, hanger.familySymbol, hanger.ductPerpendicular, hanger.duct, StructuralType.NonStructural);
                             hang.LookupParameter("Width").Set(hanger.ductWidth + (2 * hanger.insoThick) + 16 / 304.8);
                             double Z = hanger.botElevation - hanger.insoThick - hang.LookupParameter("Elevation from Level").AsDouble();
                             hang.Location.Move(new XYZ(0, 0, Z));
@@ -496,7 +496,8 @@ namespace IBIMSGen.Hangers
                     {
                         if (pipeHanger.isFireFighting)
                         {
-                            FamilyInstance hangerFamInst = doc.Create.NewFamilyInstance(support.point, pipeHanger2, pipeHanger.pipePerpendicular, doc.GetElement(pipeHanger.levelId), StructuralType.NonStructural);
+                            pipeHanger.familySymbol.Activate();
+                            FamilyInstance hangerFamInst = doc.Create.NewFamilyInstance(support.point, pipeHanger.familySymbol, pipeHanger.pipePerpendicular, doc.GetElement(pipeHanger.levelId), StructuralType.NonStructural);
                             double q = 1;
                             if (pipeHanger.midElevEnd < pipeHanger.midElevStart)
                             {
@@ -532,14 +533,26 @@ namespace IBIMSGen.Hangers
                             }
                             try
                             {
-                                FamilySymbol FS = null;
+                                FamilySymbol fs = null;
                                 if (pipeHanger.hangerDiameter > (202 / 304.8))
                                 {
-                                    FS = pipeHanger200;
+                                    fs = pipeHanger.familySymbol2;
+                                    if (fs != null)
+                                    {
+                                        fs.Activate();
+                                    }
+                                    else
+                                    {
+                                        fs = pipeHanger.familySymbol;
+                                        fs.Activate();
+                                    }
                                 }
-                                else { FS = pipeHanger20; }
-                                FS.Activate();
-                                FamilyInstance pang = doc.Create.NewFamilyInstance(reference, support.point, pipeHanger.pipeDirection, FS);
+                                else
+                                {
+                                    fs = pipeHanger.familySymbol;
+                                    fs.Activate();
+                                }
+                                FamilyInstance pang = doc.Create.NewFamilyInstance(reference, support.point, pipeHanger.pipeDirection, fs);
                                 pang.LookupParameter("Schedule Level").Set(pipeHanger.levelId);
                                 Line ll = Line.CreateUnbound(support.point, XYZ.BasisZ);
                                 double rr = pang.HandOrientation.AngleOnPlaneTo(pipeHanger.pipeDirection, XYZ.BasisZ);
@@ -567,8 +580,8 @@ namespace IBIMSGen.Hangers
                 {
                     foreach (Support support in tray.supports)
                     {
-                        ductHanger.Activate();
-                        FamilyInstance hang = doc.Create.NewFamilyInstance(support.point, ductHanger, tray.trayPerpendicular, doc.GetElement(tray.levelId), StructuralType.NonStructural);
+                        tray.familySymbol.Activate();
+                        FamilyInstance hang = doc.Create.NewFamilyInstance(support.point, tray.familySymbol, tray.trayPerpendicular, doc.GetElement(tray.levelId), StructuralType.NonStructural);
                         hang.LookupParameter("Width").Set(tray.trayWidth + 100 / 304.8);
                         hang.LookupParameter("ROD 1").Set(support.rod);
                         hang.LookupParameter("ROD 2").Set(support.rod);
@@ -591,6 +604,8 @@ namespace IBIMSGen.Hangers
 
             foreach (Element pipe in pipesInRange)
             {
+                FamilySymbol pipeFamilySymbol = null;
+                FamilySymbol pipeFamilySymbol2 = null;
                 List<Support> pipeSupports = new List<Support>();
                 #region pipe
                 bool isFireFighting = false;
@@ -627,18 +642,33 @@ namespace IBIMSGen.Hangers
                     RevitLinkType rlt = doc.GetElement(((RevitLinkInstance)pipe).GetTypeId()) as RevitLinkType;
                     Rank = GetSystemRank(rlt.Name);
                     spacing = SysSpacing(AllWorksetsDIMS[Rank], newdia);
-                    if (Rank == 4)
-                    {
-                        isFireFighting = true;
-                    }
+                    if (spacing == 0) continue;
+                    isFireFighting = AllWorksetsDIMS[Rank][0]["FF"] == 1;
+                    string familySymbolName = familySymbols.Select(x => x.FamilyName).Distinct().ElementAt(Convert.ToInt32(AllWorksetsDIMS[Rank][0]["family"]));
+                    pipeFamilySymbol = familySymbols.Where(x => x.FamilyName.Equals(familySymbolName)).First();
+                    string familySymbolName2 = familySymbols.Select(x => x.FamilyName).Distinct().ElementAt(Convert.ToInt32(AllWorksetsDIMS[Rank][0]["family2"]));
+                    pipeFamilySymbol2 = familySymbols.Where(x => x.FamilyName.Equals(familySymbolName2)).First();
+
                 }
                 else
                 {
-                    spacing = SysSpacing(AllWorksetsDIMS.Where(x => x.First()["spacing"] != 0).First().ToList(), newdia);
-                }
-                if (spacing == 0)
-                {
-                    continue;
+                    spacing = SysSpacing(AllWorksetsDIMS.Where(x => x.First()["spacing"] != 0).ElementAt(1).ToList(), newdia);
+                    if (spacing == 0) continue;
+
+                    isFireFighting = AllWorksetsDIMS.Where(x => x.First()["spacing"] != 0).ElementAt(1).First()["FF"] == 1;
+                    int index = Convert.ToInt32(AllWorksetsDIMS.Where(x => x.First()["spacing"] != 0).ElementAt(1).First()["family"]);
+                    string familySymbolName = familySymbols.Select(x => x.FamilyName).Distinct().ElementAt(index);
+                    pipeFamilySymbol = familySymbols.Where(x => x.FamilyName.Equals(familySymbolName)).First();
+                    if (index == -1)
+                    {
+                        continue;
+                    }
+                    int index2 = Convert.ToInt32(AllWorksetsDIMS.Where(x => x.First()["spacing"] != 0).ElementAt(1).First()["family2"]);
+                    if (index2 >= 0)
+                    {
+                        string familySymbolName2 = familySymbols.Select(x => x.FamilyName).Distinct().ElementAt(index2);
+                        pipeFamilySymbol2 = familySymbols.Where(x => x.FamilyName.Equals(familySymbolName2)).First();
+                    }
                 }
 
                 List<XYZ> pps = new List<XYZ>();
@@ -689,7 +719,12 @@ namespace IBIMSGen.Hangers
                 }
                 else if (pipeCurve.Length > spacing)
                 {
-                    if (!pipeHangPts.Contains(Ps)) pipeHangPts.Add(Ps);
+                    if (!pipeHangPts.Contains(Ps))
+                    {
+                        pipeHangPts.Add(Ps);
+                        double rod = getRod(Ps, faces);
+                        if (rod != 0) pipeSupports.Add(new Support(Ps, rod + 2995 / 304.8));
+                    }
                     double n = Math.Ceiling(hangCurve.Length / spacing) - 1;
                     XYZ prev = Ps;
                     double Ns = (hangCurve.Length / (n + 1));
@@ -713,7 +748,8 @@ namespace IBIMSGen.Hangers
                     }
                 }
                 #endregion
-                pipeHangers.Add(new PipeHanger(pipe, P0, isFireFighting, hangerDiameter, levelId, pipeElevation, midElevStart, midElevEnd, slope, pipeSupports, pipeDirection, pipePerpendicular, faces.get_Item(0)));
+                pipeHangers.Add(new PipeHanger(pipe, P0, isFireFighting, hangerDiameter, levelId, pipeElevation, midElevStart,
+                    midElevEnd, slope, pipeSupports, pipeDirection, pipePerpendicular, faces.get_Item(0), pipeFamilySymbol, pipeFamilySymbol2));
             }
             #endregion
         }
@@ -736,18 +772,23 @@ namespace IBIMSGen.Hangers
                 List<XYZ> pts = new List<XYZ>();
                 try { ductWidth = duct.LookupParameter("Width").AsDouble(); }
                 catch { ductWidth = duct.LookupParameter("Diameter").AsDouble(); }
-                if (AllWorksetsDIMS[0][0].Count == 1)
+                FamilySymbol ductFamilySymbol = null;
+                if (AllWorksetsDIMS[0].Count == 1)
                 {
                     spacingFin = AllWorksetsDIMS[0][0]["spacing"] / 304.8;
+                    if (spacingFin == 0) continue;
+                    string familySymbolName = familySymbols.Select(x => x.FamilyName).Distinct().ElementAt(Convert.ToInt32(AllWorksetsDIMS[0][0]["family"]));
+                    ductFamilySymbol = familySymbols.Where(x => x.FamilyName.Equals(familySymbolName)).First();
                 }
                 else
                 {
                     if (AllWorksetsDIMS[0].Where(x => x["from"] < ductWidth * 304.8 && ductWidth * 304.8 <= x["to"]).Any())
+                    {
                         spacingFin = AllWorksetsDIMS[0].Where(x => x["from"] < ductWidth * 304.8 && ductWidth * 304.8 <= x["to"]).First()["spacing"] / 304.8;
-                }
-                if (spacingFin == 0)
-                {
-                    continue;
+                        if (spacingFin == 0) continue;
+                        string familySymbolName = familySymbols.Select(x => x.FamilyName).Distinct().ElementAt(Convert.ToInt32(AllWorksetsDIMS[0][0]["family"]));
+                        ductFamilySymbol = familySymbols.Where(x => x.FamilyName.Equals(familySymbolName)).First();
+                    }
                 }
                 ElementId levelId = duct.LookupParameter("Reference Level").AsElementId();
                 double ductHeight = 0;
@@ -966,7 +1007,7 @@ namespace IBIMSGen.Hangers
                         distinctSups.Add(sup);
                     }
                 }
-                ductHangers.Add(new DuctHanger(duct, ductPerpendicular, ductWidth, ductHeight, insoThick, botElevation, distinctSups));
+                ductHangers.Add(new DuctHanger(duct, ductPerpendicular, ductWidth, ductHeight, insoThick, botElevation, distinctSups, ductFamilySymbol));
 
             }
             #endregion
@@ -977,6 +1018,7 @@ namespace IBIMSGen.Hangers
             #region Cable Trays
             foreach (Element tray in traysInRange)
             {
+                FamilySymbol trayFamilySymbol = null;
                 Curve trayCurve = ((LocationCurve)tray.Location).Curve;
                 double trayOffset = 500 / 304.80;
                 XYZ trayDir = ((Line)trayCurve).Direction.Normalize();
@@ -985,7 +1027,26 @@ namespace IBIMSGen.Hangers
                 XYZ Pf = trayCurve.Evaluate(1, true);
                 XYZ Ps = P0.Add(ductOffset * trayDir);
                 XYZ Pe = Pf.Add(-ductOffset * trayDir);
-                double spacing0 = 1500 / 304.8;
+                double width = tray.LookupParameter("Width").AsDouble();
+                double spacingFin = 0;
+                var a = AllWorksetsDIMS[5][0];
+                if (AllWorksetsDIMS[5].Count == 1)
+                {
+                    spacingFin = AllWorksetsDIMS[5][0]["spacing"] / 304.8;
+                    if (spacingFin == 0) continue;
+                    string familySymbolName = familySymbols.Select(x => x.FamilyName).Distinct().ElementAt(Convert.ToInt32(AllWorksetsDIMS[5][0]["family"]));
+                    trayFamilySymbol = familySymbols.Where(x => x.FamilyName.Equals(familySymbolName)).First();
+                }
+                else
+                {
+                    if (AllWorksetsDIMS[5].Where(x => width * 304.8 <= x["size"]).Any())
+                    {
+                        spacingFin = AllWorksetsDIMS[5].Where(x => width * 304.8 <= x["size"]).First()["spacing"] / 304.8;
+                        if (spacingFin == 0) continue;
+                        string familySymbolName = familySymbols.Select(x => x.FamilyName).Distinct().ElementAt(Convert.ToInt32(AllWorksetsDIMS[5][0]["family"]));
+                        trayFamilySymbol = familySymbols.Where(x => x.FamilyName.Equals(familySymbolName)).First();
+                    }
+                }
                 Curve hangCurve = null;
                 try
                 {
@@ -994,7 +1055,6 @@ namespace IBIMSGen.Hangers
                 catch { continue; }
                 List<XYZ> trayHangPts = new List<XYZ>();
                 List<Support> supports = new List<Support>();
-                double width = tray.LookupParameter("Width").AsDouble();
                 ElementId levelId = tray.LookupParameter("Reference Level").AsElementId();
                 double botElevation = tray.LookupParameter("Bottom Elevation").AsDouble();
                 double elevation = ((Level)doc.GetElement(levelId)).Elevation + botElevation;
@@ -1009,7 +1069,7 @@ namespace IBIMSGen.Hangers
                         if (rod != 0) supports.Add(new Support(PP, rod));
                     }
                 }
-                else if (trayCurve.Length <= spacing0 && trayCurve.Length > trayOffset)
+                else if (trayCurve.Length <= spacingFin && trayCurve.Length > trayOffset)
                 {
                     if (!trayHangPts.Contains(Ps))
                     {
@@ -1026,7 +1086,7 @@ namespace IBIMSGen.Hangers
                         if (rod != 0) supports.Add(new Support(PP, rod));
                     }
                 }
-                else if (trayCurve.Length > spacing0)
+                else if (trayCurve.Length > spacingFin)
                 {
                     if (!trayHangPts.Contains(Ps))
                     {
@@ -1035,11 +1095,11 @@ namespace IBIMSGen.Hangers
                         XYZ PP = new XYZ(Ps.X, Ps.Y, elevation);
                         if (rod != 0) supports.Add(new Support(PP, rod));
                     }
-                    double n = Math.Floor((hangCurve.Length + (100 / 304.8)) / spacing0);
+                    double n = Math.Floor((hangCurve.Length + (100 / 304.8)) / spacingFin);
                     XYZ prevPt = Ps;
                     for (int i = 0; i < n; i++)
                     {
-                        XYZ point = prevPt.Add(spacing0 * trayDir);
+                        XYZ point = prevPt.Add(spacingFin * trayDir);
                         if (!trayHangPts.Contains(point))
                         {
                             trayHangPts.Add(point);
@@ -1051,7 +1111,7 @@ namespace IBIMSGen.Hangers
                     }
                 }
 
-                trayHangers.Add(new TrayHanger(tray, width, levelId, supports, trayDir, perpendicular));
+                trayHangers.Add(new TrayHanger(tray, width, levelId, supports, trayDir, perpendicular, trayFamilySymbol));
             }
             #endregion
         }
@@ -1099,8 +1159,7 @@ namespace IBIMSGen.Hangers
                 GeometryElement geo = elem.get_Geometry(options);
                 if (geo.FirstOrDefault() is Solid)
                 {
-                    Solid solid = (Solid)geo.FirstOrDefault();
-                    return SolidUtils.Clone(solid);
+                    return (Solid)geo.FirstOrDefault();
                 }
                 foreach (GeometryObject geometryObject in geo)
                 {
@@ -1147,15 +1206,7 @@ namespace IBIMSGen.Hangers
             }
             if (solids.Count > 0)
             {
-                try
-                {
-
-                    return SolidUtils.Clone(solids.OrderByDescending(x => x.Volume).ElementAt(0));
-                }
-                catch
-                {
-                    return solids.OrderByDescending(x => x.Volume).ElementAt(0);
-                }
+                return solids.OrderByDescending(x => x.Volume).ElementAt(0);
             }
             else
             {

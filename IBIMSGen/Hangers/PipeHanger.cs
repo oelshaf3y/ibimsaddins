@@ -18,8 +18,13 @@ namespace IBIMSGen.Hangers
         public XYZ pipeDirection;
         public XYZ pipePerpendicular;
         public Face lowerFace;
+        public FamilySymbol familySymbol;
+        public FamilySymbol familySymbol2;
 
-        public PipeHanger(Element pipe, XYZ startPt, bool isFireFighting, double hangerDiameter, ElementId levelId, double pipeElevation, double midElevStart, double midElevEnd, double slope, List<Support> supports, XYZ pipeDirection, XYZ pipePerpendicular, Face lowerFace)
+
+        public PipeHanger(Element pipe, XYZ startPt, bool isFireFighting, double hangerDiameter, 
+            ElementId levelId, double pipeElevation, double midElevStart, double midElevEnd, 
+            double slope, List<Support> supports, XYZ pipeDirection, XYZ pipePerpendicular, Face lowerFace,FamilySymbol familySymbol,FamilySymbol familySymbol2)
         {
             this.pipe = pipe;
             this.startPt = startPt;
@@ -34,6 +39,8 @@ namespace IBIMSGen.Hangers
             this.pipeDirection = pipeDirection;
             this.pipePerpendicular = pipePerpendicular;
             this.lowerFace = lowerFace;
+            this.familySymbol = familySymbol;
+            this.familySymbol2 = familySymbol2;
         }
     }
 }

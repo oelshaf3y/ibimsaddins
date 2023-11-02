@@ -1,4 +1,5 @@
-﻿using Autodesk.Revit.DB.Mechanical;
+﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Mechanical;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,23 +9,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Color = System.Drawing.Color;
+using Control = System.Windows.Forms.Control;
+using Point = System.Drawing.Point;
 
 namespace IBIMSGen.Hangers
 {
 
-    public partial class HangersFM : Form
+    public partial class HangersFM : System.Windows.Forms.Form
     {
 
         public bool canc, ook, selc;
         public int dup, frin, toin, linkIndex = -1;
-        public List<string> Links, Levels;
+        public List<string> linksNames, levelsNames;
         public List<List<string>> AllworksetsNames;
         public List<List<Dictionary<string, double>>> AllworksetsDIMS;
         public UserControl Duc, Wuc, CWuc, DRuc, FFuc, CTuc;
         public Button lastButton = null;
         public List<double> DRdias, WSdias, CHWdias, Firedias, DRspcs, WSspcs, CHWspcs, Firespcs;
+        public List<FamilySymbol> familySymbols;
 
-        public HangersFM(List<string> linksNames, List<string> levelsNames)
+        public HangersFM(List<string> linksNames, List<string> levelsNames, List<FamilySymbol> familySymbols)
         {
             InitializeComponent();
             DRdias = new List<double>() { 20, 25, 32, 40, 50, 75, 110, 125, 130 };
@@ -37,16 +42,16 @@ namespace IBIMSGen.Hangers
             Firespcs = new List<double>() { 1800, 2400, 2400, 2700, 3000, 3000, 3300, 3600, 3700, 3900, 4200, 4500, 4500, 4500, 4500, 4500 };
             AllworksetsDIMS = new List<List<Dictionary<string, double>>>();
             AllworksetsNames = new List<List<string>>();
-            Links = linksNames;
-            Levels = levelsNames;
+            this.linksNames = linksNames;
+            this.levelsNames = levelsNames;
+            this.familySymbols = familySymbols;
             Duc = null; Wuc = null; CWuc = null; DRuc = null; FFuc = null; CTuc = null;
-
         }
         private void Form7_Load(object sender, EventArgs e)
         {
-            comboBox1.Items.AddRange(Links.ToArray());
-            comboBox2.Items.AddRange(Levels.ToArray());
-            comboBox3.Items.AddRange(Levels.ToArray());
+            comboBox1.Items.AddRange(linksNames.ToArray());
+            comboBox2.Items.AddRange(levelsNames.ToArray());
+            comboBox3.Items.AddRange(levelsNames.ToArray());
             Duc = createUserControl("Duc", true);
             Wuc = createUserControl("WS", false, WSdias, WSspcs);
             CWuc = createUserControl("CHW", false, CHWdias, CHWspcs);
@@ -58,7 +63,7 @@ namespace IBIMSGen.Hangers
             lastButton = ctButton;
             comboBox2.SelectedIndex = 0;
             comboBox3.SelectedIndex = comboBox3.Items.Count - 1;
-            checkBox2.Checked = true;
+            useLink.Checked = true;
 
         }
 
@@ -76,7 +81,7 @@ namespace IBIMSGen.Hangers
                 }
             }
         }
-        UserControl getActiveUI()
+        public UserControl getActiveUC()
         {
             foreach (UserControl us in panel1.Controls)
             {
@@ -87,12 +92,25 @@ namespace IBIMSGen.Hangers
 
         public UserControl createUserControl(string name, bool vis = false, List<double> sizes = null, List<double> spaces = null)
         {
+
             UserControl userControl = new HangerUC();
             userControl.Name = name;
             panel1.Controls.Add(userControl);
             userControl.Dock = DockStyle.Fill;
+            ComboBox hangersFamilies = userControl.Controls.Find("hangerFamily", true).First() as ComboBox;
+            hangersFamilies.Items.AddRange(this.familySymbols.Select(x => x.FamilyName).Distinct().ToArray());
+
+            if (name == "WS" || name == "CHW" || name == "DR" || name.Contains("stem"))
+            {
+                userControl.Controls.Find("label4", true).First().Visible = true;
+                userControl.Controls.Find("label4", true).First().Text = "larger than 200mm";
+                userControl.Controls.Find("label3", true).First().Text = "smaller than 200mm";
+                userControl.Controls.Find("hangerFamily2", true).First().Visible = true;
+                ((ComboBox)userControl.Controls.Find("hangerFamily2", true).First()).Items.AddRange(this.familySymbols.Select(x => x.FamilyName).Distinct().ToArray());
+            }
+
             CheckedListBox worksetNames = userControl.Controls.Find("worksetNames", true).First() as CheckedListBox;
-            worksetNames.Items.AddRange(Links.ToArray());
+            worksetNames.Items.AddRange(linksNames.ToArray());
             ComboBox copyFromCB = userControl.Controls.Find("copyFromCB", true).First() as ComboBox;
             copyFromCB.SelectedIndexChanged += copyFrom_SelectedIndexChanged;
             DataGridView dgv = userControl.Controls.Find("dgv", true).First() as DataGridView;
@@ -110,8 +128,8 @@ namespace IBIMSGen.Hangers
                 else { dgv.RowCount = sizes.Count; }
                 for (int i = 0; i < sizes.Count; i++)
                 {
-                    dgv[0, i].Value = sizes[i];
-                    dgv[1, i].Value = spaces[i];
+                    if (sizes[i] != null) dgv[0, i].Value = sizes[i]; else dgv[0, i].Value = "0";
+                    if (spaces[i] != null) dgv[1, i].Value = spaces[i]; else dgv[1, i].Value = "0";
                 }
             }
             else
@@ -139,7 +157,7 @@ namespace IBIMSGen.Hangers
         private void copyFrom_SelectedIndexChanged(object sender, EventArgs e)
         {
             dup = ((ComboBox)sender).SelectedIndex;
-            DataGridView neww = getActiveUI().Controls.Find("dgv", true).FirstOrDefault() as DataGridView;
+            DataGridView neww = getActiveUC().Controls.Find("dgv", true).FirstOrDefault() as DataGridView;
             if (dup == 0)
             {
                 neww.RowCount = 12;
@@ -178,23 +196,24 @@ namespace IBIMSGen.Hangers
 
             foreach (var control in panel1.Controls.Find("worksetNames", true))
             {
-                control.Enabled = checkBox2.Checked;
+                control.Enabled = useLink.Checked;
             }
             foreach (var control in panel1.Controls.Find("useDims", true))
             {
-                control.Enabled = !checkBox2.Checked;
+                control.Enabled = !useLink.Checked;
             }
         }
 
         bool isValidDims()
         {
-            DataGridView activeD = (DataGridView)getActiveUI().Controls.Find("dgv", true)?.FirstOrDefault() as DataGridView;
+            DataGridView activeD = (DataGridView)getActiveUC().Controls.Find("dgv", true)?.FirstOrDefault() as DataGridView;
+            if (!activeD.Enabled) return true;
             foreach (DataGridViewRow row in activeD.Rows)
             {
                 foreach (DataGridViewCell cell in row.Cells)
                 {
                     double x;
-                    bool conv = double.TryParse(cell.Value.ToString(), out x);
+                    bool conv = double.TryParse(cell.Value?.ToString(), out x);
                     if (cell.Value != null && !conv || x < 0)
                     {
                         return false;
@@ -209,8 +228,48 @@ namespace IBIMSGen.Hangers
             Control c = panel1.Controls.Find(name, true).First();
             DataGridView d = (DataGridView)c.Controls.Find("dgv", true).FirstOrDefault();
             List<Dictionary<string, double>> newDims = new List<Dictionary<string, double>>();
-            if (checkBox2.Checked)
+            if (useLink.Checked)
             {
+                if (d.Enabled == true)
+                {
+                    for (int i = 0; i < d.RowCount; i++)
+                    {
+                        double size = Convert.ToDouble(d[0, i].Value);
+                        double spacing = Convert.ToDouble(d[1, i].Value);
+                        Dictionary<string, double> dict = new Dictionary<string, double>();
+                        dict.Add("size", size);
+                        dict.Add("spacing", spacing);
+                        dict.Add("family", ((ComboBox)c.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex);
+                        if (name == "WS" || name == "CHW" || name == "DR" || name.Contains("stem"))
+                        {
+                            dict.Add("family2", ((ComboBox)c.Controls.Find("hangerFamily2", true).FirstOrDefault()).SelectedIndex);
+                        }
+                        if (name == "FF") dict.Add("FF", 1);
+                        else dict.Add("FF", 0);
+                        newDims.Add(dict);
+                    }
+                    AllworksetsDIMS.Add(newDims);
+                }
+                else
+                {
+                    TextBox t = (TextBox)c.Controls.Find("allSizesSpacing", true).FirstOrDefault();
+                    Dictionary<string, double> dict = new Dictionary<string, double>();
+                    dict.Add("spacing", Convert.ToDouble(t.Text));
+                    dict.Add("family", ((ComboBox)c.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex);
+                    if (name == "WS" || name == "CHW" || name == "DR" || name.Contains("stem"))
+                    {
+                        dict.Add("family2", ((ComboBox)c.Controls.Find("hangerFamily2", true).FirstOrDefault()).SelectedIndex);
+                    }
+                    if (name == "FF") dict.Add("FF", 1);
+                    else dict.Add("FF", 0);
+                    newDims.Add(dict);
+                    AllworksetsDIMS.Add(newDims);
+                }
+
+            }
+            else
+            {
+
                 CheckBox use = c.Controls.Find("useDims", true).First() as CheckBox;
                 if (use.Checked)
                 {
@@ -224,15 +283,30 @@ namespace IBIMSGen.Hangers
                             Dictionary<string, double> dict = new Dictionary<string, double>();
                             dict.Add("size", size);
                             dict.Add("spacing", spacing);
+                            dict.Add("family", ((ComboBox)c.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex);
+                            if (name == "WS" || name == "CHW" || name == "DR" || name.Contains("stem"))
+                            {
+                                dict.Add("family2", ((ComboBox)c.Controls.Find("hangerFamily2", true).FirstOrDefault()).SelectedIndex);
+                            }
+                            if (name == "FF") dict.Add("FF", 1);
+                            else dict.Add("FF", 0);
                             newDims.Add(dict);
                         }
                         AllworksetsDIMS.Add(newDims);
                     }
                     else
                     {
+                        //MessageBox.Show("Info", "Single spacing");
                         TextBox t = (TextBox)c.Controls.Find("allSizesSpacing", true).FirstOrDefault();
                         Dictionary<string, double> dict = new Dictionary<string, double>();
-                        dict["spacing"] = Convert.ToDouble(t.Text);
+                        dict.Add("spacing", Convert.ToDouble(t.Text));
+                        dict.Add("family", ((ComboBox)c.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex);
+                        if (name == "WS" || name == "CHW" || name == "DR" || name.Contains("stem"))
+                        {
+                            dict.Add("family2", ((ComboBox)c.Controls.Find("hangerFamily2", true).FirstOrDefault()).SelectedIndex);
+                        }
+                        if (name == "FF") dict.Add("FF", 1);
+                        else dict.Add("FF", 0);
                         newDims.Add(dict);
                         AllworksetsDIMS.Add(newDims);
                     }
@@ -240,31 +314,14 @@ namespace IBIMSGen.Hangers
                 else
                 {
                     Dictionary<string, double> dict = new Dictionary<string, double>();
-                    dict["spacing"] = 0;
-                    newDims.Add(dict);
-                    AllworksetsDIMS.Add(newDims);
-                }
-            }
-            else
-            {
-                if (d.Enabled == true)
-                {
-                    for (int i = 0; i < d.RowCount; i++)
+                    dict.Add("spacing", 0);
+                    dict.Add("family", ((ComboBox)c.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex);
+                    if (name == "WS" || name == "CHW" || name == "DR" || name.Contains("stem"))
                     {
-                        double size = Convert.ToDouble(d[0, i].Value);
-                        double spacing = Convert.ToDouble(d[1, i].Value);
-                        Dictionary<string, double> dict = new Dictionary<string, double>();
-                        dict.Add("size", size);
-                        dict.Add("spacing", spacing);
-                        newDims.Add(dict);
+                        dict.Add("family2", ((ComboBox)c.Controls.Find("hangerFamily2", true).FirstOrDefault()).SelectedIndex);
                     }
-                    AllworksetsDIMS.Add(newDims);
-                }
-                else
-                {
-                    TextBox t = (TextBox)c.Controls.Find("allSizesSpacing", true).FirstOrDefault();
-                    Dictionary<string, double> dict = new Dictionary<string, double>();
-                    dict["spacing"] = Convert.ToDouble(t.Text);
+                    if (name == "FF") dict.Add("FF", 1);
+                    else dict.Add("FF", 0);
                     newDims.Add(dict);
                     AllworksetsDIMS.Add(newDims);
                 }
@@ -317,9 +374,9 @@ namespace IBIMSGen.Hangers
                     }
                 }
             }
-            ComboBox cbx = getActiveUI().Controls.Find("copyFromCB", true).FirstOrDefault() as ComboBox;
-            Label label = getActiveUI().Controls.Find("label1", true).FirstOrDefault() as Label;
-            if (getActiveUI().Name.Contains("System"))
+            ComboBox cbx = getActiveUC().Controls.Find("copyFromCB", true).FirstOrDefault() as ComboBox;
+            Label label = getActiveUC().Controls.Find("label1", true).FirstOrDefault() as Label;
+            if (getActiveUC().Name.Contains("System"))
             {
                 cbx.Enabled = true;
                 cbx.Visible = true;
@@ -362,12 +419,16 @@ namespace IBIMSGen.Hangers
                 CheckedListBox CHWList = panel1.Controls.Find("CHW", true).First().Controls.Find("worksetNames", true).FirstOrDefault() as CheckedListBox;
                 CheckedListBox DRList = panel1.Controls.Find("DR", true).First().Controls.Find("worksetNames", true).FirstOrDefault() as CheckedListBox;
                 CheckedListBox FFList = panel1.Controls.Find("FF", true).First().Controls.Find("worksetNames", true).FirstOrDefault() as CheckedListBox;
+                CheckedListBox CTList = panel1.Controls.Find("FF", true).First().Controls.Find("worksetNames", true).FirstOrDefault() as CheckedListBox;
+
 
                 AllworksetsNames.Add(ductList.CheckedItems.Cast<string>().ToList());
                 AllworksetsNames.Add(WSList.CheckedItems.Cast<string>().ToList());
                 AllworksetsNames.Add(CHWList.CheckedItems.Cast<string>().ToList());
                 AllworksetsNames.Add(DRList.CheckedItems.Cast<string>().ToList());
                 AllworksetsNames.Add(FFList.CheckedItems.Cast<string>().ToList());
+                AllworksetsNames.Add(CTList.CheckedItems.Cast<string>().ToList());
+
 
                 foreach (Control cont in panel1.Controls)
                 {
@@ -389,6 +450,7 @@ namespace IBIMSGen.Hangers
                         dict["from"] = Convert.ToDouble(ductSizesList[0, j].Value.ToString());
                         dict["to"] = Convert.ToDouble(ductSizesList[1, j].Value.ToString());
                         dict["spacing"] = Convert.ToDouble(ductSizesList[2, j].Value.ToString());
+                        dict["family"] = ((ComboBox)c.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex;
                         DIMS.Add(dict);
                     }
 
@@ -399,6 +461,7 @@ namespace IBIMSGen.Hangers
                     TextBox t = (TextBox)c.Controls.Find("allSizesSpacing", true).First();
                     Dictionary<string, double> dict = new Dictionary<string, double>();
                     dict["spacing"] = Convert.ToDouble(t.Text);
+                    dict["family"] = ((ComboBox)c.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex;
                     DIMS.Add(dict);
                     AllworksetsDIMS.Add(DIMS);
                 }
@@ -407,6 +470,8 @@ namespace IBIMSGen.Hangers
                 getWorksetDims("CHW");
                 getWorksetDims("DR");
                 getWorksetDims("FF");
+                getWorksetDims(ctButton.Text);
+
                 foreach (Control control in panel1.Controls)
                 {
                     if (control is UserControl && c.Name.Contains("System"))
@@ -420,6 +485,7 @@ namespace IBIMSGen.Hangers
                                 Dictionary<string, double> dict = new Dictionary<string, double>();
                                 dict["size"] = Convert.ToDouble(d[0, j].Value.ToString());
                                 dict["spacing"] = Convert.ToDouble(d[1, j].Value.ToString());
+                                dict["family"] = ((ComboBox)control.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex;
                                 DIMS.Add(dict);
                             }
                             AllworksetsDIMS.Add(DIMS);
@@ -429,6 +495,7 @@ namespace IBIMSGen.Hangers
                             TextBox t = (TextBox)c.Controls.Find("allSizesSpacing", true).FirstOrDefault();
                             Dictionary<string, double> dict = new Dictionary<string, double>();
                             dict["spacing"] = Convert.ToDouble(t.Text);
+                            dict["family"] = ((ComboBox)c.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex;
                             DIMS.Add(dict);
                             AllworksetsDIMS.Add(DIMS);
                         }
@@ -552,9 +619,9 @@ namespace IBIMSGen.Hangers
 
         private void fixedSpacing_CheckedChanged(object sender, EventArgs e)
         {
-            DataGridView dgv = getActiveUI().Controls.Find("dgv", true).FirstOrDefault() as DataGridView;
-            TextBox textBox = getActiveUI().Controls.Find("allSizesSpacing", true).FirstOrDefault() as TextBox;
-            Label label = getActiveUI().Controls.Find("fixedSpacingLabel", true).FirstOrDefault() as Label;
+            DataGridView dgv = getActiveUC().Controls.Find("dgv", true).FirstOrDefault() as DataGridView;
+            TextBox textBox = getActiveUC().Controls.Find("allSizesSpacing", true).FirstOrDefault() as TextBox;
+            Label label = getActiveUC().Controls.Find("fixedSpacingLabel", true).FirstOrDefault() as Label;
             if (checkBox1.Checked)
             {
                 dgv.Visible = false;

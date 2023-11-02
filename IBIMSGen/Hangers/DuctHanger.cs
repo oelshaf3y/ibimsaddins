@@ -12,8 +12,9 @@ namespace IBIMSGen.Hangers
         public double insoThick;
         public double botElevation;
         public List<Support> supports;
+        public FamilySymbol familySymbol;
 
-        public DuctHanger(Element duct, XYZ ductPerpendicular, double ductWidth, double ductHeight, double insoThick, double botElevation, List<Support> supports)
+        public DuctHanger(Element duct, XYZ ductPerpendicular, double ductWidth, double ductHeight, double insoThick, double botElevation, List<Support> supports, FamilySymbol familySymbol)
         {
             this.duct = duct;
             this.ductPerpendicular = ductPerpendicular;
@@ -22,6 +23,7 @@ namespace IBIMSGen.Hangers
             this.insoThick = insoThick;
             this.botElevation = botElevation;
             this.supports = supports;
+            this.familySymbol = familySymbol;
         }
     }
 }

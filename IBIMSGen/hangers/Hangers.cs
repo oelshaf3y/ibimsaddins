@@ -93,7 +93,7 @@ namespace IBIMSGen.Hangers
                 TaskDialog.Show("Error", "Document has no UserWorksets.");
                 return Result.Failed;
             }
-            UI = new HangersFM(LinksNames, levelsNames);
+            UI = new HangersFM(LinksNames, levelsNames,MechanicalEquipment.Cast<FamilySymbol>().ToList());
             //UI.Links = LinksNames;
             //UI.worksetnames = worksetnames;
             //UI.Levels = levelsNames;
