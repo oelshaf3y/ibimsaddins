@@ -34,7 +34,7 @@ namespace IBIMSGen.Hangers
         List<Workset> worksets;
         List<WorksetId> worksetIDs;
         Options options;
-        RevitLinkInstance RLI;
+        RevitLinkInstance RLI,ductsRLI;
         List<DuctHanger> ductHangers;
         List<PipeHanger> pipeHangers;
         List<TrayHanger> trayHangers;
@@ -53,7 +53,7 @@ namespace IBIMSGen.Hangers
             options = new Options();
             options.ComputeReferences = true;
             options.View = doc.ActiveView;
-
+            ductsRLI = null;
             ductHangers = new List<DuctHanger>();
             pipeHangers = new List<PipeHanger>();
             trayHangers = new List<TrayHanger>();
@@ -150,41 +150,90 @@ namespace IBIMSGen.Hangers
             watch.Restart();
             try
             {
-                mechRefs = uidoc.Selection.PickObjects(ObjectType.Element, new SelectionFilterPDC(), "Select Pipes / Ducts / CableTrays.");
-                foreach (Reference reference in mechRefs)
+                if (UI.useLink.Checked)
                 {
-                    Element e = doc.GetElement(reference);
-                    if (e.Category.Name == "Ducts")
+                    mechRefs = uidoc.Selection.PickObjects(ObjectType.LinkedElement, new SelectionFilterPDC(), "Select Pipes / Ducts / CableTrays.");
+                    //after selection process
+                    foreach (Reference reference in mechRefs)
                     {
-                        Curve ductCurve = ((LocationCurve)e.Location).Curve;
-                        double s1 = Math.Round(e.LookupParameter("Start Middle Elevation").AsDouble(), 6);
-                        double s2 = Math.Round(e.LookupParameter("End Middle Elevation").AsDouble(), 6);
-                        if (ductCurve.Length >= negLength && s1 == s2) //perfectly horizontal 
+                        Element elem = doc.GetElement(reference.ElementId);
+
+                        RevitLinkInstance rli = elem as RevitLinkInstance;
+                        Document _link = rli.GetLinkDocument();
+                        Element e = _link.GetElement(reference.LinkedElementId);
+                        if (e.Category.Name == "Ducts")
                         {
-                            ducts.Add(e);
+                            Curve ductCurve = ((LocationCurve)e.Location).Curve;
+                            double s1 = Math.Round(e.LookupParameter("Start Middle Elevation").AsDouble(), 6);
+                            double s2 = Math.Round(e.LookupParameter("End Middle Elevation").AsDouble(), 6);
+                            if (ductCurve.Length >= negLength && s1 == s2) //perfectly horizontal 
+                            {
+                                ducts.Add(e);
+                                ductsRLI = rli;
+                            }
                         }
-                    }
-                    else if (e.Category.Name == "Pipes")
-                    {
-                        Curve pipeCurve = ((LocationCurve)e.Location).Curve;
-                        if (pipeCurve.Length >= negLength && Math.Abs(Math.Round(((Line)pipeCurve).Direction.Normalize().Z, 3)) != 1)
+                        else if (e.Category.Name == "Pipes")
                         {
-                            pipes.Add(e);
+                            Curve pipeCurve = ((LocationCurve)e.Location).Curve;
+                            if (pipeCurve.Length >= negLength && Math.Abs(Math.Round(((Line)pipeCurve).Direction.Normalize().Z, 3)) != 1)
+                            {
+                                pipes.Add(e);
+                            }
                         }
-                    }
-                    else if (e is CableTray)
-                    {
-                        Curve c = ((LocationCurve)e.Location).Curve;
-                        if (c.Length >= negLength && Math.Abs(Math.Round(((Line)c).Direction.Normalize().Z, 3)) == 0)
+                        else if (e is CableTray)
                         {
-                            cables.Add(e);
+                            Curve c = ((LocationCurve)e.Location).Curve;
+                            if (c.Length >= negLength && Math.Abs(Math.Round(((Line)c).Direction.Normalize().Z, 3)) == 0)
+                            {
+                                cables.Add(e);
+                            }
+                        }
+
+                    }
+                }
+                else
+                {
+                    mechRefs = uidoc.Selection.PickObjects(ObjectType.Element, new SelectionFilterPDC(), "Select Pipes / Ducts / CableTrays.");
+
+
+                    //after selection process
+                    foreach (Reference reference in mechRefs)
+                    {
+                        Element e = doc.GetElement(reference);
+                        if (e.Category.Name == "Ducts")
+                        {
+                            Curve ductCurve = ((LocationCurve)e.Location).Curve;
+                            double s1 = Math.Round(e.LookupParameter("Start Middle Elevation").AsDouble(), 6);
+                            double s2 = Math.Round(e.LookupParameter("End Middle Elevation").AsDouble(), 6);
+                            if (ductCurve.Length >= negLength && s1 == s2) //perfectly horizontal 
+                            {
+                                ducts.Add(e);
+                            }
+                        }
+                        else if (e.Category.Name == "Pipes")
+                        {
+                            Curve pipeCurve = ((LocationCurve)e.Location).Curve;
+                            if (pipeCurve.Length >= negLength && Math.Abs(Math.Round(((Line)pipeCurve).Direction.Normalize().Z, 3)) != 1)
+                            {
+                                pipes.Add(e);
+                            }
+                        }
+                        else if (e is CableTray)
+                        {
+                            Curve c = ((LocationCurve)e.Location).Curve;
+                            if (c.Length >= negLength && Math.Abs(Math.Round(((Line)c).Direction.Normalize().Z, 3)) == 0)
+                            {
+                                cables.Add(e);
+                            }
                         }
                     }
                 }
+
             }
-            catch
+            catch (Exception ex)
             {
-                return Result.Cancelled;
+                td(ex.StackTrace);
+                //return Result.Cancelled;
             }
             if (UI.selc) // allows me to select region
             {
@@ -278,11 +327,24 @@ namespace IBIMSGen.Hangers
             }
 
             //List<ElementId> ids = new List<ElementId>();
-            ductfits = new FilteredElementCollector(doc)
-                .OfCategory(BuiltInCategory.OST_DuctFitting)
-                .OfClass(typeof(FamilyInstance))
-                //.Where(x => selectionBoundary.contains(x))
-                .ToList();
+            if (ductsRLI!=null)
+            {
+                Document link = ductsRLI.GetLinkDocument();
+                ductfits = new FilteredElementCollector(link)
+                    .OfCategory(BuiltInCategory.OST_DuctFitting)
+                    .OfClass(typeof(FamilyInstance))
+                    //.Where(x => selectionBoundary.contains(x))
+                    .ToList();
+            }
+            else
+            {
+
+                ductfits = new FilteredElementCollector(doc)
+                    .OfCategory(BuiltInCategory.OST_DuctFitting)
+                    .OfClass(typeof(FamilyInstance))
+                    //.Where(x => selectionBoundary.contains(x))
+                    .ToList();
+            }
 
             getQuadTreeDims();
             QuadTree ductTree = new QuadTree(minx, maxy, maxx, miny, maxz, minz);

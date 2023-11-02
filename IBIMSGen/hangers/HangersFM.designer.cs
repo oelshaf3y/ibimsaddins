@@ -432,7 +432,7 @@
         private System.Windows.Forms.RadioButton radioButton2;
         private System.Windows.Forms.RadioButton radioButton1;
         private System.Windows.Forms.Panel panel7;
-        private System.Windows.Forms.CheckBox useLink;
         private System.Windows.Forms.Button ctButton;
+        public System.Windows.Forms.CheckBox useLink;
     }
 }
