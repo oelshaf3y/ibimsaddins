@@ -23,11 +23,7 @@ namespace IBIMSGen
             uidoc = commandData.Application.ActiveUIDocument;
             doc = uidoc.Document;
             sb = new StringBuilder();
-            Transaction tr = new Transaction(doc);
-            tr.Start("Draw");
-            drawSolids();
-            tr.Commit();
-            tr.Dispose();
+            
             //TaskDialog.Show("Info", sb.ToString());
             return Result.Succeeded;
         }

@@ -1,5 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Structure;
+using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace IBIMSGen.Hangers
         public double Offset { get; }
         public double Up { get; }
         public double Down { get; }
-        public bool isValid { get; private set; }
+        public bool isValid { get; private set; } = false;
         public List<Element> FitsInRange { get; private set; }
         public XYZ Perpendicular { get; private set; }
         public double Width { get; private set; }
@@ -49,7 +50,6 @@ namespace IBIMSGen.Hangers
         public void Process()
         {
             List<Support> _supports = new List<Support>();
-
             Curve ductCurve = ((LocationCurve)Element.Location).Curve;
             double minx = Math.Min(ductCurve.GetEndPoint(0).X, ductCurve.GetEndPoint(1).X) - 5;
             double miny = Math.Min(ductCurve.GetEndPoint(0).Y, ductCurve.GetEndPoint(1).Y) - 5;
@@ -61,10 +61,11 @@ namespace IBIMSGen.Hangers
             List<XYZ> pts = new List<XYZ>();
             try { Width = Element.LookupParameter("Width").AsDouble(); }
             catch { Width = Element.LookupParameter("Diameter").AsDouble(); }
+            if (Dimensions[0].Count == 0) return;
             if (Dimensions[0].Count == 1)
             {
                 Spacing = Dimensions[0][0]["spacing"] / 304.8;
-                if (Spacing == 0) { isValid = false; return; }
+                if (Spacing == 0) return;
                 string familySymbolName = Symbols.Select(x => x.FamilyName).Distinct().ElementAt(Convert.ToInt32(Dimensions[0][0]["family"]));
                 FamilySymbol = Symbols.Where(x => x.FamilyName.Equals(familySymbolName)).First();
             }
@@ -73,7 +74,7 @@ namespace IBIMSGen.Hangers
                 if (Dimensions[0].Where(x => x["from"] < Width * 304.8 && Width * 304.8 <= x["to"]).Any())
                 {
                     Spacing = Dimensions[0].Where(x => x["from"] < Width * 304.8 && Width * 304.8 <= x["to"]).First()["spacing"] / 304.8;
-                    if (Spacing == 0) { isValid = false; return; }
+                    if (Spacing == 0) return;
                     int index = Convert.ToInt32(Dimensions[0][0]["family"]);
                     if (index < 0) return;
                     string familySymbolName = Symbols.Select(x => x.FamilyName).Distinct().ElementAt(index);
@@ -152,7 +153,7 @@ namespace IBIMSGen.Hangers
             {
                 cc = Line.CreateBound(Ps, Pe);
             }
-            catch { isValid = false; return; }
+            catch { return; }
             if (fittingPts.Count == 0) // No ductfittings
             {
                 if (ductCurve.Length > Negligible && ductCurve.Length <= 4 * Offset)
@@ -306,6 +307,7 @@ namespace IBIMSGen.Hangers
             }
             if (Supports.Count > 0) isValid = true;
         }
+
         public List<XYZ> DecOrder(List<XYZ> points, Curve curve)
         {
             if (Math.Round(((Line)curve).Direction.Normalize().Y, 3) == 0)
@@ -352,7 +354,5 @@ namespace IBIMSGen.Hangers
                 return 0;
             }
         }
-        public int GetSystemRank(string name) => throw new NotImplementedException();
-        public double GetSysSpacing(List<Dictionary<string, double>> dimensions, double diameter) => throw new NotImplementedException();
     }
 }

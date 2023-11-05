@@ -31,7 +31,7 @@
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.panel3 = new System.Windows.Forms.Panel();
-            this.ctButton = new System.Windows.Forms.Button();
+            this.CT = new System.Windows.Forms.Button();
             this.FFButton = new System.Windows.Forms.Button();
             this.DRButton = new System.Windows.Forms.Button();
             this.CHWButton = new System.Windows.Forms.Button();
@@ -52,6 +52,8 @@
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.button3 = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
             this.panel3.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel7.SuspendLayout();
@@ -69,7 +71,7 @@
             this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F);
             this.button2.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.button2.Location = new System.Drawing.Point(314, 28);
+            this.button2.Location = new System.Drawing.Point(440, 8);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(86, 26);
             this.button2.TabIndex = 3;
@@ -87,7 +89,7 @@
             this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F);
             this.button1.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.button1.Location = new System.Drawing.Point(406, 27);
+            this.button1.Location = new System.Drawing.Point(532, 7);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(86, 29);
             this.button1.TabIndex = 2;
@@ -98,7 +100,7 @@
             // panel3
             // 
             this.panel3.BackColor = System.Drawing.Color.Gainsboro;
-            this.panel3.Controls.Add(this.ctButton);
+            this.panel3.Controls.Add(this.CT);
             this.panel3.Controls.Add(this.FFButton);
             this.panel3.Controls.Add(this.DRButton);
             this.panel3.Controls.Add(this.CHWButton);
@@ -110,19 +112,20 @@
             this.panel3.Size = new System.Drawing.Size(170, 504);
             this.panel3.TabIndex = 7;
             // 
-            // ctButton
+            // CT
             // 
-            this.ctButton.FlatAppearance.BorderSize = 0;
-            this.ctButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.ctButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F);
-            this.ctButton.ForeColor = System.Drawing.Color.Brown;
-            this.ctButton.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.ctButton.Location = new System.Drawing.Point(0, 256);
-            this.ctButton.Name = "ctButton";
-            this.ctButton.Size = new System.Drawing.Size(170, 44);
-            this.ctButton.TabIndex = 3;
-            this.ctButton.Text = "Cable Trays";
-            this.ctButton.UseVisualStyleBackColor = true;
+            this.CT.FlatAppearance.BorderSize = 0;
+            this.CT.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.CT.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F);
+            this.CT.ForeColor = System.Drawing.Color.Brown;
+            this.CT.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.CT.Location = new System.Drawing.Point(0, 256);
+            this.CT.Name = "CT";
+            this.CT.Size = new System.Drawing.Size(170, 44);
+            this.CT.TabIndex = 3;
+            this.CT.Text = "Cable Trays";
+            this.CT.UseVisualStyleBackColor = true;
+            this.CT.Click += new System.EventHandler(this.CT_Click);
             // 
             // FFButton
             // 
@@ -201,6 +204,8 @@
             // panel2
             // 
             this.panel2.BackColor = System.Drawing.Color.Gainsboro;
+            this.panel2.Controls.Add(this.label6);
+            this.panel2.Controls.Add(this.label5);
             this.panel2.Controls.Add(this.panel7);
             this.panel2.Controls.Add(this.button1);
             this.panel2.Controls.Add(this.radioButton2);
@@ -209,7 +214,7 @@
             this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.panel2.Location = new System.Drawing.Point(170, 433);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(520, 71);
+            this.panel2.Size = new System.Drawing.Size(630, 71);
             this.panel2.TabIndex = 9;
             // 
             // panel7
@@ -299,14 +304,14 @@
             this.panel4.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel4.Location = new System.Drawing.Point(170, 0);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(520, 63);
+            this.panel4.Size = new System.Drawing.Size(630, 63);
             this.panel4.TabIndex = 13;
             // 
             // useLink
             // 
             this.useLink.AutoSize = true;
             this.useLink.ForeColor = System.Drawing.Color.Brown;
-            this.useLink.Location = new System.Drawing.Point(393, 12);
+            this.useLink.Location = new System.Drawing.Point(495, 12);
             this.useLink.Name = "useLink";
             this.useLink.Size = new System.Drawing.Size(123, 17);
             this.useLink.TabIndex = 7;
@@ -318,7 +323,7 @@
             // 
             this.checkBox1.AutoSize = true;
             this.checkBox1.ForeColor = System.Drawing.Color.Brown;
-            this.checkBox1.Location = new System.Drawing.Point(393, 35);
+            this.checkBox1.Location = new System.Drawing.Point(495, 35);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(92, 17);
             this.checkBox1.TabIndex = 6;
@@ -371,18 +376,39 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(170, 63);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(520, 370);
+            this.panel1.Size = new System.Drawing.Size(630, 370);
             this.panel1.TabIndex = 14;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.label6.Location = new System.Drawing.Point(415, 53);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(96, 13);
+            this.label6.TabIndex = 14;
+            this.label6.Text = "|   Tarek Mahmoud";
+            this.label6.Click += new System.EventHandler(this.label6_Click);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.label5.Location = new System.Drawing.Point(320, 53);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(95, 13);
+            this.label5.TabIndex = 13;
+            this.label5.Text = "© Omar El-Shaf3y";
+            this.label5.Click += new System.EventHandler(this.label5_Click);
             // 
             // HangersFM
             // 
-            this.AcceptButton = this.button1;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.BackColor = System.Drawing.Color.White;
             this.CancelButton = this.button2;
-            this.ClientSize = new System.Drawing.Size(690, 504);
+            this.ClientSize = new System.Drawing.Size(800, 504);
             this.ControlBox = false;
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.panel4);
@@ -390,9 +416,9 @@
             this.Controls.Add(this.panel3);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(690, 504);
+            this.MaximumSize = new System.Drawing.Size(800, 504);
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(690, 504);
+            this.MinimumSize = new System.Drawing.Size(800, 504);
             this.Name = "HangersFM";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -432,7 +458,9 @@
         private System.Windows.Forms.RadioButton radioButton2;
         private System.Windows.Forms.RadioButton radioButton1;
         private System.Windows.Forms.Panel panel7;
-        private System.Windows.Forms.Button ctButton;
+        private System.Windows.Forms.Button CT;
         public System.Windows.Forms.CheckBox useLink;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label5;
     }
 }

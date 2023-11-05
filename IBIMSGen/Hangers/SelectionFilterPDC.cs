@@ -3,6 +3,7 @@ using Autodesk.Revit.DB.Electrical;
 using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI.Selection;
+using System;
 
 namespace IBIMSGen.Hangers
 {
@@ -10,26 +11,50 @@ namespace IBIMSGen.Hangers
     {
         public Document doc;
         public RevitLinkInstance RLI { get; }
-        public SelectionFilterPDC(RevitLinkInstance rli = null)
+        public bool isHost;
+        public SelectionFilterPDC(RevitLinkInstance rli = null, bool isHost = false)
         {
             RLI = rli;
+            this.isHost = isHost;
         }
         public bool AllowElement(Element e)
         {
-            if (RLI != null && ((RevitLinkInstance)e).Name != RLI.Name)
+            if (this.isHost)
             {
+
                 doc = ((RevitLinkInstance)e).GetLinkDocument();
                 if (doc != null) return true;
-            }
-            if (e.Category != null)
-            {
-                if (e is Pipe || e is Duct || e is CableTray)
+
+                if (e.Category != null)
                 {
-                    return true;
+                    if (e is Floor)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
-                else
+            }
+            else
+            {
+
+                if (RLI != null && ((RevitLinkInstance)e).Name != RLI.Name)
                 {
-                    return false;
+                    doc = ((RevitLinkInstance)e).GetLinkDocument();
+                    if (doc != null) return true;
+                }
+                if (e.Category != null)
+                {
+                    if (e is Pipe || e is Duct || e is CableTray)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
             }
             return false;
@@ -38,15 +63,15 @@ namespace IBIMSGen.Hangers
         public bool AllowReference(Reference reference, XYZ position)
         {
             Element ee = doc.GetElement(reference.LinkedElementId);
-            if (ee.Category != null)
+            if (isHost)
             {
-                if (ee is Pipe || ee is Duct || ee is CableTray)
+                if (ee.Category != null) return ee is Floor;
+            }
+            else
+            {
+                if (ee.Category != null)
                 {
-                    return true;
-                }
-                else
-                {
-                    return false;
+                    return (ee is Pipe || ee is Duct || ee is CableTray);
                 }
             }
             return false;

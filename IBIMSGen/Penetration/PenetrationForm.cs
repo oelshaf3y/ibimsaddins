@@ -81,6 +81,11 @@ namespace IBIMSGen.Penetration
         private void label5_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start("https://www.linkedin.com/in/oelshaf3y");
+
+        }
+
+        private void label6_Click(object sender, EventArgs e)
+        {
             System.Diagnostics.Process.Start("https://www.linkedin.com/in/tarek-mahmoud-ahmed-103041204");
 
         }

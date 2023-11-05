@@ -47,19 +47,18 @@ namespace IBIMSGen.Hangers
             comboBox1.Items.AddRange(linksNames.ToArray());
             comboBox2.Items.AddRange(levelsNames.ToArray());
             comboBox3.Items.AddRange(levelsNames.ToArray());
-            Duc = createUserControl("Duc", true);
+            Duc = createUserControl("Duct", true);
             Wuc = createUserControl("WS", false, WSdias, WSspcs);
             CWuc = createUserControl("CHW", false, CHWdias, CHWspcs);
             DRuc = createUserControl("DR", false, DRdias, DRspcs);
             FFuc = createUserControl("FF", false, Firedias, Firespcs);
-            CTuc = createUserControl(ctButton.Text);
+            CTuc = createUserControl("CT");
             CTuc.Controls.Find("dgv", true).First().Enabled = false;
-            ctButton.Click += genButtonClicked;
-            lastButton = ctButton;
+            lastButton = CT;
             comboBox2.SelectedIndex = 0;
             comboBox3.SelectedIndex = comboBox3.Items.Count - 1;
             useLink.Checked = true;
-
+            buttonClicked(ductButton.Name);
         }
 
         private void D_CellLeave(object sender, DataGridViewCellEventArgs e)
@@ -111,7 +110,7 @@ namespace IBIMSGen.Hangers
             DataGridView dgv = userControl.Controls.Find("dgv", true).First() as DataGridView;
             dgv.DefaultCellStyle.NullValue = "0";
             dgv.CellLeave += D_CellLeave;
-            if (name != "Duc")
+            if (name != "Duct")
             {
                 if (sizes == null) { sizes = new List<double>(); }
                 if (spaces == null) { spaces = new List<double>(); }
@@ -184,6 +183,31 @@ namespace IBIMSGen.Hangers
                     }
                 }
             }
+        }
+
+        private void CT_Click(object sender, EventArgs e)
+        {
+            if (isValidDims())
+            {
+                showUserControl("CT");
+                buttonClicked(CT.Name);
+            }
+            else
+            {
+                MessageBox.Show("Size or Spacing Value must be a number and greater than 0!");
+            }
+        }
+
+        private void label6_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.linkedin.com/in/tarek-mahmoud-ahmed-103041204");
+
+        }
+
+        private void label5_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.linkedin.com/in/oelshaf3y");
+
         }
 
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
@@ -408,23 +432,66 @@ namespace IBIMSGen.Hangers
             }
             else
             {
+                List<Control> CLBs = new List<Control>();
+                CLBs.Add(panel1.Controls.Find("Duct", true).First());
+                CLBs.Add(panel1.Controls.Find("WS", true).First());
+                CLBs.Add(panel1.Controls.Find("CHW", true).First());
+                CLBs.Add(panel1.Controls.Find("DR", true).First());
+                CLBs.Add(panel1.Controls.Find("FF", true).First());
+                CLBs.Add(panel1.Controls.Find("CT", true).First());
+                if (useLink.Checked)
+                {
 
-                CheckedListBox ductList = panel1.Controls.Find("Duc", true).First().Controls.Find("worksetNames", true).FirstOrDefault() as CheckedListBox;
-                CheckedListBox WSList = panel1.Controls.Find("WS", true).First().Controls.Find("worksetNames", true).FirstOrDefault() as CheckedListBox;
-                CheckedListBox CHWList = panel1.Controls.Find("CHW", true).First().Controls.Find("worksetNames", true).FirstOrDefault() as CheckedListBox;
-                CheckedListBox DRList = panel1.Controls.Find("DR", true).First().Controls.Find("worksetNames", true).FirstOrDefault() as CheckedListBox;
-                CheckedListBox FFList = panel1.Controls.Find("FF", true).First().Controls.Find("worksetNames", true).FirstOrDefault() as CheckedListBox;
-                CheckedListBox CTList = panel1.Controls.Find("FF", true).First().Controls.Find("worksetNames", true).FirstOrDefault() as CheckedListBox;
-
-                AllworksetsNames.Add(ductList.CheckedItems.Cast<string>().ToList());
-                //MessageBox.Show(AllworksetsNames.Count.ToString());
-                AllworksetsNames.Add(WSList.CheckedItems.Cast<string>().ToList());
-                AllworksetsNames.Add(CHWList.CheckedItems.Cast<string>().ToList());
-                AllworksetsNames.Add(DRList.CheckedItems.Cast<string>().ToList());
-                AllworksetsNames.Add(FFList.CheckedItems.Cast<string>().ToList());
-                AllworksetsNames.Add(CTList.CheckedItems.Cast<string>().ToList());
-
-
+                    foreach (var item in CLBs)
+                    {
+                        CheckedListBox CLB = item.Controls.Find("worksetNames", true).FirstOrDefault() as CheckedListBox;
+                        if (CLB.CheckedItems.Cast<string>().ToList().Count > 0)
+                        {
+                            AllworksetsNames.Add(CLB.CheckedItems.Cast<string>().ToList());
+                            ComboBox comboBox = item.Controls.Find("hangerFamily", true).First() as ComboBox;
+                            if (comboBox.SelectedIndex == -1)
+                            {
+                                MessageBox.Show($"Please select the family for {item.Name}");
+                                return;
+                            }
+                            if (item.Controls.Find("hangerFamily2", true).First().Visible)
+                            {
+                                ComboBox comboBox2 = item.Controls.Find("hangerFamily2", true).First() as ComboBox;
+                                if (comboBox2.SelectedIndex == -1)
+                                {
+                                    MessageBox.Show($"Please select the larger family for {item.Name}");
+                                    return;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            AllworksetsNames.Add(new List<string>());
+                        }
+                    }
+                    if (CLBs.Select(x => x.Controls.Find("worksetNames", true).FirstOrDefault()).Cast<CheckedListBox>().ToList().Count == 0)
+                    {
+                        MessageBox.Show("Nothing selected!!");
+                        return;
+                    }
+                    getDimensions();
+                }
+                else
+                {
+                    foreach (var item in CLBs)
+                    {
+                        CheckBox useDimension = item.Controls.Find("useDims", true).First() as CheckBox;
+                        if (useDimension.Checked)
+                        {
+                            AllworksetsNames.Add(new List<string>() { "used"});
+                        }
+                        else
+                        {
+                            AllworksetsNames.Add(new List<string>());
+                        }
+                    }
+                    getDimensions();
+                }
                 foreach (Control cont in panel1.Controls)
                 {
                     if (cont is UserControl && cont.Name.Contains("System"))
@@ -433,72 +500,7 @@ namespace IBIMSGen.Hangers
                         AllworksetsNames.Add(clb.CheckedItems.Cast<string>().ToList());
                     }
                 }
-                Control c = panel1.Controls.Find("Duc", true).First();
-                DataGridView ductSizesList = c.Controls.Find("dgv", true).First() as DataGridView;
-                List<Dictionary<string, double>> DIMS = new List<Dictionary<string, double>>();
-                if (AllworksetsNames[0].Count > 0)
-                {
-                    if (ductSizesList.Enabled)
-                    {
 
-                        for (int j = 0; j < ductSizesList.RowCount; j++)
-                        {
-                            Dictionary<string, double> dict = new Dictionary<string, double>();
-                            dict["from"] = Convert.ToDouble(ductSizesList[0, j].Value.ToString());
-                            dict["to"] = Convert.ToDouble(ductSizesList[1, j].Value.ToString());
-                            dict["spacing"] = Convert.ToDouble(ductSizesList[2, j].Value.ToString());
-                            dict["family"] = ((ComboBox)c.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex;
-                            DIMS.Add(dict);
-                        }
-
-                        AllworksetsDIMS.Add(DIMS);
-                    }
-                    else
-                    {
-                        TextBox t = (TextBox)c.Controls.Find("allSizesSpacing", true).First();
-                        Dictionary<string, double> dict = new Dictionary<string, double>();
-                        dict["spacing"] = Convert.ToDouble(t.Text);
-                        dict["family"] = ((ComboBox)c.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex;
-                        DIMS.Add(dict);
-                        AllworksetsDIMS.Add(DIMS);
-                    }
-                }
-
-                if (AllworksetsNames[1].Count > 0) getWorksetDims("WS");
-                if (AllworksetsNames[2].Count > 0) getWorksetDims("CHW");
-                if (AllworksetsNames[3].Count > 0) getWorksetDims("DR");
-                if (AllworksetsNames[4].Count > 0) getWorksetDims("FF");
-                if (AllworksetsNames[5].Count > 0) getWorksetDims(ctButton.Text);
-
-                foreach (Control control in panel1.Controls)
-                {
-                    if (control is UserControl && c.Name.Contains("System"))
-                    {
-                        DataGridView d = (DataGridView)control.Controls.Find("dgv", true).FirstOrDefault();
-                        DIMS = new List<Dictionary<string, double>>();
-                        if (d.Enabled == true)
-                        {
-                            for (int j = 0; j < d.RowCount; j++)
-                            {
-                                Dictionary<string, double> dict = new Dictionary<string, double>();
-                                dict["size"] = Convert.ToDouble(d[0, j].Value.ToString());
-                                dict["spacing"] = Convert.ToDouble(d[1, j].Value.ToString());
-                                dict["family"] = ((ComboBox)control.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex;
-                                DIMS.Add(dict);
-                            }
-                            AllworksetsDIMS.Add(DIMS);
-                        }
-                        else
-                        {
-                            TextBox t = (TextBox)c.Controls.Find("allSizesSpacing", true).FirstOrDefault();
-                            Dictionary<string, double> dict = new Dictionary<string, double>();
-                            dict["spacing"] = Convert.ToDouble(t.Text);
-                            dict["family"] = ((ComboBox)c.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex;
-                            DIMS.Add(dict);
-                            AllworksetsDIMS.Add(DIMS);
-                        }
-                    }
-                }
                 ook = true;
                 button1.DialogResult = DialogResult.OK;
                 Close();
@@ -512,11 +514,79 @@ namespace IBIMSGen.Hangers
             canc = true;
         }
 
+        private void getDimensions()
+        {
+            Control c = panel1.Controls.Find("Duct", true).First();
+            DataGridView ductSizesList = c.Controls.Find("dgv", true).First() as DataGridView;
+            List<Dictionary<string, double>> DIMS = new List<Dictionary<string, double>>();
+            if (AllworksetsNames[0].Count > 0)
+            {
+                if (ductSizesList.Enabled)
+                {
+                    for (int j = 0; j < ductSizesList.RowCount; j++)
+                    {
+                        Dictionary<string, double> dict = new Dictionary<string, double>();
+                        dict["from"] = Convert.ToDouble(ductSizesList[0, j].Value.ToString());
+                        dict["to"] = Convert.ToDouble(ductSizesList[1, j].Value.ToString());
+                        dict["spacing"] = Convert.ToDouble(ductSizesList[2, j].Value.ToString());
+                        dict["family"] = ((ComboBox)c.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex;
+                        DIMS.Add(dict);
+                    }
+                    MessageBox.Show("Adding duct");
+                    AllworksetsDIMS.Add(DIMS);
+                }
+                else
+                {
+                    TextBox t = (TextBox)c.Controls.Find("allSizesSpacing", true).First();
+                    Dictionary<string, double> dict = new Dictionary<string, double>();
+                    dict["spacing"] = Convert.ToDouble(t.Text);
+                    dict["family"] = ((ComboBox)c.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex;
+                    DIMS.Add(dict);
+                    AllworksetsDIMS.Add(DIMS);
+                }
+            }
+            else { AllworksetsDIMS.Add(new List<Dictionary<string, double>>()); }
+
+            if (AllworksetsNames[1].Count > 0) getWorksetDims("WS"); else AllworksetsDIMS.Add(new List<Dictionary<string, double>>());
+            if (AllworksetsNames[2].Count > 0) getWorksetDims("CHW"); else AllworksetsDIMS.Add(new List<Dictionary<string, double>>());
+            if (AllworksetsNames[3].Count > 0) getWorksetDims("DR"); else AllworksetsDIMS.Add(new List<Dictionary<string, double>>());
+            if (AllworksetsNames[4].Count > 0) getWorksetDims("FF"); else AllworksetsDIMS.Add(new List<Dictionary<string, double>>());
+            if (AllworksetsNames[5].Count > 0) getWorksetDims("CT"); else AllworksetsDIMS.Add(new List<Dictionary<string, double>>());
+            foreach (Control control in panel1.Controls)
+            {
+                if (control is UserControl && c.Name.Contains("System"))
+                {
+                    DataGridView d = (DataGridView)control.Controls.Find("dgv", true).FirstOrDefault();
+                    DIMS = new List<Dictionary<string, double>>();
+                    if (d.Enabled == true)
+                    {
+                        for (int j = 0; j < d.RowCount; j++)
+                        {
+                            Dictionary<string, double> dict = new Dictionary<string, double>();
+                            dict["size"] = Convert.ToDouble(d[0, j].Value.ToString());
+                            dict["spacing"] = Convert.ToDouble(d[1, j].Value.ToString());
+                            dict["family"] = ((ComboBox)control.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex;
+                            DIMS.Add(dict);
+                        }
+                        AllworksetsDIMS.Add(DIMS);
+                    }
+                    else
+                    {
+                        TextBox t = (TextBox)c.Controls.Find("allSizesSpacing", true).FirstOrDefault();
+                        Dictionary<string, double> dict = new Dictionary<string, double>();
+                        dict["spacing"] = Convert.ToDouble(t.Text);
+                        dict["family"] = ((ComboBox)c.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex;
+                        DIMS.Add(dict);
+                        AllworksetsDIMS.Add(DIMS);
+                    }
+                }
+            }
+        }
         private void Ductbt_Click(object sender, EventArgs e)
         {
             if (isValidDims())
             {
-                showUserControl("Duc");
+                showUserControl("Duct");
                 buttonClicked(ductButton.Name);
             }
             else

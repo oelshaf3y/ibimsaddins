@@ -36,6 +36,12 @@ namespace IBIMSGen
             RibbonPanel systems = application.CreateRibbonPanel(tabName, "System Tools");
             RibbonPanel Arch = application.CreateRibbonPanel(tabName, "Arch. Tools");
 
+            PushButtonData Hangers = new PushButtonData("Similar Detail Line", "Similar Lines", assemblyName, "IBIMSGen.IBIMSGen.Hangers.Hangers")
+            {
+                LargeImage = Properties.Resources.hanger.ToImageSource(),
+                Image = Properties.Resources.hangers_s.ToImageSource(),
+                ToolTip = "Place supports for MEP Elements."
+            };
 
             PushButtonData SelectSimilarDL = new PushButtonData("Similar Detail Line", "Similar Lines", assemblyName, "IBIMSGen.SelectSimilar")
             {
@@ -142,6 +148,7 @@ namespace IBIMSGen
 
             Arch.AddItem(RoomSections);
             systems.AddItem(BWork);
+            systems.AddItem(Hangers);
             systems.AddItem(Lights);
             systems.AddStackedItems(CenterElement, ColorCables);
             systems.AddStackedItems(Fillet, CutLines,cableTrayHeights);

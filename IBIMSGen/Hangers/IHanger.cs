@@ -24,8 +24,5 @@ namespace IBIMSGen.Hangers
         void Process();
         void Plant();
         double GetRod(XYZ point);
-        List<XYZ> DecOrder(List<XYZ> points, Curve curve);
-        int GetSystemRank(string name);
-        double GetSysSpacing(List<Dictionary<string, double>> dimensions, double diameter);
     }
 }

@@ -38,11 +38,11 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="RevitAPI">
-      <HintPath>..\..\..\..\..\Desktop\code\csRevit\RevitAPI.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files\Autodesk\Revit 2021\RevitAPI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="RevitAPIUI">
-      <HintPath>..\..\..\..\..\..\..\Program Files\Autodesk\Revit 2024\RevitAPIUI.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files\Autodesk\Revit 2021\RevitAPIUI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -109,14 +109,13 @@
     </Compile>
     <Compile Include="ElementSections.cs" />
     <Compile Include="Hangers\DuctHanger.cs" />
-    <Compile Include="Hangers\Hangers.cs" />
     <Compile Include="Hangers\HangersFM.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Hangers\HangersFM.Designer.cs">
       <DependentUpon>HangersFM.cs</DependentUpon>
     </Compile>
-    <Compile Include="Hangers\HangersTrial.cs" />
+    <Compile Include="Hangers\Hangers.cs" />
     <Compile Include="Hangers\HangerUC.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -345,6 +344,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\section.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\hangers-s.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\hanger.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

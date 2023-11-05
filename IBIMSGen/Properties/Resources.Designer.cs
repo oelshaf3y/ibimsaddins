@@ -263,6 +263,26 @@ namespace IBIMSGen.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
+        internal static System.Drawing.Icon hanger {
+            get {
+                object obj = ResourceManager.GetObject("hanger", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon hangers_s {
+            get {
+                object obj = ResourceManager.GetObject("hangers_s", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
         internal static System.Drawing.Icon replace2 {
             get {
                 object obj = ResourceManager.GetObject("replace2", resourceCulture);

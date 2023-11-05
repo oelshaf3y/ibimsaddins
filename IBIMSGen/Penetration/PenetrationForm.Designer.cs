@@ -203,6 +203,7 @@
             // 
             resources.ApplyResources(this.label6, "label6");
             this.label6.Name = "label6";
+            this.label6.Click += new System.EventHandler(this.label6_Click);
             // 
             // PenetrationForm
             // 

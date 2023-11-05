@@ -32,6 +32,11 @@
             this.label2 = new System.Windows.Forms.Label();
             this.worksetNames = new System.Windows.Forms.CheckedListBox();
             this.sizesPanel = new System.Windows.Forms.Panel();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.hangerFamily2 = new System.Windows.Forms.ComboBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.hangerFamily = new System.Windows.Forms.ComboBox();
             this.useDims = new System.Windows.Forms.CheckBox();
             this.allSizesSpacing = new System.Windows.Forms.TextBox();
             this.fixedSpacingLabel = new System.Windows.Forms.Label();
@@ -39,11 +44,6 @@
             this.panel3 = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
             this.copyFromCB = new System.Windows.Forms.ComboBox();
-            this.hangerFamily = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.hangerFamily2 = new System.Windows.Forms.ComboBox();
-            this.label5 = new System.Windows.Forms.Label();
             this.checkListPanel.SuspendLayout();
             this.sizesPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
@@ -56,7 +56,7 @@
             this.checkListPanel.Controls.Add(this.worksetNames);
             this.checkListPanel.Location = new System.Drawing.Point(0, 0);
             this.checkListPanel.Name = "checkListPanel";
-            this.checkListPanel.Size = new System.Drawing.Size(209, 367);
+            this.checkListPanel.Size = new System.Drawing.Size(321, 367);
             this.checkListPanel.TabIndex = 0;
             // 
             // label2
@@ -77,7 +77,7 @@
             this.worksetNames.FormattingEnabled = true;
             this.worksetNames.Location = new System.Drawing.Point(0, 22);
             this.worksetNames.Name = "worksetNames";
-            this.worksetNames.Size = new System.Drawing.Size(209, 345);
+            this.worksetNames.Size = new System.Drawing.Size(321, 345);
             this.worksetNames.TabIndex = 0;
             // 
             // sizesPanel
@@ -91,10 +91,60 @@
             this.sizesPanel.Controls.Add(this.allSizesSpacing);
             this.sizesPanel.Controls.Add(this.fixedSpacingLabel);
             this.sizesPanel.Controls.Add(this.dgv);
-            this.sizesPanel.Location = new System.Drawing.Point(215, 3);
+            this.sizesPanel.Location = new System.Drawing.Point(327, 3);
             this.sizesPanel.Name = "sizesPanel";
             this.sizesPanel.Size = new System.Drawing.Size(300, 332);
             this.sizesPanel.TabIndex = 1;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.ForeColor = System.Drawing.Color.Brown;
+            this.label5.Location = new System.Drawing.Point(4, 247);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(107, 13);
+            this.label5.TabIndex = 7;
+            this.label5.Text = "Select Hanger Family";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.ForeColor = System.Drawing.Color.Brown;
+            this.label4.Location = new System.Drawing.Point(2, 294);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(75, 13);
+            this.label4.TabIndex = 6;
+            this.label4.Text = "Hanger Family";
+            this.label4.Visible = false;
+            // 
+            // hangerFamily2
+            // 
+            this.hangerFamily2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.hangerFamily2.FormattingEnabled = true;
+            this.hangerFamily2.Location = new System.Drawing.Point(107, 290);
+            this.hangerFamily2.Name = "hangerFamily2";
+            this.hangerFamily2.Size = new System.Drawing.Size(176, 21);
+            this.hangerFamily2.TabIndex = 5;
+            this.hangerFamily2.Visible = false;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.ForeColor = System.Drawing.Color.Brown;
+            this.label3.Location = new System.Drawing.Point(2, 267);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(75, 13);
+            this.label3.TabIndex = 4;
+            this.label3.Text = "Hanger Family";
+            // 
+            // hangerFamily
+            // 
+            this.hangerFamily.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.hangerFamily.FormattingEnabled = true;
+            this.hangerFamily.Location = new System.Drawing.Point(107, 263);
+            this.hangerFamily.Name = "hangerFamily";
+            this.hangerFamily.Size = new System.Drawing.Size(176, 21);
+            this.hangerFamily.TabIndex = 3;
             // 
             // useDims
             // 
@@ -140,7 +190,7 @@
             // 
             this.panel3.Controls.Add(this.label1);
             this.panel3.Controls.Add(this.copyFromCB);
-            this.panel3.Location = new System.Drawing.Point(215, 334);
+            this.panel3.Location = new System.Drawing.Point(327, 334);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(300, 38);
             this.panel3.TabIndex = 2;
@@ -168,56 +218,6 @@
             this.copyFromCB.TabIndex = 0;
             this.copyFromCB.Visible = false;
             // 
-            // hangerFamily
-            // 
-            this.hangerFamily.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.hangerFamily.FormattingEnabled = true;
-            this.hangerFamily.Location = new System.Drawing.Point(107, 263);
-            this.hangerFamily.Name = "hangerFamily";
-            this.hangerFamily.Size = new System.Drawing.Size(176, 21);
-            this.hangerFamily.TabIndex = 3;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.ForeColor = System.Drawing.Color.Brown;
-            this.label3.Location = new System.Drawing.Point(2, 267);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(75, 13);
-            this.label3.TabIndex = 4;
-            this.label3.Text = "Hanger Family";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.ForeColor = System.Drawing.Color.Brown;
-            this.label4.Location = new System.Drawing.Point(2, 294);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(75, 13);
-            this.label4.TabIndex = 6;
-            this.label4.Text = "Hanger Family";
-            this.label4.Visible = false;
-            // 
-            // hangerFamily2
-            // 
-            this.hangerFamily2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.hangerFamily2.FormattingEnabled = true;
-            this.hangerFamily2.Location = new System.Drawing.Point(107, 290);
-            this.hangerFamily2.Name = "hangerFamily2";
-            this.hangerFamily2.Size = new System.Drawing.Size(176, 21);
-            this.hangerFamily2.TabIndex = 5;
-            this.hangerFamily2.Visible = false;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.ForeColor = System.Drawing.Color.Brown;
-            this.label5.Location = new System.Drawing.Point(4, 247);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(107, 13);
-            this.label5.TabIndex = 7;
-            this.label5.Text = "Select Hanger Family";
-            // 
             // HangerUC
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -226,7 +226,7 @@
             this.Controls.Add(this.sizesPanel);
             this.Controls.Add(this.checkListPanel);
             this.Name = "HangerUC";
-            this.Size = new System.Drawing.Size(520, 370);
+            this.Size = new System.Drawing.Size(630, 370);
             this.checkListPanel.ResumeLayout(false);
             this.checkListPanel.PerformLayout();
             this.sizesPanel.ResumeLayout(false);

@@ -15,14 +15,13 @@ namespace IBIMSGen.Hangers
         public double Up { get; }
         public double Down { get; }
         public double Width { get; private set; }
-        public List<Support> Supports { get; private set; }
+        public List<Support> Supports { get; private set; } = new List<Support>();
         public XYZ Perpendicular { get; private set; }
         public FamilySymbol FamilySymbol { get; private set; }
         public List<List<Dictionary<string, double>>> Dimensions { get; }
         public List<FamilySymbol> Symbols { get; }
         public double Negligible { get; }
         public double Offset { get; }
-        public string Workset { get; }
         public List<double> Diameters { get; }
         public RevitLinkInstance DocumentRLI { get; }
         public RevitLinkInstance LinkInstance { get; }
@@ -41,12 +40,13 @@ namespace IBIMSGen.Hangers
         public Face LowerFace { get; private set; }
         public FamilySymbol FamilySymbol2 { get; private set; }
         public List<List<string>> AllLinksNames { get; private set; }
-        public double Spacing { get; private set; }
+        public double Spacing { get; private set; } = 0;
         public double HangerDiameter { get; private set; }
+        public double PipeDiam { get; private set; }
 
         public PipeHanger(Document document, Solid solid, Element element, double up, double down,
             List<List<Dictionary<string, double>>> dimensions, List<FamilySymbol> symbols, double negligible,
-            double offset, string workset, List<double> diameters, List<List<string>> linksNames, RevitLinkInstance linkInstance, RevitLinkInstance pipesRLI = null)
+            double offset, List<double> diameters, List<List<string>> linksNames, RevitLinkInstance linkInstance, RevitLinkInstance pipesRLI = null)
         {
             Document = document;
             Solid = solid;
@@ -57,7 +57,6 @@ namespace IBIMSGen.Hangers
             Symbols = symbols;
             Negligible = negligible;
             Offset = offset;
-            Workset = workset;
             Diameters = diameters;
             AllLinksNames = linksNames;
             DocumentRLI = linkInstance;
@@ -74,12 +73,10 @@ namespace IBIMSGen.Hangers
             isFireFighting = false;
             try
             {
-
                 Width = Element.LookupParameter("Diameter").AsDouble() * 304.8; //mm
             }
             catch
             {
-                isValid = false;
                 return;
             }
             Curve pipeCurve = ((LocationCurve)Element.Location).Curve;
@@ -97,25 +94,16 @@ namespace IBIMSGen.Hangers
             }
             catch
             {
-                TaskDialog.Show("Info", "Hang curve");
-
-                isValid = false; return;
+                return;
             }
             if (LinkInstance != null)
             {
                 RevitLinkType rlt = Document.GetElement(LinkInstance.GetTypeId()) as RevitLinkType;
                 Rank = GetSystemRank(rlt.Name);
-
-                if (Rank == -1)
-                {
-                    TaskDialog.Show("Info", rlt.Name);
-                    return;
-                }
+                if (Rank == -1) return;
                 Spacing = GetSysSpacing(Dimensions[Rank], Width);
-                //TaskDialog.Show("Name", Spacing.ToString());
-                TaskDialog.Show("Info", "spacing 2 " + Spacing.ToString());
 
-                if (Spacing == 0) { isValid = false; return; }
+                if (Spacing == 0) return;
                 string familySymbolName = Symbols.Select(x => x.FamilyName).Distinct().ElementAt(Convert.ToInt32(Dimensions[Rank][0]["family"]));
                 FamilySymbol = Symbols.Where(x => x.FamilyName.Equals(familySymbolName)).First();
                 isFireFighting = Dimensions[Rank][0]["FF"] == 1;
@@ -128,21 +116,26 @@ namespace IBIMSGen.Hangers
             }
             else
             {
-                var r = Dimensions.Where(x => x.First()["spacing"] != 0).First();
-                Spacing = GetSysSpacing(Dimensions.Where(x => x.First()["spacing"] != 0).First(), Width);
-                TaskDialog.Show("Info", "spacing 1 " + Spacing.ToString());
-                if (Spacing == 0) { isValid = false; return; }
-
-                isFireFighting = Dimensions.Where(x => x.First()["spacing"] != 0).First().First()["FF"] == 1;
-                int index = Convert.ToInt32(Dimensions.Where(x => x.First()["spacing"] != 0).First().First()["family"]);
-                if (index == -1)
+                int r = -1;
+                try
                 {
-                    TaskDialog.Show("Info", index.ToString());
-                    isValid = false; return;
+                    r = GetSystemRank("used", true).Where(x => x != -1 && x != 0 && x != 5).FirstOrDefault();
                 }
+                catch
+                {
+                    return;
+                }
+                TaskDialog.Show("R", r.ToString());
+                if (r == -1 || r==0 || r ==5) return;
+                Spacing = GetSysSpacing(Dimensions[r], Width);
+                if (Spacing == 0) return;
+
+                isFireFighting = Dimensions[r].First()["FF"] == 1;
+                int index = Convert.ToInt32(Dimensions[r].Where(x => x["spacing"] != 0).First()["family"]);
+                if (index == -1) return;
                 string familySymbolName = Symbols.Select(x => x.FamilyName).Distinct().ElementAt(index);
                 FamilySymbol = Symbols.Where(x => x.FamilyName.Equals(familySymbolName)).First();
-                int index2 = Convert.ToInt32(Dimensions.Where(x => x.First()["spacing"] != 0).First().First()["family2"]);
+                int index2 = Convert.ToInt32(Dimensions[r].Where(x => x["spacing"] != 0).First()["family2"]);
                 if (index2 >= 0)
                 {
                     string familySymbolName2 = Symbols.Select(x => x.FamilyName).Distinct().ElementAt(index2);
@@ -152,11 +145,21 @@ namespace IBIMSGen.Hangers
 
             List<XYZ> pps = new List<XYZ>();
             List<XYZ> pipeHangPts = new List<XYZ>();
-            double pipeDiam = (Width / 304.8) + (2 * Element.LookupParameter("Insulation Thickness").AsDouble());
+            try
+            {
+
+                OutsideDiam = Element.LookupParameter("Outside Diameter").AsDouble();
+                PipeDiam = (OutsideDiam) + (2 * Element.LookupParameter("Insulation Thickness").AsDouble());
+            }
+            catch
+            {
+                PipeDiam = (Width / 304.8) + (2 * Element.LookupParameter("Insulation Thickness").AsDouble());
+
+            }
             HangerDiameter = -1;
             foreach (double hangerDiam in Diameters)
             {
-                if (pipeDiam <= (hangerDiam / 304.8))
+                if (PipeDiam <= (hangerDiam / 304.8))
                 {
                     HangerDiameter = hangerDiam / 304.8;
                     break;
@@ -164,7 +167,6 @@ namespace IBIMSGen.Hangers
             }
             if (HangerDiameter == -1) { HangerDiameter = 402 / 304.8; }
             levelId = Element.LookupParameter("Reference Level").AsElementId();
-            OutsideDiam = Element.LookupParameter("Outside Diameter").AsDouble();
             pipeElevation = pipeCurve.GetEndPoint(0).Z - Element.LookupParameter("Insulation Thickness").AsDouble();
             midElevStart = Element.LookupParameter("Start Middle Elevation").AsDouble();
             midElevEnd = Element.LookupParameter("End Middle Elevation").AsDouble();
@@ -172,7 +174,7 @@ namespace IBIMSGen.Hangers
             if (pipeCurve.Length > Negligible && pipeCurve.Length <= Offset)
             {
                 XYZ midPt = pipeCurve.Evaluate(0.50, true);
-                if (!pipeHangPts.Contains(midPt))
+                if (!pipeHangPts.Where(x => x.IsAlmostEqualTo(midPt)).Any())
                 {
                     pipeHangPts.Add(midPt);
                     double rod = GetRod(midPt);
@@ -181,14 +183,14 @@ namespace IBIMSGen.Hangers
             }
             else if (pipeCurve.Length <= Spacing && pipeCurve.Length > Offset)
             {
-                if (!pipeHangPts.Contains(Ps))
+                if (!pipeHangPts.Where(x => x.IsAlmostEqualTo(Ps)).Any())
                 {
                     pipeHangPts.Add(Ps);
                     double rod = GetRod(Ps);
                     if (rod != 0) Supports.Add(new Support(Ps, rod + 2995 / 304.8));
 
                 }
-                if (!pipeHangPts.Contains(Pe))
+                if (!pipeHangPts.Where(x => x.IsAlmostEqualTo(Pe)).Any())
                 {
                     pipeHangPts.Add(Pe);
                     double rod = GetRod(Pe);
@@ -198,7 +200,7 @@ namespace IBIMSGen.Hangers
             }
             else if (pipeCurve.Length > Spacing)
             {
-                if (!pipeHangPts.Contains(Ps))
+                if (!pipeHangPts.Where(x => x.IsAlmostEqualTo(Ps)).Any())
                 {
                     pipeHangPts.Add(Ps);
                     double rod = GetRod(Ps);
@@ -210,7 +212,7 @@ namespace IBIMSGen.Hangers
                 for (int i = 0; i < n; i++)
                 {
                     XYZ point = prev.Add(Ns * pipeDirection);
-                    if (!pipeHangPts.Contains(point))
+                    if (!pipeHangPts.Where(x => x.IsAlmostEqualTo(point)).Any())
                     {
                         pipeHangPts.Add(point);
                         double rod = GetRod(point);
@@ -218,7 +220,7 @@ namespace IBIMSGen.Hangers
                     }
                     prev = point;
                 }
-                if (!pipeHangPts.Contains(Pe))
+                if (!pipeHangPts.Where(x => x.IsAlmostEqualTo(Pe)).Any())
                 {
                     pipeHangPts.Add(Pe);
                     double rod = GetRod(Pe);
@@ -231,7 +233,7 @@ namespace IBIMSGen.Hangers
 
         public void Plant()
         {
-            if (isValid) { TaskDialog.Show("Err", "Valid"); } else { return; }
+            if (!isValid) return;
             foreach (Support support in Supports)
             {
                 if (isFireFighting)
@@ -246,8 +248,8 @@ namespace IBIMSGen.Hangers
                     }
                     double elev = pipeElevation + (q * slope * support.point.DistanceTo(startPt));
                     double pipeOffsetFromHost = elev - (3000 / 304.8);
-                    if (hangerFamInst == null) { TaskDialog.Show("Err", "Not Planted"); return; }
-                    hangerFamInst.LookupParameter("Diameter").Set(OutsideDiam);
+                    if (hangerFamInst == null) { return; }
+                    hangerFamInst.LookupParameter("Diameter").Set(PipeDiam);
                     hangerFamInst.LookupParameter("Offset from Host").Set(pipeOffsetFromHost);
                     hangerFamInst.LookupParameter("AnchorElevation").Set(support.rod);
                 }
@@ -279,7 +281,7 @@ namespace IBIMSGen.Hangers
                     try
                     {
                         FamilySymbol fs = null;
-                        if (Width > (202 / 304.8))
+                        if (Width > (202))
                         {
                             fs = FamilySymbol2;
                             if (fs != null)
@@ -306,9 +308,9 @@ namespace IBIMSGen.Hangers
                         if (iraa != null && !iraa.IsEmpty)
                         {
                             Curve cv = Line.CreateBound(support.point, iraa.get_Item(0).XYZPoint);
-                            pang.LookupParameter("Pipe_distance").Set(cv.Length - (0.5 * Width));
+                            pang.LookupParameter("Pipe_distance").Set(cv.Length - (0.5 * PipeDiam));
                         }
-                        pang.LookupParameter("Pipe Outer Diameter").Set(OutsideDiam);
+                        pang.LookupParameter("Pipe Outer Diameter").Set(PipeDiam);
                     }
                     catch
                     {
@@ -338,17 +340,6 @@ namespace IBIMSGen.Hangers
             }
         }
 
-        public List<XYZ> DecOrder(List<XYZ> points, Curve curve)
-        {
-            if (Math.Round(((Line)curve).Direction.Normalize().Y, 3) == 0)
-            {
-                return points.OrderByDescending(a => a.X).ToList();
-            }
-            else
-            {
-                return points.OrderByDescending(a => a.Y).ToList();
-            }
-        }
 
         public int GetSystemRank(string name)
         {
@@ -360,11 +351,22 @@ namespace IBIMSGen.Hangers
             return -1;
         }
 
+        public List<int> GetSystemRank(string name, bool getAll)
+        {
+            List<int> foundRanks = new List<int>();
+            for (int i = 0; i < AllLinksNames.Count; i++)
+            {
+                List<string> linksnames = AllLinksNames[i];
+                if (linksnames.Where(x => x == name).Any()) foundRanks.Add(i);
+            }
+            return foundRanks;
+        }
+
         public double GetSysSpacing(List<Dictionary<string, double>> dimensions, double diameter)
         {
             if (dimensions == null) return 0;
             if (dimensions.Count == 0) return 0;
-            else if (dimensions.Count == 1) return dimensions[0]["spacing"];
+            else if (dimensions.Count == 1) return dimensions[0]["spacing"] / 304.8;
             else if (dimensions.Where(x => Math.Round(diameter, 5) <= Math.Round(x["size"], 5)).Any())
                 return dimensions.Where(x => Math.Round(diameter, 5) <= Math.Round(x["size"], 5)).First()["spacing"] / 304.8;
             else return dimensions.Last()["spacing"] / 304.8;
