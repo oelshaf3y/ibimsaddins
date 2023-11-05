@@ -1,19 +1,26 @@
-﻿using System;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI.Selection;
+﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Electrical;
-using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.DB.Mechanical;
+using Autodesk.Revit.DB.Plumbing;
+using Autodesk.Revit.UI.Selection;
 
 namespace IBIMSGen.Hangers
 {
     public class SelectionFilterPDC : ISelectionFilter
     {
         public Document doc;
+        public RevitLinkInstance RLI { get; }
+        public SelectionFilterPDC(RevitLinkInstance rli = null)
+        {
+            RLI = rli;
+        }
         public bool AllowElement(Element e)
         {
-            doc = ((RevitLinkInstance)e).GetLinkDocument();
-            if (doc != null) return true;
+            if (RLI != null && ((RevitLinkInstance)e).Name != RLI.Name)
+            {
+                doc = ((RevitLinkInstance)e).GetLinkDocument();
+                if (doc != null) return true;
+            }
             if (e.Category != null)
             {
                 if (e is Pipe || e is Duct || e is CableTray)

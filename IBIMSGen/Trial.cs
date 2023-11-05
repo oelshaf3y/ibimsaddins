@@ -2,13 +2,10 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
-using Microsoft.Office.Interop.Excel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 
 namespace IBIMSGen
 {
@@ -28,7 +25,7 @@ namespace IBIMSGen
             sb = new StringBuilder();
             Transaction tr = new Transaction(doc);
             tr.Start("Draw");
-            //drawSolids();
+            drawSolids();
             tr.Commit();
             tr.Dispose();
             //TaskDialog.Show("Info", sb.ToString());

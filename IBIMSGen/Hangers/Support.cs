@@ -2,7 +2,7 @@
 
 namespace IBIMSGen.Hangers
 {
-    internal class Support
+    public class Support
     {
         public XYZ point { get; set; }
         public double rod { get; set; }

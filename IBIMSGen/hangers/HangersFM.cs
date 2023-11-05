@@ -1,13 +1,8 @@
 ﻿using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Mechanical;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Color = System.Drawing.Color;
 using Control = System.Windows.Forms.Control;
@@ -98,7 +93,7 @@ namespace IBIMSGen.Hangers
             panel1.Controls.Add(userControl);
             userControl.Dock = DockStyle.Fill;
             ComboBox hangersFamilies = userControl.Controls.Find("hangerFamily", true).First() as ComboBox;
-            hangersFamilies.Items.AddRange(this.familySymbols.Select(x => x.FamilyName).Distinct().ToArray());
+            hangersFamilies.Items.AddRange(familySymbols.Select(x => x.FamilyName).Distinct().ToArray());
 
             if (name == "WS" || name == "CHW" || name == "DR" || name.Contains("stem"))
             {
@@ -106,7 +101,7 @@ namespace IBIMSGen.Hangers
                 userControl.Controls.Find("label4", true).First().Text = "larger than 200mm";
                 userControl.Controls.Find("label3", true).First().Text = "smaller than 200mm";
                 userControl.Controls.Find("hangerFamily2", true).First().Visible = true;
-                ((ComboBox)userControl.Controls.Find("hangerFamily2", true).First()).Items.AddRange(this.familySymbols.Select(x => x.FamilyName).Distinct().ToArray());
+                ((ComboBox)userControl.Controls.Find("hangerFamily2", true).First()).Items.AddRange(familySymbols.Select(x => x.FamilyName).Distinct().ToArray());
             }
 
             CheckedListBox worksetNames = userControl.Controls.Find("worksetNames", true).First() as CheckedListBox;
@@ -206,7 +201,7 @@ namespace IBIMSGen.Hangers
 
         bool isValidDims()
         {
-            DataGridView activeD = (DataGridView)getActiveUC().Controls.Find("dgv", true)?.FirstOrDefault() as DataGridView;
+            DataGridView activeD = (DataGridView)getActiveUC().Controls.Find("dgv", true)?.FirstOrDefault();
             if (!activeD.Enabled) return true;
             foreach (DataGridViewRow row in activeD.Rows)
             {
@@ -421,8 +416,8 @@ namespace IBIMSGen.Hangers
                 CheckedListBox FFList = panel1.Controls.Find("FF", true).First().Controls.Find("worksetNames", true).FirstOrDefault() as CheckedListBox;
                 CheckedListBox CTList = panel1.Controls.Find("FF", true).First().Controls.Find("worksetNames", true).FirstOrDefault() as CheckedListBox;
 
-
                 AllworksetsNames.Add(ductList.CheckedItems.Cast<string>().ToList());
+                //MessageBox.Show(AllworksetsNames.Count.ToString());
                 AllworksetsNames.Add(WSList.CheckedItems.Cast<string>().ToList());
                 AllworksetsNames.Add(CHWList.CheckedItems.Cast<string>().ToList());
                 AllworksetsNames.Add(DRList.CheckedItems.Cast<string>().ToList());
@@ -441,36 +436,39 @@ namespace IBIMSGen.Hangers
                 Control c = panel1.Controls.Find("Duc", true).First();
                 DataGridView ductSizesList = c.Controls.Find("dgv", true).First() as DataGridView;
                 List<Dictionary<string, double>> DIMS = new List<Dictionary<string, double>>();
-                if (ductSizesList.Enabled)
+                if (AllworksetsNames[0].Count > 0)
                 {
-
-                    for (int j = 0; j < ductSizesList.RowCount; j++)
+                    if (ductSizesList.Enabled)
                     {
+
+                        for (int j = 0; j < ductSizesList.RowCount; j++)
+                        {
+                            Dictionary<string, double> dict = new Dictionary<string, double>();
+                            dict["from"] = Convert.ToDouble(ductSizesList[0, j].Value.ToString());
+                            dict["to"] = Convert.ToDouble(ductSizesList[1, j].Value.ToString());
+                            dict["spacing"] = Convert.ToDouble(ductSizesList[2, j].Value.ToString());
+                            dict["family"] = ((ComboBox)c.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex;
+                            DIMS.Add(dict);
+                        }
+
+                        AllworksetsDIMS.Add(DIMS);
+                    }
+                    else
+                    {
+                        TextBox t = (TextBox)c.Controls.Find("allSizesSpacing", true).First();
                         Dictionary<string, double> dict = new Dictionary<string, double>();
-                        dict["from"] = Convert.ToDouble(ductSizesList[0, j].Value.ToString());
-                        dict["to"] = Convert.ToDouble(ductSizesList[1, j].Value.ToString());
-                        dict["spacing"] = Convert.ToDouble(ductSizesList[2, j].Value.ToString());
+                        dict["spacing"] = Convert.ToDouble(t.Text);
                         dict["family"] = ((ComboBox)c.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex;
                         DIMS.Add(dict);
+                        AllworksetsDIMS.Add(DIMS);
                     }
-
-                    AllworksetsDIMS.Add(DIMS);
-                }
-                else
-                {
-                    TextBox t = (TextBox)c.Controls.Find("allSizesSpacing", true).First();
-                    Dictionary<string, double> dict = new Dictionary<string, double>();
-                    dict["spacing"] = Convert.ToDouble(t.Text);
-                    dict["family"] = ((ComboBox)c.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex;
-                    DIMS.Add(dict);
-                    AllworksetsDIMS.Add(DIMS);
                 }
 
-                getWorksetDims("WS");
-                getWorksetDims("CHW");
-                getWorksetDims("DR");
-                getWorksetDims("FF");
-                getWorksetDims(ctButton.Text);
+                if (AllworksetsNames[1].Count > 0) getWorksetDims("WS");
+                if (AllworksetsNames[2].Count > 0) getWorksetDims("CHW");
+                if (AllworksetsNames[3].Count > 0) getWorksetDims("DR");
+                if (AllworksetsNames[4].Count > 0) getWorksetDims("FF");
+                if (AllworksetsNames[5].Count > 0) getWorksetDims(ctButton.Text);
 
                 foreach (Control control in panel1.Controls)
                 {
@@ -503,7 +501,7 @@ namespace IBIMSGen.Hangers
                 }
                 ook = true;
                 button1.DialogResult = DialogResult.OK;
-                this.Close();
+                Close();
             }
             frin = comboBox2.SelectedIndex;
             toin = comboBox3.SelectedIndex;
