@@ -8,32 +8,16 @@ using System.Windows.Controls;
 
 namespace IBIMSGen.Hangers
 {
-    internal class TrayHanger : IHanger
+    internal class TrayHanger : Hanger
     {
-        public Document Document { get; }
-        public Solid Solid { get; }
-        public Element Element { get; }
-        public List<List<Dictionary<string, double>>> Dimensions { get; }
-        public double Up { get; }
-        public double Down { get; }
-        public List<FamilySymbol> Symbols { get; }
-        public double Negligible { get; }
-        public double Offset { get; }
         public RevitLinkInstance DocumentRLI { get; }
-        public RevitLinkInstance LinkInstance { get; }
-
-        public List<Support> Supports { get; private set; } = new List<Support>();
-        public FamilySymbol FamilySymbol { get; private set; }
-        public XYZ Perpendicular { get; private set; }
-        public double Width { get; private set; }
-        public bool isValid { get; private set; } = false;
-        public double Spacing { get; private set; } = 0;
         public ElementId LevelId { get; private set; }
         public XYZ trayDir { get; private set; }
         public double botElevation { get; private set; }
 
         public TrayHanger(Document document, Solid solid, Element element, List<List<Dictionary<string, double>>> dimensions, double up, double down,
-            List<FamilySymbol> symbols, double negligible, double offset, RevitLinkInstance linkInstance, RevitLinkInstance trayRLI = null)
+            List<FamilySymbol> symbols, double negligible, double offset, RevitLinkInstance linkInstance,
+            QuadTree allDuctsTree, QuadTree allPipesTree, QuadTree allTraysTree, RevitLinkInstance trayRLI = null)
         {
             Document = document;
             Solid = solid;
@@ -46,6 +30,9 @@ namespace IBIMSGen.Hangers
             Offset = offset;
             DocumentRLI = linkInstance;
             LinkInstance = trayRLI;
+            AllDuctsTree = allDuctsTree;
+            AllPipesTree = allPipesTree;
+            AllTraysTree = allTraysTree;
             Process();
         }
 
@@ -54,12 +41,13 @@ namespace IBIMSGen.Hangers
         public void Process()
         {
             FamilySymbol = null;
-            Curve trayCurve = ((LocationCurve)Element.Location).Curve;
+            ElementCurve = ((LocationCurve)Element.Location).Curve;
+            GetRegion();
             double trayOffset = 500 / 304.80;
-            trayDir = ((Line)trayCurve).Direction.Normalize();
+            trayDir = ((Line)ElementCurve).Direction.Normalize();
             Perpendicular = new XYZ(-trayDir.Y, trayDir.X, trayDir.Z);
-            XYZ P0 = trayCurve.Evaluate(0, true);
-            XYZ Pf = trayCurve.Evaluate(1, true);
+            XYZ P0 = ElementCurve.Evaluate(0, true);
+            XYZ Pf = ElementCurve.Evaluate(1, true);
             XYZ Ps = P0.Add(Offset * trayDir);
             XYZ Pe = Pf.Add(-Offset * trayDir);
             Width = Element.LookupParameter("Width").AsDouble();
@@ -110,9 +98,9 @@ namespace IBIMSGen.Hangers
             {
                 elevation = ((Level)Document.GetElement(LevelId)).Elevation + botElevation;
             }
-            if (trayCurve.Length > Negligible && trayCurve.Length <= trayOffset)
+            if (ElementCurve.Length > Negligible && ElementCurve.Length <= trayOffset)
             {
-                XYZ midPt = trayCurve.Evaluate(0.50, true);
+                XYZ midPt = ElementCurve.Evaluate(0.50, true);
                 if (!trayHangPts.Contains(midPt))
                 {
                     trayHangPts.Add(midPt);
@@ -121,7 +109,7 @@ namespace IBIMSGen.Hangers
                     if (rod != 0) Supports.Add(new Support(PP, rod));
                 }
             }
-            else if (trayCurve.Length <= Spacing && trayCurve.Length > trayOffset)
+            else if (ElementCurve.Length <= Spacing && ElementCurve.Length > trayOffset)
             {
                 if (!trayHangPts.Contains(Ps))
                 {
@@ -138,7 +126,7 @@ namespace IBIMSGen.Hangers
                     if (rod != 0) Supports.Add(new Support(PP, rod));
                 }
             }
-            else if (trayCurve.Length > Spacing)
+            else if (ElementCurve.Length > Spacing)
             {
                 if (!trayHangPts.Contains(Ps))
                 {
@@ -178,25 +166,6 @@ namespace IBIMSGen.Hangers
             }
         }
 
-        public double GetRod(XYZ point)
-        {
-            Line tempLine = Line.CreateUnbound(point, XYZ.BasisZ);
-            Face lower = Solid.Faces.get_Item(0);
-            //Face upper = Solid.Faces.get_Item(1);
-            lower.Intersect(tempLine, out IntersectionResultArray intersectionWithLower);
-            //upper.Intersect(tempLine, out IntersectionResultArray intersectionWithUpper);
-            if (intersectionWithLower == null || intersectionWithLower.IsEmpty) return 0;
-            //if () return 0;
-            XYZ ipWithLower = intersectionWithLower.get_Item(0).XYZPoint;
-            //XYZ ipWithUpper = intersectionWithUpper.get_Item(0).XYZPoint;
-            if (ipWithLower.Z > point.Z)
-            {
-                return ipWithLower.Z - point.Z;
-            }
-            else
-            {
-                return 0;
-            }
-        }
+
     }
 }

@@ -4,29 +4,14 @@ using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 
 namespace IBIMSGen.Hangers
 {
-    internal class PipeHanger : IHanger
+    internal class PipeHanger : Hanger
     {
-        public Document Document { get; }
-        public Solid Solid { get; }
-        public Element Element { get; }
-        public double Up { get; }
-        public double Down { get; }
-        public double Width { get; private set; }
-        public List<Support> Supports { get; private set; } = new List<Support>();
-        public XYZ Perpendicular { get; private set; }
-        public FamilySymbol FamilySymbol { get; private set; }
-        public List<List<Dictionary<string, double>>> Dimensions { get; }
-        public List<FamilySymbol> Symbols { get; }
-        public double Negligible { get; }
-        public double Offset { get; }
         public List<double> Diameters { get; }
         public RevitLinkInstance DocumentRLI { get; }
-        public RevitLinkInstance LinkInstance { get; }
-
-        public bool isValid { get; private set; } = false;
 
         public XYZ startPt { get; private set; }
         public bool isFireFighting { get; private set; }
@@ -40,13 +25,13 @@ namespace IBIMSGen.Hangers
         public Face LowerFace { get; private set; }
         public FamilySymbol FamilySymbol2 { get; private set; }
         public List<List<string>> AllLinksNames { get; private set; }
-        public double Spacing { get; private set; } = 0;
         public double HangerDiameter { get; private set; }
         public double PipeDiam { get; private set; }
 
         public PipeHanger(Document document, Solid solid, Element element, double up, double down,
             List<List<Dictionary<string, double>>> dimensions, List<FamilySymbol> symbols, double negligible,
-            double offset, List<double> diameters, List<List<string>> linksNames, RevitLinkInstance linkInstance, RevitLinkInstance pipesRLI = null)
+            double offset, List<double> diameters, List<List<string>> linksNames, RevitLinkInstance linkInstance,
+            QuadTree allDuctsTree, QuadTree allPipesTree, QuadTree allTraysTree, RevitLinkInstance pipesRLI = null)
         {
             Document = document;
             Solid = solid;
@@ -61,6 +46,9 @@ namespace IBIMSGen.Hangers
             AllLinksNames = linksNames;
             DocumentRLI = linkInstance;
             LinkInstance = pipesRLI;
+            AllDuctsTree = allDuctsTree;
+            AllPipesTree = allPipesTree;
+            AllTraysTree = allTraysTree;
             Process();
         }
 
@@ -79,11 +67,13 @@ namespace IBIMSGen.Hangers
             {
                 return;
             }
-            Curve pipeCurve = ((LocationCurve)Element.Location).Curve;
-            pipeDirection = ((Line)pipeCurve).Direction.Normalize();
+            ElementCurve = ((LocationCurve)Element.Location).Curve;
+            GetRegion();
+            //elementsNearby=
+            pipeDirection = ((Line)ElementCurve).Direction.Normalize();
             Perpendicular = new XYZ(-pipeDirection.Y, pipeDirection.X, pipeDirection.Z);
-            startPt = pipeCurve.Evaluate(0, true);
-            XYZ Pf = pipeCurve.Evaluate(1, true);
+            startPt = ElementCurve.Evaluate(0, true);
+            XYZ Pf = ElementCurve.Evaluate(1, true);
             XYZ Ps = startPt.Add(Offset * pipeDirection);
             XYZ Pe = Pf.Add(-Offset * pipeDirection);
             Curve hangCurve = null;
@@ -99,7 +89,7 @@ namespace IBIMSGen.Hangers
             if (LinkInstance != null)
             {
                 RevitLinkType rlt = Document.GetElement(LinkInstance.GetTypeId()) as RevitLinkType;
-                Rank = GetSystemRank(rlt.Name);
+                Rank = GetSystemRank(rlt.Name, AllLinksNames);
                 if (Rank == -1) return;
                 Spacing = GetSysSpacing(Dimensions[Rank], Width);
 
@@ -119,14 +109,14 @@ namespace IBIMSGen.Hangers
                 int r = -1;
                 try
                 {
-                    r = GetSystemRank("used", true).Where(x => x != -1 && x != 0 && x != 5).FirstOrDefault();
+                    r = GetSystemRank("used", true, AllLinksNames).Where(x => x != -1 && x != 0 && x != 5).FirstOrDefault();
                 }
                 catch
                 {
                     return;
                 }
                 TaskDialog.Show("R", r.ToString());
-                if (r == -1 || r==0 || r ==5) return;
+                if (r == -1 || r == 0 || r == 5) return;
                 Spacing = GetSysSpacing(Dimensions[r], Width);
                 if (Spacing == 0) return;
 
@@ -143,7 +133,6 @@ namespace IBIMSGen.Hangers
                 }
             }
 
-            List<XYZ> pps = new List<XYZ>();
             List<XYZ> pipeHangPts = new List<XYZ>();
             try
             {
@@ -167,30 +156,30 @@ namespace IBIMSGen.Hangers
             }
             if (HangerDiameter == -1) { HangerDiameter = 402 / 304.8; }
             levelId = Element.LookupParameter("Reference Level").AsElementId();
-            pipeElevation = pipeCurve.GetEndPoint(0).Z - Element.LookupParameter("Insulation Thickness").AsDouble();
+            pipeElevation = ElementCurve.GetEndPoint(0).Z - Element.LookupParameter("Insulation Thickness").AsDouble();
             midElevStart = Element.LookupParameter("Start Middle Elevation").AsDouble();
             midElevEnd = Element.LookupParameter("End Middle Elevation").AsDouble();
             slope = Element.LookupParameter("Slope").AsDouble();
-            if (pipeCurve.Length > Negligible && pipeCurve.Length <= Offset)
+            if (ElementCurve.Length > Negligible && ElementCurve.Length <= 5 * Offset)
             {
-                XYZ midPt = pipeCurve.Evaluate(0.50, true);
-                if (!pipeHangPts.Where(x => x.IsAlmostEqualTo(midPt)).Any())
+                XYZ midPt = ElementCurve.Evaluate(0.50, true);
+                if (!pipeHangPts.Contains(midPt))
                 {
                     pipeHangPts.Add(midPt);
                     double rod = GetRod(midPt);
                     if (rod != 0) Supports.Add(new Support(midPt, rod + 2995 / 304.8));
                 }
             }
-            else if (pipeCurve.Length <= Spacing && pipeCurve.Length > Offset)
+            else if (ElementCurve.Length <= Spacing && ElementCurve.Length > 5 * Offset)
             {
-                if (!pipeHangPts.Where(x => x.IsAlmostEqualTo(Ps)).Any())
+                if (!pipeHangPts.Contains(Ps))
                 {
                     pipeHangPts.Add(Ps);
                     double rod = GetRod(Ps);
                     if (rod != 0) Supports.Add(new Support(Ps, rod + 2995 / 304.8));
 
                 }
-                if (!pipeHangPts.Where(x => x.IsAlmostEqualTo(Pe)).Any())
+                if (!pipeHangPts.Contains(Pe))
                 {
                     pipeHangPts.Add(Pe);
                     double rod = GetRod(Pe);
@@ -198,9 +187,9 @@ namespace IBIMSGen.Hangers
 
                 }
             }
-            else if (pipeCurve.Length > Spacing)
+            else if (ElementCurve.Length > Spacing)
             {
-                if (!pipeHangPts.Where(x => x.IsAlmostEqualTo(Ps)).Any())
+                if (!pipeHangPts.Contains(Ps))
                 {
                     pipeHangPts.Add(Ps);
                     double rod = GetRod(Ps);
@@ -212,7 +201,7 @@ namespace IBIMSGen.Hangers
                 for (int i = 0; i < n; i++)
                 {
                     XYZ point = prev.Add(Ns * pipeDirection);
-                    if (!pipeHangPts.Where(x => x.IsAlmostEqualTo(point)).Any())
+                    if (!pipeHangPts.Contains(point))
                     {
                         pipeHangPts.Add(point);
                         double rod = GetRod(point);
@@ -220,7 +209,7 @@ namespace IBIMSGen.Hangers
                     }
                     prev = point;
                 }
-                if (!pipeHangPts.Where(x => x.IsAlmostEqualTo(Pe)).Any())
+                if (!pipeHangPts.Contains(Pe))
                 {
                     pipeHangPts.Add(Pe);
                     double rod = GetRod(Pe);
@@ -228,7 +217,7 @@ namespace IBIMSGen.Hangers
 
                 }
             }
-            isValid = true;
+            if (Supports.Count > 0) isValid = true;
         }
 
         public void Plant()
@@ -274,7 +263,7 @@ namespace IBIMSGen.Hangers
                         FamilyInstance air = null;
                         air = Document.Create.NewFamilyInstance(support.point, fsair, StructuralType.NonStructural);
                         Document.Regenerate();
-                        Face faceair = getSolid(air).Faces.get_Item(0);
+                        Face faceair = GetSolid(air).Faces.get_Item(0);
                         string refnew = air.UniqueId + ":0:INSTANCE:" + faceair.Reference.ConvertToStableRepresentation(Document);
                         reference = Reference.ParseFromStableRepresentation(Document, refnew);
                     }
@@ -319,122 +308,8 @@ namespace IBIMSGen.Hangers
             }
         }
 
-        public double GetRod(XYZ point)
-        {
-            Line tempLine = Line.CreateUnbound(point, XYZ.BasisZ);
-            Face lower = Solid.Faces.get_Item(0);
-            //Face upper = Solid.Faces.get_Item(1);
-            lower.Intersect(tempLine, out IntersectionResultArray intersectionWithLower);
-            //upper.Intersect(tempLine, out IntersectionResultArray intersectionWithUpper);
-            if (intersectionWithLower == null || intersectionWithLower.IsEmpty) return 0;
-            //if () return 0;
-            XYZ ipWithLower = intersectionWithLower.get_Item(0).XYZPoint;
-            //XYZ ipWithUpper = intersectionWithUpper.get_Item(0).XYZPoint;
-            if (ipWithLower.Z > point.Z)
-            {
-                return ipWithLower.Z - point.Z;
-            }
-            else
-            {
-                return 0;
-            }
-        }
 
 
-        public int GetSystemRank(string name)
-        {
-            for (int i = 0; i < AllLinksNames.Count; i++)
-            {
-                List<string> linksnames = AllLinksNames[i];
-                if (linksnames.Where(x => x == name).Any()) return i;
-            }
-            return -1;
-        }
-
-        public List<int> GetSystemRank(string name, bool getAll)
-        {
-            List<int> foundRanks = new List<int>();
-            for (int i = 0; i < AllLinksNames.Count; i++)
-            {
-                List<string> linksnames = AllLinksNames[i];
-                if (linksnames.Where(x => x == name).Any()) foundRanks.Add(i);
-            }
-            return foundRanks;
-        }
-
-        public double GetSysSpacing(List<Dictionary<string, double>> dimensions, double diameter)
-        {
-            if (dimensions == null) return 0;
-            if (dimensions.Count == 0) return 0;
-            else if (dimensions.Count == 1) return dimensions[0]["spacing"] / 304.8;
-            else if (dimensions.Where(x => Math.Round(diameter, 5) <= Math.Round(x["size"], 5)).Any())
-                return dimensions.Where(x => Math.Round(diameter, 5) <= Math.Round(x["size"], 5)).First()["spacing"] / 304.8;
-            else return dimensions.Last()["spacing"] / 304.8;
-        }
-        public Solid getSolid(Element elem)
-        {
-            IList<Solid> solids = new List<Solid>();
-            Options options = new Options();
-            options.ComputeReferences = true;
-            try
-            {
-                GeometryElement geo = elem.get_Geometry(options);
-                if (geo.FirstOrDefault() is Solid)
-                {
-                    return (Solid)geo.FirstOrDefault();
-                }
-                foreach (GeometryObject geometryObject in geo)
-                {
-                    if (geometryObject != null)
-                    {
-                        Solid solid = geometryObject as Solid;
-                        if (solid != null && solid.Volume > 0)
-                        {
-                            solids.Add(solid);
-
-                        }
-                    }
-                }
-            }
-            catch
-            {
-            }
-            if (solids.Count == 0)
-            {
-                try
-                {
-                    GeometryElement geo = elem.get_Geometry(options);
-                    GeometryInstance geoIns = geo.FirstOrDefault() as GeometryInstance;
-                    if (geoIns != null)
-                    {
-                        GeometryElement geoElem = geoIns.GetInstanceGeometry();
-                        if (geoElem != null)
-                        {
-                            foreach (GeometryObject geometryObject in geoElem)
-                            {
-                                Solid solid = geometryObject as Solid;
-                                if (solid != null && solid.Volume > 0)
-                                {
-                                    solids.Add(solid);
-                                }
-                            }
-                        }
-                    }
-                }
-                catch
-                {
-                    throw new InvalidOperationException();
-                }
-            }
-            if (solids.Count > 0)
-            {
-                return solids.OrderByDescending(x => x.Volume).ElementAt(0);
-            }
-            else
-            {
-                return null;
-            }
-        }
 
     }
 }

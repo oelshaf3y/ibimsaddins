@@ -122,7 +122,7 @@
     <Compile Include="Hangers\HangerUC.Designer.cs">
       <DependentUpon>HangerUC.cs</DependentUpon>
     </Compile>
-    <Compile Include="Hangers\IHanger.cs" />
+    <Compile Include="Hangers\Hanger.cs" />
     <Compile Include="Hangers\PipeHanger.cs" />
     <Compile Include="Hangers\QuadTree.cs" />
     <Compile Include="Hangers\SelectionFilterPDC.cs" />

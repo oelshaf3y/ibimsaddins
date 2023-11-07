@@ -1,6 +1,8 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Electrical;
+using Autodesk.Revit.DB.Mechanical;
+using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.DB.Structure;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
@@ -29,7 +31,7 @@ namespace IBIMSGen.Hangers
         List<List<Dictionary<string, double>>> AllWorksetsDIMS;
         IList<Element> ducts, pipes, cables, floors;
         IList<Reference> mechRefs, linkedRefs;
-        List<Element> ductfits;
+        List<Element> ductfits, allDuctsInModel, AllPipesInModel, AllTrayInModel;
         List<double> HangDias;
         Options options;
         RevitLinkInstance RLI;
@@ -37,7 +39,7 @@ namespace IBIMSGen.Hangers
         List<DuctHanger> ductHangers;
         List<PipeHanger> pipeHangers;
         List<TrayHanger> trayHangers;
-        double meanFloorHeight, ductOffset, negLength;
+        double meanFloorHeight, Offset, negLength;
         StringBuilder sb;
         double minx = double.MaxValue, miny = double.MaxValue, minz = double.MaxValue;
         double maxx = double.MinValue, maxy = double.MinValue, maxz = double.MinValue;
@@ -63,14 +65,17 @@ namespace IBIMSGen.Hangers
             cables = new List<Element>();
             floors = new List<Element>();
             ductfits = new List<Element>();
-            ductOffset = 100 / 304.8;
+            Offset = 100 / 304.8;
             negLength = 100 / 304.80;
             HangDias = new List<double>() { 17, 22, 27, 34, 42, 52, 65, 67, 77, 82, 92, 102, 112, 127, 152, 162, 202, 227, 252, 317, 352, 402 };
+            allDuctsInModel = new List<Element>();
+            AllPipesInModel = new List<Element>();
+            AllTrayInModel = new List<Element>();
 
             familySymbols = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_GenericModel)
                 .OfClass(typeof(FamilySymbol))
-                .Cast<FamilySymbol>().OrderBy(x=>x.FamilyName).ToList();
+                .Cast<FamilySymbol>().OrderBy(x => x.FamilyName).ToList();
             linksFEC = new FilteredElementCollector(doc).OfClass(typeof(RevitLinkInstance));
             LinksNames = linksFEC.Cast<RevitLinkInstance>()
                 .Select(x => ((RevitLinkType)doc.GetElement(x.GetTypeId())))
@@ -107,8 +112,6 @@ namespace IBIMSGen.Hangers
             {
                 return Result.Cancelled;
             }
-
-
 
             AllWorksetNames = UI.AllworksetsNames;
             AllWorksetsDIMS = UI.AllworksetsDIMS;
@@ -309,7 +312,7 @@ namespace IBIMSGen.Hangers
                 if (fitsRLI.Where(x => x.Name == rli.Name).Any()) continue;
                 fitsRLI.Add(rli);
             }
-            if (ductsRLI.Count > 0)
+            if (fitsRLI.Count > 0)
             {
                 foreach (RevitLinkInstance rli in fitsRLI)
                 {
@@ -336,6 +339,38 @@ namespace IBIMSGen.Hangers
             QuadTree fitsTree = new QuadTree(minx, maxy, maxx, miny, maxz, minz);
             QuadTree pipesTree = new QuadTree(minx, maxy, maxx, miny, maxz, minz);
             QuadTree traysTree = new QuadTree(minx, maxy, maxx, miny, maxz, minz);
+
+            Boundary selectionBoundary = new Boundary(minx, maxy, maxx, miny, maxz, minz);
+            foreach (RevitLinkInstance rli in linksFEC)
+            {
+                Document _link = rli.GetLinkDocument();
+                allDuctsInModel.AddRange(new FilteredElementCollector(_link).OfClass(typeof(Duct)).WhereElementIsNotElementType().Where(x => selectionBoundary.contains(x)).ToArray());
+
+                AllPipesInModel.AddRange(new FilteredElementCollector(_link).OfClass(typeof(Pipe)).WhereElementIsNotElementType().Where(x => selectionBoundary.contains(x)).ToArray());
+
+                AllTrayInModel.AddRange(new FilteredElementCollector(_link).OfCategory(BuiltInCategory.OST_CableTray).WhereElementIsNotElementType().Where(x => selectionBoundary.contains(x)).ToArray());
+
+            }
+            allDuctsInModel.AddRange(new FilteredElementCollector(doc).OfClass(typeof(Duct)).WhereElementIsNotElementType().Where(x => selectionBoundary.contains(x)).ToArray());
+            AllPipesInModel.AddRange(new FilteredElementCollector(doc).OfClass(typeof(Pipe)).WhereElementIsNotElementType().Where(x => selectionBoundary.contains(x)).ToArray());
+            AllTrayInModel.AddRange(new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_CableTray).WhereElementIsNotElementType().Where(x => selectionBoundary.contains(x)).ToArray());
+            td(allDuctsInModel.Count.ToString());
+            QuadTree allDuctsTree = new QuadTree(minx, maxy, maxx, miny, maxz, minz);
+            QuadTree allPipesTree = new QuadTree(minx, maxy, maxx, miny, maxz, minz);
+            QuadTree allTraysTree = new QuadTree(minx, maxy, maxx, miny, maxz, minz);
+
+            foreach (Element duct in allDuctsInModel)
+            {
+                allDuctsTree.insert(duct);
+            }
+            foreach (Element pipe in AllPipesInModel)
+            {
+                allPipesTree.insert(pipe);
+            }
+            foreach (Element tray in AllTrayInModel)
+            {
+                allTraysTree.insert(tray);
+            }
 
             foreach (Element duct in ducts)
             {
@@ -364,6 +399,7 @@ namespace IBIMSGen.Hangers
                 double floorUp = double.MinValue;
                 double floorDown = double.MaxValue;
                 Solid solid = getSolid(ele);
+
                 if (solid != null && solid.Volume != 0)
                 {
                     double elevationAtBot = 0;
@@ -426,31 +462,69 @@ namespace IBIMSGen.Hangers
                         List<Element> fitsInRange = fitsTree.query(floorRange);
                         List<Element> pipesInRange = pipesTree.query(floorRange);
                         List<Element> traysInRange = traysTree.query(floorRange);
-                        foreach (Element duct in ductTree.query(floorRange))
+                        List<Element> ductsInRange = ductTree.query(floorRange);
+                        for (int i = 0; i < ductsInRange.Count; i++)
                         {
-                            ductHangers.Add(new DuctHanger(doc, solid, duct, AllWorksetsDIMS, familySymbols, negLength, ductOffset, floorUp, floorDown, fitsInRange));
-                            //new DuctHanger(doc, solid, duct, AllWorksetsDIMS, familySymbols, negLength, ductOffset, floorUp, floorDown, fitsInRange);
+                            Element duct = ductsInRange[i];
+                            if (UI.useLink.Checked)
+                            {
+                                RevitLinkInstance ductRLI = ductsRLI.ElementAt(ducts.IndexOf(ducts.Where(x => x.Id.IntegerValue == duct.Id.IntegerValue).First()));
+                                ductHangers.Add(new DuctHanger(doc, solid, duct, AllWorksetsDIMS, familySymbols, negLength, Offset, floorUp, floorDown, fitsInRange,
+                                allDuctsTree: allDuctsTree,
+                                allPipesTree: allPipesTree,
+                                allTraysTree: allTraysTree, ductRLI));
+                            }
+                            else
+                            {
+                                ductHangers.Add(new DuctHanger(doc, solid, duct, AllWorksetsDIMS, familySymbols, negLength, Offset, floorUp, floorDown, fitsInRange,
+                                allDuctsTree: allDuctsTree,
+                                allPipesTree: allPipesTree,
+                                allTraysTree: allTraysTree));
+                            }
                         }
                         #region Pipes
                         for (int i = 0; i < pipesInRange.Count; i++)
                         {
                             Element pipe = pipesInRange[i];
-                            if (UI.useLink.Checked) pipeHangers.Add(new PipeHanger(doc, solid, pipe, floorUp, floorDown, AllWorksetsDIMS,
-                                familySymbols, negLength, offset: 500 / 304.80, HangDias, AllWorksetNames, RLI, pipesRLI[i]));
-                            else pipeHangers.Add(new PipeHanger(doc, solid, pipe, floorUp, floorDown, AllWorksetsDIMS,
-                                familySymbols, negLength, offset: 500 / 304.80, HangDias, AllWorksetNames, RLI));
-                            //new PipeHanger(doc, solid, pipe, floorUp, floorDown, AllWorksetsDIMS,
-                            //    familySymbols, negLength, offset: 500 / 304.80, HangDias, AllWorksetNames, RLI, pipesRLI[i]);
+                            if (UI.useLink.Checked)
+                            {
+                                RevitLinkInstance pipeRLI = pipesRLI.ElementAt(pipes.IndexOf(pipe));
+                                pipeHangers.Add(new PipeHanger(doc, solid, pipe, floorUp, floorDown, AllWorksetsDIMS,
+                                familySymbols, negLength, Offset, HangDias, AllWorksetNames, RLI,
+                                 allDuctsTree: allDuctsTree,
+                                allPipesTree: allPipesTree,
+                                allTraysTree: allTraysTree, pipeRLI));
+                            }
+                            else
+                            {
+                                pipeHangers.Add(new PipeHanger(doc, solid, pipe, floorUp, floorDown, AllWorksetsDIMS,
+                                familySymbols, negLength, Offset, HangDias, AllWorksetNames, RLI,
+                                 allDuctsTree: allDuctsTree,
+                                allPipesTree: allPipesTree,
+                                allTraysTree: allTraysTree));
+                            }
                         }
                         #endregion
-                        //processPipes(ele as Floor, pipesInRange, solid.Faces, floorUp, floorDown, elevationAtBot);
 
                         #region Cable Trays
                         for (int i = 0; i < traysInRange.Count; i++)
                         {
                             Element tray = traysInRange[i];
-                            if (UI.useLink.Checked) trayHangers.Add(new TrayHanger(doc, solid, tray, AllWorksetsDIMS, floorUp, floorDown, familySymbols, negLength, ductOffset, RLI, cablesRLI[i]));
-                            else trayHangers.Add(new TrayHanger(doc, solid, tray, AllWorksetsDIMS, floorUp, floorDown, familySymbols, negLength, ductOffset, RLI));
+                            if (UI.useLink.Checked)
+                            {
+                                RevitLinkInstance trayRLI = cablesRLI.ElementAt(cables.IndexOf(tray));
+                                trayHangers.Add(new TrayHanger(doc, solid, tray, AllWorksetsDIMS, floorUp, floorDown, familySymbols, negLength, Offset, RLI,
+                                allDuctsTree: allDuctsTree,
+                                allPipesTree: allPipesTree,
+                                allTraysTree: allTraysTree, trayRLI));
+                            }
+                            else
+                            {
+                                trayHangers.Add(new TrayHanger(doc, solid, tray, AllWorksetsDIMS, floorUp, floorDown, familySymbols, negLength, Offset, RLI,
+                                 allDuctsTree: allDuctsTree,
+                                allPipesTree: allPipesTree,
+                                allTraysTree: allTraysTree));
+                            }
                         }
                         #endregion
                     }

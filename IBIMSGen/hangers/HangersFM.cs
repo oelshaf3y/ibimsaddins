@@ -30,11 +30,11 @@ namespace IBIMSGen.Hangers
             DRdias = new List<double>() { 20, 25, 32, 40, 50, 75, 110, 125, 130 };
             WSdias = new List<double>() { 20, 25, 32, 40, 50, 75, 110, 125, 130 };
             CHWdias = new List<double>() { 15, 20, 25, 32, 40, 50, 65, 80, 100, 125, 150, 200, 250, 300, 350, 400 };
-            Firedias = new List<double>() { 15, 20, 25, 32, 40, 50, 65, 80, 90, 100, 125, 150, 200, 250, 300, 350 };
+            Firedias = new List<double>() {  20, 25, 32, 40, 50, 65, 80, 90, 100, 125, 150, 200, 250, 300, 350 };
             DRspcs = new List<double>() { 1000, 1000, 1000, 1000, 1065, 1370, 1525, 1680, 1830 };
             WSspcs = new List<double>() { 1000, 1000, 1000, 1000, 1065, 1370, 1525, 1680, 1830 };
             CHWspcs = new List<double>() { 2100, 2100, 2100, 2400, 2700, 3100, 3400, 3600, 4300, 4300, 5100, 5800, 6100, 7000, 7600, 8200 };
-            Firespcs = new List<double>() { 1800, 2400, 2400, 2700, 3000, 3000, 3300, 3600, 3700, 3900, 4200, 4500, 4500, 4500, 4500, 4500 };
+            Firespcs = new List<double>() {  2400, 2400, 2700, 3000, 3000, 3300, 3600, 3700, 3900, 4200, 4500, 4500, 4500, 4500, 4500 };
             AllworksetsDIMS = new List<List<Dictionary<string, double>>>();
             AllworksetsNames = new List<List<string>>();
             this.linksNames = linksNames;
@@ -532,7 +532,6 @@ namespace IBIMSGen.Hangers
                         dict["family"] = ((ComboBox)c.Controls.Find("hangerFamily", true).FirstOrDefault()).SelectedIndex;
                         DIMS.Add(dict);
                     }
-                    MessageBox.Show("Adding duct");
                     AllworksetsDIMS.Add(DIMS);
                 }
                 else

@@ -36,7 +36,7 @@ namespace IBIMSGen
             RibbonPanel systems = application.CreateRibbonPanel(tabName, "System Tools");
             RibbonPanel Arch = application.CreateRibbonPanel(tabName, "Arch. Tools");
 
-            PushButtonData Hangers = new PushButtonData("Similar Detail Line", "Similar Lines", assemblyName, "IBIMSGen.IBIMSGen.Hangers.Hangers")
+            PushButtonData Hangers = new PushButtonData("Elements Support Hanger", "Elements Hanger", assemblyName, "IBIMSGen.Hangers.Hangers")
             {
                 LargeImage = Properties.Resources.hanger.ToImageSource(),
                 Image = Properties.Resources.hangers_s.ToImageSource(),

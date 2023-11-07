@@ -7,32 +7,16 @@ using System.Linq;
 
 namespace IBIMSGen.Hangers
 {
-    internal class DuctHanger : IHanger
+    public class DuctHanger : Hanger
     {
-        public Document Document { get; }
-        public Solid Solid { get; private set; }
-        public Element Element { get; }
-        public List<List<Dictionary<string, double>>> Dimensions { get; }
-        public List<FamilySymbol> Symbols { get; }
-        public double Negligible { get; }
-        public double Offset { get; }
-        public double Up { get; }
-        public double Down { get; }
-        public bool isValid { get; private set; } = false;
         public List<Element> FitsInRange { get; private set; }
-        public XYZ Perpendicular { get; private set; }
-        public double Width { get; private set; }
         public double Height { get; private set; }
-        public List<Support> Supports { get; private set; } = new List<Support>();
-        public FamilySymbol FamilySymbol { get; private set; }
         public double InsulationThick { get; private set; }
         public double BotElevation { get; private set; }
-        public double Spacing { get; private set; } = 0;
-
-        public RevitLinkInstance LinkInstance { get; }
 
         public DuctHanger(Document document, Solid solid, Element element, List<List<Dictionary<string, double>>> dimensions, List<FamilySymbol> symbols,
-            double negligible, double offset, double floorUp, double floorDown, List<Element> fitsInRange, RevitLinkInstance RLI = null)
+            double negligible, double offset, double floorUp, double floorDown, List<Element> fitsInRange,
+            QuadTree allDuctsTree, QuadTree allPipesTree, QuadTree allTraysTree, RevitLinkInstance RLI = null)
         {
             Document = document;
             Solid = solid;
@@ -45,18 +29,17 @@ namespace IBIMSGen.Hangers
             Down = floorDown;
             FitsInRange = fitsInRange;
             LinkInstance = RLI;
+            AllDuctsTree = allDuctsTree;
+            AllPipesTree = allPipesTree;
+            AllTraysTree = allTraysTree;
             Process();
         }
         public void Process()
         {
             List<Support> _supports = new List<Support>();
-            Curve ductCurve = ((LocationCurve)Element.Location).Curve;
-            double minx = Math.Min(ductCurve.GetEndPoint(0).X, ductCurve.GetEndPoint(1).X) - 5;
-            double miny = Math.Min(ductCurve.GetEndPoint(0).Y, ductCurve.GetEndPoint(1).Y) - 5;
-            double maxx = Math.Max(ductCurve.GetEndPoint(0).X, ductCurve.GetEndPoint(1).X) + 5;
-            double maxy = Math.Max(ductCurve.GetEndPoint(0).Y, ductCurve.GetEndPoint(1).Y) + 5;
-            Boundary region = new Boundary(minx, maxy, maxx, miny, Up, Down);
-            XYZ ductOrigin = ductCurve.Evaluate(0.5, true);
+            ElementCurve = ((LocationCurve)Element.Location).Curve;
+            GetRegion();
+            XYZ ductOrigin = ElementCurve.Evaluate(0.5, true);
             Width = 0;
             List<XYZ> pts = new List<XYZ>();
             try { Width = Element.LookupParameter("Width").AsDouble(); }
@@ -94,17 +77,26 @@ namespace IBIMSGen.Hangers
             {
                 botElevationParam = Element.LookupParameter("Lower End Bottom Elevation").AsDouble();
             }
-            BotElevation = botElevationParam + ((Level)Document.GetElement(levelId)).Elevation;
+            if(LinkInstance != null)
+            {
+
+            Document _link = LinkInstance.GetLinkDocument();
+            BotElevation = botElevationParam + ((Level)_link.GetElement(levelId)).Elevation;
+            }
+            else
+            {
+                BotElevation = botElevationParam + ((Level)Document.GetElement(levelId)).Elevation;
+            }
             InsulationThick = Element.LookupParameter("Insulation Thickness").AsDouble();
-            XYZ ductDir = ((Line)ductCurve).Direction.Normalize();
+            XYZ ductDir = ((Line)ElementCurve).Direction.Normalize();
             Perpendicular = new XYZ(-ductDir.Y, ductDir.X, ductDir.Z);
-            XYZ ductMidPt = ductCurve.Evaluate(0.5, true);
+            XYZ ductMidPt = ElementCurve.Evaluate(0.5, true);
 
             #region Duct Fitting
             // getting the duct fitting points that intersects the curve line.
             // then offsets the hangers by a margin that insures the hangers will never intersect the fitting.
 
-            List<Element> nearFits = FitsInRange.Where(x => region.contains(x)).ToList();
+            List<Element> nearFits = FitsInRange.Where(x => Region.contains(x)).ToList();
             foreach (Element fitting in nearFits)
             {
                 double angle = 0;
@@ -129,7 +121,7 @@ namespace IBIMSGen.Hangers
                 double margin = 0.50 * (Math.Tan(angle) * takeOffLength);
                 XYZ center = new XYZ(fittingLocPt.X, fittingLocPt.Y, ductMidPt.Z).Add(-margin * fittingFI.FacingOrientation);
                 Curve circ = Ellipse.CreateCurve(center, radius, radius, ductDir, Perpendicular, 0, 2 * Math.PI * radius);
-                circ.Intersect(ductCurve, out IntersectionResultArray ira);
+                circ.Intersect(ElementCurve, out IntersectionResultArray ira);
                 if (ira != null)
                 {
                     if (ira.Size == 2)
@@ -141,10 +133,10 @@ namespace IBIMSGen.Hangers
             }
             #endregion
 
-            XYZ P0 = ductCurve.Evaluate(0, true);
-            XYZ Pf = ductCurve.Evaluate(1, true);
-            List<XYZ> fittingPts = DecOrder(pts, ductCurve);
-            List<XYZ> ductCurvePts = DecOrder(new List<XYZ>() { P0, Pf }, ductCurve);
+            XYZ P0 = ElementCurve.Evaluate(0, true);
+            XYZ Pf = ElementCurve.Evaluate(1, true);
+            List<XYZ> fittingPts = DecOrder(pts, ElementCurve);
+            List<XYZ> ductCurvePts = DecOrder(new List<XYZ>() { P0, Pf }, ElementCurve);
             XYZ dir = Line.CreateBound(ductCurvePts[0], ductCurvePts[1]).Direction.Normalize();
             XYZ Ps = ductCurvePts[0].Add(Offset * dir);
             XYZ Pe = ductCurvePts[1].Add(-Offset * dir);
@@ -156,14 +148,14 @@ namespace IBIMSGen.Hangers
             catch { return; }
             if (fittingPts.Count == 0) // No ductfittings
             {
-                if (ductCurve.Length > Negligible && ductCurve.Length <= 4 * Offset)
+                if (ElementCurve.Length > Negligible && ElementCurve.Length <= 4 * Offset)
                 {
                     double rod = GetRod(ductMidPt);
                     XYZ PP = new XYZ(ductMidPt.X, ductMidPt.Y, ductMidPt.Z - InsulationThick - (Height / 2));
 
                     if (rod != 0) _supports.Add(new Support(PP, rod));
                 }
-                else if (ductCurve.Length <= Spacing && ductCurve.Length > 4 * Offset)
+                else if (ElementCurve.Length <= Spacing && ElementCurve.Length > 4 * Offset)
                 {
                     double rod1 = GetRod(Ps);
                     XYZ ps = new XYZ(Ps.X, Ps.Y, Ps.Z - InsulationThick - (Height / 2));
@@ -173,7 +165,7 @@ namespace IBIMSGen.Hangers
                     XYZ pe = new XYZ(Pe.X, Pe.Y, Pe.Z - InsulationThick - (Height / 2));
                     if (rod2 != 0) _supports.Add(new Support(pe, rod2));
                 }
-                else if (ductCurve.Length > Spacing) // collect point of hangers
+                else if (ElementCurve.Length > Spacing) // collect point of hangers
                 {
                     double rod = GetRod(Ps);
                     XYZ ps = new XYZ(Ps.X, Ps.Y, Ps.Z - InsulationThick - (Height / 2));
@@ -195,9 +187,9 @@ namespace IBIMSGen.Hangers
             }
             else       // With ductfittings
             {
-                if (ductCurve.Length > Negligible && ductCurve.Length <= 4 * Offset)
+                if (ElementCurve.Length > Negligible && ElementCurve.Length <= 4 * Offset)
                 {
-                    List<XYZ> fitPtsOrdered = DecOrder(new List<XYZ>() { fittingPts[0], fittingPts[1], ductMidPt }, ductCurve);
+                    List<XYZ> fitPtsOrdered = DecOrder(new List<XYZ>() { fittingPts[0], fittingPts[1], ductMidPt }, ElementCurve);
                     if (fitPtsOrdered.IndexOf(ductMidPt) == 1)
                     {
                         double rod = GetRod(fitPtsOrdered[2]);
@@ -212,10 +204,10 @@ namespace IBIMSGen.Hangers
                     }
                 }
 
-                else if (ductCurve.Length <= Spacing && ductCurve.Length > 4 * Offset)
+                else if (ElementCurve.Length <= Spacing && ElementCurve.Length > 4 * Offset)
                 {
 
-                    List<XYZ> fitPtsOrdered = DecOrder(new List<XYZ>() { fittingPts[0], fittingPts[1], Ps }, ductCurve);
+                    List<XYZ> fitPtsOrdered = DecOrder(new List<XYZ>() { fittingPts[0], fittingPts[1], Ps }, ElementCurve);
                     if (fitPtsOrdered.IndexOf(Ps) == 1)
                     {
                         double rod = GetRod(fitPtsOrdered[2]);
@@ -233,7 +225,7 @@ namespace IBIMSGen.Hangers
                     {
                         for (int j = 0; j < fittingPts.Count; j += 2)
                         {
-                            List<XYZ> pso = DecOrder(new List<XYZ>() { fittingPts[j], fittingPts[j + 1], ptss[i] }, ductCurve);
+                            List<XYZ> pso = DecOrder(new List<XYZ>() { fittingPts[j], fittingPts[j + 1], ptss[i] }, ElementCurve);
                             if (pso.IndexOf(ptss[i]) == 1) //Between Case
                             {
                                 if (i == 0)
@@ -256,9 +248,9 @@ namespace IBIMSGen.Hangers
                     XYZ pe = new XYZ(Pe.X, Pe.Y, Pe.Z - InsulationThick - (Height / 2));
                     if (rod2 != 0) _supports.Add(new Support(pe, rod2));
                 }
-                else if (ductCurve.Length > Spacing)
+                else if (ElementCurve.Length > Spacing)
                 {
-                    List<XYZ> ps1o = DecOrder(new List<XYZ>() { fittingPts[0], fittingPts[1], Ps }, ductCurve);
+                    List<XYZ> ps1o = DecOrder(new List<XYZ>() { fittingPts[0], fittingPts[1], Ps }, ElementCurve);
                     if (ps1o.IndexOf(Ps) == 1)
                     {
                         double rod = GetRod(ps1o[2]);
@@ -278,7 +270,7 @@ namespace IBIMSGen.Hangers
                         XYZ point = prevPt.Add(Spacing * dir);
                         for (int j = 0; j < fittingPts.Count; j += 2)
                         {
-                            List<XYZ> ps3o = DecOrder(new List<XYZ>() { fittingPts[j], fittingPts[j + 1], point }, ductCurve);
+                            List<XYZ> ps3o = DecOrder(new List<XYZ>() { fittingPts[j], fittingPts[j + 1], point }, ElementCurve);
                             if (ps3o.IndexOf(point) == 1) //Between Case
                             {
                                 point = ps3o[0];
@@ -308,17 +300,7 @@ namespace IBIMSGen.Hangers
             if (Supports.Count > 0) isValid = true;
         }
 
-        public List<XYZ> DecOrder(List<XYZ> points, Curve curve)
-        {
-            if (Math.Round(((Line)curve).Direction.Normalize().Y, 3) == 0)
-            {
-                return points.OrderByDescending(a => a.X).ToList();
-            }
-            else
-            {
-                return points.OrderByDescending(a => a.Y).ToList();
-            }
-        }
+
         public void Plant()
         {
             if (!isValid) return;
@@ -334,25 +316,6 @@ namespace IBIMSGen.Hangers
                 hang.LookupParameter("ROD 2").Set(support.rod);
             }
         }
-        public double GetRod(XYZ point)
-        {
-            Line tempLine = Line.CreateUnbound(point, XYZ.BasisZ);
-            Face lower = Solid.Faces.get_Item(0);
-            //Face upper = Solid.Faces.get_Item(1);
-            lower.Intersect(tempLine, out IntersectionResultArray intersectionWithLower);
-            //upper.Intersect(tempLine, out IntersectionResultArray intersectionWithUpper);
-            if (intersectionWithLower == null || intersectionWithLower.IsEmpty) return 0;
-            //if () return 0;
-            XYZ ipWithLower = intersectionWithLower.get_Item(0).XYZPoint;
-            //XYZ ipWithUpper = intersectionWithUpper.get_Item(0).XYZPoint;
-            if (ipWithLower.Z > point.Z)
-            {
-                return ipWithLower.Z - point.Z;
-            }
-            else
-            {
-                return 0;
-            }
-        }
+
     }
 }
