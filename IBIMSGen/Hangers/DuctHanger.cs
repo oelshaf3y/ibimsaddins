@@ -16,7 +16,7 @@ namespace IBIMSGen.Hangers
 
         public DuctHanger(Document document, Solid solid, Element element, List<List<Dictionary<string, double>>> dimensions, List<FamilySymbol> symbols,
             double negligible, double offset, double floorUp, double floorDown, List<Element> fitsInRange,
-            QuadTree allDuctsTree, QuadTree allPipesTree, QuadTree allTraysTree, RevitLinkInstance RLI = null)
+            QuadTree allDuctsTree,  QuadTree allTraysTree, RevitLinkInstance RLI = null)
         {
             Document = document;
             Solid = solid;
@@ -30,7 +30,6 @@ namespace IBIMSGen.Hangers
             FitsInRange = fitsInRange;
             LinkInstance = RLI;
             AllDuctsTree = allDuctsTree;
-            AllPipesTree = allPipesTree;
             AllTraysTree = allTraysTree;
             Process();
         }

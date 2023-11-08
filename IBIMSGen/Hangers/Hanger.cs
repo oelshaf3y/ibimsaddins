@@ -1,8 +1,11 @@
 ﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Electrical;
+using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace IBIMSGen.Hangers
 {
@@ -21,12 +24,12 @@ namespace IBIMSGen.Hangers
         public FamilySymbol FamilySymbol { get; set; }
         public XYZ Perpendicular { get; set; }
         public double Width { get; set; }
+        public double Height { get; set; }
         public bool isValid { get; set; } = false;
         public double Spacing { get; set; } = 0;
         public List<Element> ElementsNearby { get; set; } = new List<Element>();
         public RevitLinkInstance LinkInstance { get; set; }
         public QuadTree AllDuctsTree { get; set; }
-        public QuadTree AllPipesTree { get; set; }
         public QuadTree AllTraysTree { get; set; }
         public Curve ElementCurve { get; set; }
         public Boundary Region { get; set; }
@@ -43,18 +46,6 @@ namespace IBIMSGen.Hangers
 
             Line tempLine = Line.CreateUnbound(point, XYZ.BasisZ);
             Face floorLower = Solid.Faces.get_Item(0);
-            Face face = null;
-            face = GetNearbyElementFaces()?.Where(x => x.Origin.Z > point.Z && x.Origin.Z < ((PlanarFace)floorLower).Origin.Z)?.OrderBy(x => x.Origin.Z)?.FirstOrDefault();
-            if (face != null)
-            {
-                TaskDialog.Show("notNull", "notNull");
-                face.Intersect(tempLine, out IntersectionResultArray intersectionWithFace);
-                if (intersectionWithFace != null && !intersectionWithFace.IsEmpty)
-                {
-                    XYZ ipWithFace = intersectionWithFace.get_Item(0).XYZPoint;
-                    return ipWithFace.Z - point.Z;
-                }
-            }
             //Face upper = Solid.Faces.get_Item(1);
             floorLower.Intersect(tempLine, out IntersectionResultArray intersectionWithLower);
             //upper.Intersect(tempLine, out IntersectionResultArray intersectionWithUpper);
@@ -64,7 +55,9 @@ namespace IBIMSGen.Hangers
             //XYZ ipWithUpper = intersectionWithUpper.get_Item(0).XYZPoint;
             if (ipWithLower.Z > point.Z)
             {
-                return ipWithLower.Z - point.Z;
+                double nearest = GetNearestPoint(point);
+                if (nearest > 0) return Math.Min(ipWithLower.Z - point.Z, GetNearestPoint(point));
+                else return ipWithLower.Z - point.Z;
             }
             else
             {
@@ -180,26 +173,59 @@ namespace IBIMSGen.Hangers
         }
 
 
-        public List<PlanarFace> GetNearbyElementFaces()
+        public double GetNearestPoint(XYZ point)
         {
             ElementsNearby.AddRange(AllDuctsTree.query(Region).ToArray());
-            ElementsNearby.AddRange(AllPipesTree.query(Region).ToArray());
             ElementsNearby.AddRange(AllTraysTree.query(Region).ToArray());
-            List<PlanarFace> lowerFaces = new List<PlanarFace>();
+            double min = double.MaxValue;
+            Line tempLine = Line.CreateUnbound(point, XYZ.BasisZ);
+            Element nearest = null;
             foreach (Element elem in ElementsNearby)
             {
+                if (elem.Id.IntegerValue == Element.Id.IntegerValue) continue;
                 Solid _solid = GetSolid(elem);
                 try
                 {
-                    TaskDialog.Show("Here", "here");
-                    Face lowerFace = _solid.Faces.get_Item(0);
-                    PlanarFace planar = lowerFace as PlanarFace;
-                    lowerFaces.Add(planar);
+                    foreach (Face face in _solid.Faces)
+                    {
+                        PlanarFace planar = face as PlanarFace;
+                        if (planar.Origin.Z > point.Z)
+                        {
+                            face.Intersect(tempLine, out IntersectionResultArray intersectionWithFace);
+                            if (intersectionWithFace != null && !intersectionWithFace.IsEmpty)
+                            {
+                                if (intersectionWithFace.get_Item(0).XYZPoint.Z - point.Z < min)
+                                {
+                                    min = intersectionWithFace.get_Item(0).XYZPoint.Z - point.Z;
+                                    nearest = elem;
+                                }
+                            }
+                        }
+                    }
+
                 }
                 catch { }
-            }
 
-            return null;
+            }
+            double height = 0;
+            try
+            {
+                height = nearest.LookupParameter("Height").AsDouble();
+            }
+            catch
+            {
+                try
+                {
+
+                height = nearest.LookupParameter("Diameter").AsDouble();
+                }
+                catch
+                {
+                    height = 0;
+                }
+
+            }
+            return min-height*0.5;
         }
     }
 }

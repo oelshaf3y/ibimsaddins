@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
+using System.Windows.Media.Media3D;
 
 namespace IBIMSGen.Hangers
 {
@@ -17,7 +18,7 @@ namespace IBIMSGen.Hangers
 
         public TrayHanger(Document document, Solid solid, Element element, List<List<Dictionary<string, double>>> dimensions, double up, double down,
             List<FamilySymbol> symbols, double negligible, double offset, RevitLinkInstance linkInstance,
-            QuadTree allDuctsTree, QuadTree allPipesTree, QuadTree allTraysTree, RevitLinkInstance trayRLI = null)
+            QuadTree allDuctsTree, QuadTree allTraysTree, RevitLinkInstance trayRLI = null)
         {
             Document = document;
             Solid = solid;
@@ -31,7 +32,6 @@ namespace IBIMSGen.Hangers
             DocumentRLI = linkInstance;
             LinkInstance = trayRLI;
             AllDuctsTree = allDuctsTree;
-            AllPipesTree = allPipesTree;
             AllTraysTree = allTraysTree;
             Process();
         }
@@ -51,6 +51,12 @@ namespace IBIMSGen.Hangers
             XYZ Ps = P0.Add(Offset * trayDir);
             XYZ Pe = Pf.Add(-Offset * trayDir);
             Width = Element.LookupParameter("Width").AsDouble();
+            Height = 0;
+            try
+            {
+                Height = Element.LookupParameter("Height").AsDouble();
+            }
+            catch { }
             Spacing = 0;
             //var a = Dimensions[5][0];
             if (Dimensions[5].Count == 0) return;
@@ -159,10 +165,20 @@ namespace IBIMSGen.Hangers
             foreach (Support support in Supports)
             {
                 FamilySymbol.Activate();
-                FamilyInstance hang = Document.Create.NewFamilyInstance(support.point, FamilySymbol, Perpendicular, Document.GetElement(LevelId), StructuralType.NonStructural);
-                hang.LookupParameter("Width").Set(Width + 100 / 304.8);
-                hang.LookupParameter("ROD 1").Set(support.rod);
-                hang.LookupParameter("ROD 2").Set(support.rod);
+                try
+                {
+
+                    FamilyInstance hang = Document.Create.NewFamilyInstance(support.point, FamilySymbol, Perpendicular, Document.GetElement(LevelId), StructuralType.NonStructural);
+                    hang.LookupParameter("Width").Set(Width + 100 / 304.8);
+                    //TaskDialog.Show("Err", support.rod.ToString());
+                    support.rod += (Height / 2);
+
+                    hang.LookupParameter("ROD 1").Set(support.rod);
+                    hang.LookupParameter("ROD 2").Set(support.rod);
+                }
+                catch (Exception ex)
+                {
+                }
             }
         }
 

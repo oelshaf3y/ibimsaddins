@@ -31,7 +31,7 @@ namespace IBIMSGen.Hangers
         public PipeHanger(Document document, Solid solid, Element element, double up, double down,
             List<List<Dictionary<string, double>>> dimensions, List<FamilySymbol> symbols, double negligible,
             double offset, List<double> diameters, List<List<string>> linksNames, RevitLinkInstance linkInstance,
-            QuadTree allDuctsTree, QuadTree allPipesTree, QuadTree allTraysTree, RevitLinkInstance pipesRLI = null)
+            QuadTree allDuctsTree, QuadTree allTraysTree, RevitLinkInstance pipesRLI = null)
         {
             Document = document;
             Solid = solid;
@@ -47,7 +47,6 @@ namespace IBIMSGen.Hangers
             DocumentRLI = linkInstance;
             LinkInstance = pipesRLI;
             AllDuctsTree = allDuctsTree;
-            AllPipesTree = allPipesTree;
             AllTraysTree = allTraysTree;
             Process();
         }
@@ -77,7 +76,7 @@ namespace IBIMSGen.Hangers
             XYZ Ps = startPt.Add(Offset * pipeDirection);
             XYZ Pe = Pf.Add(-Offset * pipeDirection);
             Curve hangCurve = null;
-            int Rank;
+            int Rank = -1;
             try
             {
                 hangCurve = Line.CreateBound(Ps, Pe);
@@ -89,7 +88,12 @@ namespace IBIMSGen.Hangers
             if (LinkInstance != null)
             {
                 RevitLinkType rlt = Document.GetElement(LinkInstance.GetTypeId()) as RevitLinkType;
-                Rank = GetSystemRank(rlt.Name, AllLinksNames);
+                try
+                {
+
+                    Rank = GetSystemRank(rlt.Name, true, AllLinksNames).Where(x => x != -1 && x != 0 && x != 5).First();
+                }
+                catch { return; }
                 if (Rank == -1) return;
                 Spacing = GetSysSpacing(Dimensions[Rank], Width);
 
@@ -115,7 +119,6 @@ namespace IBIMSGen.Hangers
                 {
                     return;
                 }
-                TaskDialog.Show("R", r.ToString());
                 if (r == -1 || r == 0 || r == 5) return;
                 Spacing = GetSysSpacing(Dimensions[r], Width);
                 if (Spacing == 0) return;

@@ -109,7 +109,7 @@ namespace IBIMSGen.Hangers
         public bool contains(Element elem)
         {
             List<XYZ> points = getLocation(elem);
-            return points.Where(point => (point.X < Right && point.X > Left && point.Y < Top && point.Y > Bottom && point.Z < Up && point.Z > Down)).Any();
+            return points.Where(point => (point.X < Right && point.X > Left && point.Y < Top && point.Y > Bottom && point.Z < Up && point.Z > Down)).Any() || this.intersects(GetBoundary(points));
         }
         private List<XYZ> getLocation(Element elem)
         {
@@ -124,6 +124,15 @@ namespace IBIMSGen.Hangers
                 return new List<XYZ> { curve.Evaluate(0, true), curve.Evaluate(0.5, true), curve.Evaluate(1, true) };
             }
         }
+        private Boundary GetBoundary(List<XYZ> points)
+        {
+            double minx = points.Select(x => x.X).Min();
+            double miny = points.Select(x => x.Y).Min();
+            double minz = points.Select(x => x.Z).Min();
+            double maxx = points.Select(x => x.X).Max();
+            double maxy = points.Select(x => x.Y).Max();
+            double maxz = points.Select(x => x.Z).Max();
+            return new Boundary(minx, maxy, maxx, miny, maxz, minz);
+        }
     }
-
 }
